@@ -1,0 +1,60 @@
+function [ epar ] = exp_mon_init( epar )
+
+
+%% 10-Bit Screen
+
+% Initialize the screen
+PsychLinuxSetup(); %NRB Added for Random Java Crashes 14-4-23
+PsychImaging('PrepareConfiguration');
+PsychImaging('AddTask', 'General', 'FloatingPoint16Bit');
+PsychImaging('AddTask', 'General', 'EnableNative10BitFramebuffer');
+PsychImaging('AddTask', 'General', 'EnableHDR'[hdrMode='HDR10']);
+% PsychImaging('AddTask','General','UseGPGPUCompute','GPUmat');
+ScreenNums = Screen('screens'); %These seem like they can change sometimes, keep an eye on it with ScreenCheck
+LWin = ScreenNums(4);
+CWin = ScreenNums(3); 
+RWin = ScreenNums(5); 
+Dummy = ScreenNums(2);
+[epar.windowC epar.screenRect] =PsychImaging('OpenWindow',  CWin,0.5);
+[epar.windowR epar.screenRectR] =PsychImaging('OpenWindow',  RWin,0.5);
+[epar.windowL epar.screenRectL] =PsychImaging('OpenWindow',  LWin,0.5);
+[epar.windowDummy epar.screenRectD] =PsychImaging('OpenWindow',  Dummy,0.5);
+Screen('ColorRange', epar.windowC, 1);
+Screen('ColorRange', epar.windowL, 1);
+Screen('ColorRange', epar.windowR, 1);
+epar.black=BlackIndex(epar.windowC);
+epar.white=WhiteIndex(epar.windowC);
+
+global LUT
+
+if epar.GAMMA
+    LUT = epar.LUTC;
+    epar.grayC = Correct([0.5 0.5 0.5],epar.bitdepth);
+    epar.whiteC = Correct([1 1 1],epar.bitdepth);
+    LUT = [];
+    LUT = epar.LUTR;
+    epar.grayR = Correct([0.5 0.5 0.5],epar.bitdepth);
+    epar.whiteR = Correct([1 1 1],epar.bitdepth);
+    LUT = [];
+    LUT = epar.LUTL;
+    epar.grayL = Correct([0.5 0.5 0.5],epar.bitdepth);
+    epar.whiteL = Correct([1 1 1],epar.bitdepth);
+    LUT = [];
+else
+    epar.gray=[0.5 0.5 0.5];
+end
+epar.red = [(2^epar.bitdepth)-1 0 0];
+
+Screen('TextFont', epar.windowC, 'Arial');
+Screen('TextSize', epar.windowC, 12);
+if epar.GAMMA
+    initmon();
+
+else
+    epar.newGamma = NaN;
+    epar.oldGamma = NaN;
+end
+HideCursor;
+
+
+
