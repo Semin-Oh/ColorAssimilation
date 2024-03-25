@@ -128,10 +128,7 @@ try
             AllLocNames = [epar.LocNames fliplr(epar.LocNames)];
             ThisLoc = AllLocNames{find(epar.ThisLoc==epar.AllLocPx)};
             eval( sprintf('epar.ThisContrast = round(QuestQuantile(Quest.%s.%s),3);',ThisLoc,ThisSF) );
-
-
         end
-
 
         %If contrast estimate from Quest is < 0
         if epar.ThisContrast < Grain
