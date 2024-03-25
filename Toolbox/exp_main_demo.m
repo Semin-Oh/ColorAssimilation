@@ -1,18 +1,3 @@
-% exp_main
-%
-% This is a main experiment running code for color assimilation. This
-% routine is based on the previous routine for measuing contrast
-% sensitivity at peripheral vision done by Noric. The very first version of
-% this routine is from Alex.
-%
-% See also:
-%    exp_main.m
-% 
-% History:
-%    03/21/24  smo  - Started on it.
-
-%% Initialize.
-clear all; close all; clc;
 
 try
     %%% Experiment to measure CSF in the far periphery. This experiment can use
@@ -25,6 +10,8 @@ try
     %%% experiment (1: achromatic, 2: red-green, 3: blue-yellow), subject#, and
     %%% block#) so it can create the correct folder QUEST and FastCSF will
     %%% iterate automatically based on the inputs from the previous folders.
+
+    clear all; close all; clc;
     cd('./');
     addpath(genpath('./'));
     %     addpath('_lib');
@@ -37,13 +24,10 @@ try
     QUEST = 1; %CSF estimation using QUEST
     PRIOR = 0; %Prior estimator using method-of-adjustment (For us with QUEST)
     FASTCSF = 0; %Fast CSF
-
-    % Set eyelink
-    epar.EL = 1;    %1: Eyelink active; 0: No eyelink
     
-    % Set gabor size. : Fixed size, 1 = Fixed cycle
-    GaborType = 0; 
+    epar.EL = 1;    %1: Eyelink active; 0: No eyelink
 
+    GaborType = 0; %0: Fixed size, 1 = Fixed cycle
     %% INIT EXPERIMENT
     rng('Shuffle'); %NRB: no need for a fancy rng seed. Just do local time.
     epar.experiment=input('Experiment:');
@@ -56,9 +40,9 @@ try
         error('Cannot estimate CSF and Priors simultaneouly, check toggles');
     end
     cd('/home/gegenfurtner/Desktop/FRL/Wide-Field-CSF');
-
     %% Settings
     exp_settings; % --> EyeTracker & Monitor Calibration
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %% Define Paths
     epar.exp_path = sprintf('%se%dv%db%d', epar.save_path, epar.experiment, epar.subject, epar.block');
@@ -102,7 +86,7 @@ try
     if epar.block == 1 && QUEST  %If first block
         % if exist(sprintf('%s/e%dv%d_Priors', epar.save_path,
         % epar.experiment, epar.subject)) == 7 %If prior folder exists (Commneted, only applicable during pilot)
-        exp_quest_params %Create QUEST params (1 per position, per SF)
+            exp_quest_params %Create QUEST params (1 per position, per SF)
         % else
         %     error('Must estimate priors before beginning experiment');
         %     close all
@@ -206,8 +190,8 @@ try
 
 
         %Fix contrast & SF (mostly for debugging stuff)
-        %epar.ThisContrast = 1;
-        %epar.trial.sf(t) = 0.3;
+        epar.ThisContrast = 1;
+        epar.trial.sf(t) = 0.3;
 
         %If contrast estimate from Quest is < 0
         if epar.ThisContrast < Grain
@@ -254,6 +238,7 @@ try
         end
 
         %% Present things
+
         epar = exp_show_image(epar,el,t,QUEST,FASTCSF,PRIOR);
 
         %% if Abort
@@ -274,6 +259,7 @@ try
                 WaitSecs(0.05);
             end
         end
+
 
         %% End Eyelink Recording
         if epar.EL
@@ -307,7 +293,6 @@ try
 
         %Check for bad trial
         if epar.trial.badtrials(t) == 0
-
             %% Update Fast CSF / QUEST
             if QUEST
 
@@ -360,7 +345,7 @@ try
 
     %% FINISH
 
-    save('./TMP_WORKSPACE.mat'); %Save the entire workspace after a trial is complete in case things get bonked on shutdown
+         save('./TMP_WORKSPACE.mat'); %Save the entire workspace after a trial is complete in case things get bonked on shutdown
 
     % Save mat file with necessary stuff
     if QUEST
@@ -416,7 +401,7 @@ try
     exp_mon_exit(epar);
     sca
     Screen('CloseAll')
-    %
+% 
 
     % Convert the edf Data  into MAT
     if epar.EL

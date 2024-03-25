@@ -1,0 +1,4 @@
+-- Orientation Judgement -- 
+Each trial will start with a fixation dot. Then you will see an oriented grating. After a mask, you need to adjust a line to match the orientation of the grating.
+Use the left and right arrow key to move quickly around the circle, the up and down arrow keys to make fine adjustments. 
+Use the space bar to confirm your choice. 
