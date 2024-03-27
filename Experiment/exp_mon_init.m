@@ -1,8 +1,7 @@
 function [ epar ] = exp_mon_init( epar )
 
-
 %% 10-Bit Screen
-
+%
 % Initialize the screen
 PsychImaging('PrepareConfiguration');
 PsychImaging('AddTask', 'General', 'EnableNative10BitFramebuffer',['disableDithering',1]);
@@ -16,7 +15,7 @@ PsychImaging('PrepareConfiguration');
 
 ScreenNums = Screen('screens');
 CWin = ScreenNums(1);
-[epar.windowC epar.screenRect] =PsychImaging('OpenWindow',  CWin,0.5);
+[epar.windowC epar.screenRect] = PsychImaging('OpenWindow',CWin,0.5);
 Screen('ColorRange', epar.windowC, 1);
 % epar.black=BlackIndex(epar.windowC);
 % epar.white=WhiteIndex(epar.windowC);
@@ -38,14 +37,14 @@ epar.red = [(2^epar.bitdepth)-1 0 0];
 
 Screen('TextFont', epar.windowC, 'Arial');
 Screen('TextSize', epar.windowC, 12);
-if epar.GAMMA
-    initmon();
 
-else
-    epar.newGamma = NaN;
-    epar.oldGamma = NaN;
-end
+% Commented out temporarily. 'initmon' is not recognized (as of 03/27/24,
+% SMO).
+% if epar.GAMMA
+%     initmon();
+% else
+%     epar.newGamma = NaN;
+%     epar.oldGamma = NaN;
+% end
+
 HideCursor;
-
-
-

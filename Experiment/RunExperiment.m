@@ -70,18 +70,11 @@ try
         Eyelink('WaitForModeReady', 500);
     end
 
-    %% Initialize FAST CSF / QUEST (Create Toggle)
-    if epar.block == 1 && QUEST  %If first block
-        exp_quest_params %Create QUEST params (1 per position, per SF)
-
-    elseif epar.block ~= 1 && QUEST %If previous blocks have been run, load previous Quest Priors
-        load( sprintf('./data/e%dv%db%d/data.mat',epar.experiment,epar.subject,(epar.block-1)),'Quest')
-
-    elseif epar.block == 1 && FASTCSF
-        exp_fastcsf_params;
-
-    elseif epar.block ~= 1 && FASTCSF %If previous blocks have been run, load previous FStruct
-        load( sprintf('./data/e%dv%db%d/data.mat',epar.experiment,epar.subject,(epar.block-1)),'FStruct')
+    %% Initialize QUEST (Create Toggle)
+    %
+    % Create QUEST params (1 per position, per SF)
+    if epar.block == 1 && QUEST
+        exp_quest_params;
     end
 
     %% EXP
@@ -181,7 +174,8 @@ try
             warning('Experiment Aborted')
             break
 
-            if epar.EL % Exit Eyelink stuff
+            % Exit Eyelink stuff.
+            if epar.EL
                 WaitSecs(0.05);
                 Eyelink('StopRecording');
                 error = Eyelink('CheckRecording');
@@ -193,7 +187,6 @@ try
 
         %% End Eyelink Recording
         if epar.EL
-            %
             WaitSecs(0.05);
             Eyelink('StopRecording');
             error = Eyelink('CheckRecording');
@@ -205,8 +198,12 @@ try
         %% Save the trial information
         %     exp_trial_save(epar,t);
         TimeOff = toc(TimeOn);
-        epar.trial.timeoff(t) = TimeOff; %Record overall length of trials
-        PutABreakHereToLookAtTimeOff = 1; %do as the variable says
+
+        % Record overall length of trials
+        epar.trial.timeoff(t) = TimeOff;
+
+        % Do as the variable says
+        PutABreakHereToLookAtTimeOff = 1;
         % save('./TMP.mat','epar');
 
         %% Response of detection
@@ -221,7 +218,7 @@ catch
     % If error occurs, close the screen.
     Screen('CloseAll')
     tmpE = lasterror;
-    
+
     % Display the error message.
     tmpE.message
 end
