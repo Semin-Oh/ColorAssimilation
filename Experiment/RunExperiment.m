@@ -221,4 +221,7 @@ catch
     % If error occurs, close the screen.
     Screen('CloseAll')
     tmpE = lasterror;
+    
+    % Display the error message.
+    tmpE.message
 end
