@@ -14,7 +14,7 @@
 %
 % See also:
 %    exp_main.m
-%
+
 % History:
 %    03/21/24  smo  - Started on it.
 
@@ -22,11 +22,6 @@
 clear all; close all; clc;
 
 try
-    % Get the current path and add it to the path.
-    cd('./');
-    addpath(genpath('./'));
-    warning off
-
     % Toggles to change what's running (only one of these should be on!).
     %
     % Choose one among 'QUEST' (CSF estimation using QUEST), 'PRIOR'
@@ -56,7 +51,7 @@ try
     epar = exp_mon_init(epar);
 
     %% Init Experiment --> Trial Structure & Conditions
-    exp_settings_1
+    exp_settings_1;
 
     %% INIT EYELINK
     if epar.EL
@@ -93,7 +88,8 @@ try
     Grain = round(1/(2^epar.bitdepth),3); %Smallest step in contrast possible
     epar.Grain = Grain;
 
-    t = 0; %loop var
+    % Start a loop.
+    t = 0;
     while t < epar.trial.num % Run through the trial loop
         % Iterate.
         t = t+1;
@@ -185,8 +181,7 @@ try
             warning('Experiment Aborted')
             break
 
-            if epar.EL %Exit Eyelink stuff
-                %
+            if epar.EL % Exit Eyelink stuff
                 WaitSecs(0.05);
                 Eyelink('StopRecording');
                 error = Eyelink('CheckRecording');
