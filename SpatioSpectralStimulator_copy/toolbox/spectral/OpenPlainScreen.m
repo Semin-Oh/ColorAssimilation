@@ -68,41 +68,4 @@ white = WhiteIndex(screenNumber);
 
 %% Set the settings
 SetPlainScreenSettings(initialSettings,window,windowRect,'verbose',options.verbose);
-
-%% Also make sure we can talk to the subprimaries.
-%
-% Make sure Vpixx toolbox is on the path and do our best to add it if not.
-thePath = path;
-isThere = findstr(thePath,[filesep 'VPixx']);
-if (isempty(isThere))
-    addpath(genpath(options.projectorToolboxPath));
-    thePathWithToolbox = path;
-    isThere = findstr(thePathWithToolbox,[filesep 'VPixx']);
-    if (isempty(isThere))
-        error('Unable to add VPixx toolbox to path. Figure out why not and fix.');
-    end
-end
-
-%% Connect to the Vpixx projector.
-isReady = Datapixx('open');
-if (~isReady)
-    error('Datapixx call returns error');
-end
-isReady = Datapixx('IsReady');
-if (~isReady)
-    error('Datapixx call returns error');
-end
-
-% Set the projector mode to start. Projector mode can be only controlled
-% here or when setting subprimary settings in 'SetChannelSettings'.
-if (options.projectorMode)
-    commandNormal = 'vputil rw 0x1c8 0x0 -q quit'; % Normal mode (Default)
-    unix(commandNormal)
-    disp('Projector is set as Normal mode');
-else
-    commandSteadyOn = 'vputil rw 0x1c8 0x7 -q quit'; % Steady-on mode
-    unix(commandSteadyOn)
-    disp('Projector is set as Steady-on mode');
-end
-
 end

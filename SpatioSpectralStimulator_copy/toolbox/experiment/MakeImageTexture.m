@@ -43,22 +43,24 @@ function [imageTexture, imageWindowRect, rngVal] = MakeImageTexture(image,window
 %    08/17/22      smo          - Wrote it.
 %    08/22/22      smo          - Added an option adding noise to image.
 %    09/08/22      smo          - We save the seed number for random noise.
+%    03/28/24      smo          - Deleted unused options for color
+%                                 assimiliation project. Also, added an
+%                                 option to choose the location on the
+%                                 screen to put the image.
 
 %% Set parameters.
 arguments
     image
     window (1,1)
     windowRect (1,4)
-    options.addNoiseToImage (1,1) = false
     options.addFixationPointImage = []
+    options.ratioHorintalScreen (1,1) = 0.5
+    options.ratioVerticalScreen (1,1) = 0.5
     options.verbose (1,1) = true
 end
 
-%% Add noise to image if you want.
-if (options.addNoiseToImage)
-   noiseLevel = 3;
-   [image rngVal] = AddNoiseToImage(image,'noiseLevel',noiseLevel);
-end
+% Get a seed.
+rngVal = rng;
 
 %% Add fixation point at the center of image if you want.
 if (~isempty(options.addFixationPointImage))
@@ -82,9 +84,9 @@ end
 %% Convert image format in uint8.
 %
 % Convert the image format to uint8.
-if (class(image) == 'double')
+if strcmp(class(image),'double')
     image = im2uint8(image);
-elseif (class(image) == 'uint8')
+elseif strcmp(class(image), 'uint8')
     image = image;
 else
     error('Input image should be in the format either double or uint8');
@@ -95,11 +97,14 @@ end
 % Make image texture.
 imageTexture = Screen('MakeTexture', window, image);
 
-% Make image windowRect for placing it at the center of the screen.
-centerScreen = [windowRect(3) windowRect(4)] * 0.5;
+% Set the position of the image in ratio.
+anchorScreen = [windowRect(3)*options.ratioHorintalScreen windowRect(4)*options.ratioVerticalScreen];
+
 imageSizeHalf = [size(image,1) size(image,2)] * 0.5;
-imageWindowRect = [centerScreen(1)-imageSizeHalf(1) centerScreen(2)-imageSizeHalf(2) ...
-    centerScreen(1)+imageSizeHalf(1) centerScreen(2)+imageSizeHalf(2)];
+
+% Make image windowRect for placing it at the center of the screen.
+imageWindowRect = [anchorScreen(1)-imageSizeHalf(1) anchorScreen(2)-imageSizeHalf(2) ...
+    anchorScreen(1)+imageSizeHalf(1) anchorScreen(2)+imageSizeHalf(2)];
 
 %% Show the verbose message if you want.
 if (options.verbose)
