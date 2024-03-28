@@ -19,9 +19,6 @@ testImage = imread('image.jpeg');
 initialScreenSetting = [0 0 0]';
 [window windowRect] = OpenPlainScreen(initialScreenSetting);
 
-% Set channel settings here. We loaded the settings from the saved data.
-SetChannelSettings(channelSettings);
-
 %% Make PTB image texture.
 %
 % We will use the same function that we used in the experiment to display
