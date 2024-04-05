@@ -12,8 +12,11 @@ close all; clear;
 
 %% Add repository to path.
 testfiledir = '/home/gegenfurtn er/Desktop/SEMIN/SpatioSpectralStimulator_copy';
-if ~ (exist(testfiledir,'dir')  == 7)
+if isfolder(testfiledir)
     addpath(testfiledir);
+    fprintf('Directory has been added to the path!: %s \n',testfiledir);
+else
+    fprintf('No such directory exist: %s \n',testfiledir);
 end
 
 %% Start here, if error occurs, we automatically close the PTB screen.
