@@ -22,12 +22,39 @@ end
 %% Start here, if error occurs, we automatically close the PTB screen.
 try
     %% Load the image data.
-    testImage = imread('image.jpeg');
+    testImage = imread('Semin.png');
+    imgScalingFactor = 0.3;
+    testImage = imresize(testImage, imgScalingFactor);
+
+    %% Set the image background right.
+    %
+    % Convert the image to double precision to ensure accurate calculations
+    testImage = im2double(testImage);
+
+    % Calculate the grayscale equivalent of the image
+    grayImage = rgb2gray(testImage);
+
+    % Thresholding to find black regions
+    blackMask = grayImage == 0;
+
+    % Create a gray value for substitution (adjust as desired)
+    bgSetting = 0.5; % This represents gray in the range [0,1]
+
+    % Replace black regions with gray in each channel
+    testImageModified = testImage;
+    for cc = 1:size(testImage, 3)
+        substitutedImageChannel = testImageModified(:,:,cc);
+        substitutedImageChannel(blackMask) = bgSetting;
+        testImageModified(:,:,cc) = substitutedImageChannel;
+    end
+
+    % Here update the image with updated background.
+    testImage = testImageModified;
 
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
-
+   
     %% Make PTB image texture.
     %
     % Here, we make the PTB texture first, then  we will flip the image in the
@@ -40,7 +67,7 @@ try
     ratioVerticalScreen = 0.5;
     [imageTexture imageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, ...
         'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
-
+    
     %% Flip the PTB texture to display the image on the projector.
     FlipImageTexture(imageTexture, window, imageWindowRect,'verbose',false);
     disp('Image is now displaying...\n');
