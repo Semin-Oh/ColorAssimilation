@@ -15,32 +15,48 @@ clear; close all;
 % 'color'.
 whichCenterImage = 'color';
 
-%% Place a original image on the canvas.
-%
-% Load your main image
-testImage = imread('Semin.png');
+% Define the size of the stripes
+stripe_height = 5;
+
+% Choose the color among 'red', 'green', 'blue'.
+whichColorStripes = 'red';
+
+% Set the position of the image on the left. This would decide the
+% locations of all images on the canvas.
+position_leftImage_x = 0.1;
+
+% Control plot and text output.
+verbose = false;
 
 % Define the size of the canvas.
 canvas_width = 1920;
 canvas_height = 1080;
 
+%% Place a original image on the canvas.
+%
+% Load your main image
+testImage = imread('Semin.png');
+
 % Create a blank canvas
 canvas = zeros(canvas_height, canvas_width, 3);
 
 % Define the size of the main image
-testImage_width = canvas_width*0.2;
-testImage_height = canvas_height*0.3;
+testImage_width = canvas_width * 0.1;
+testImage_height = canvas_height * 0.3;
 
 % Resize the main image to fit in the canvas
 resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
+
+% Find the location where the image content exist. Idea here is to
+% treat the black (0, 0, 0) part as a background and it will be
+% excluded in this index.
 idxImageHeight = [];
 idxImageWidth = [];
+bgSetting = 0;
 for hh = 1:testImage_height
     for ww = 1:testImage_width
         sum = resized_testImage(hh,ww,1)+resized_testImage(hh,ww,2)+resized_testImage(hh,ww,3);
-
-        % Find the location where the image content exist.
-        if ~(sum == 0)
+        if ~(sum == bgSetting)
             idxImageHeight(end+1) = hh;
             idxImageWidth(end+1) = ww;
         end
@@ -50,16 +66,13 @@ end
 % Set the position to place the original image. Set the position of this
 % image and the locations of the following images will be automatically
 % updated.
-position_testImage_x = 0.2;
+position_testImage_x = position_leftImage_x;
 position_testImage_y = 0.5;
 testImage_x = floor((canvas_width - testImage_width) * position_testImage_x) + 1;
 testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) + 1;
 
 %% Add stripes on the background.
 %
-% Define the size of the stripes
-stripe_height = 5;
-
 % Generate the background with horizontal stripes
 for i = 1:stripe_height:canvas_height
     if mod(floor(i/stripe_height), 3) == 0
@@ -96,26 +109,23 @@ end
 %% Draw one color of the stripes on top of the image.
 %
 % This part will simulate the color assimilation phenomena.
-
-% Choose the color among 'Red', 'Green', 'Blue'.
-whichColor = 'Red';
-
+%
 % Add stripe on top of the image here.
 for i = 1:stripe_height:canvas_height
-    switch whichColor
-        case 'Red'
+    switch whichColorStripes
+        case 'red'
             if mod(floor(i/stripe_height), 3) == 0
                 canvas(i:i+stripe_height-1, :, 1) = 255;
                 canvas(i:i+stripe_height-1, :, 2) = 0;
                 canvas(i:i+stripe_height-1, :, 3) = 0;
             end
-        case 'Green'
+        case 'green'
             if mod(floor(i/stripe_height), 3) == 1
                 canvas(i:i+stripe_height-1, :, 1) = 0;
                 canvas(i:i+stripe_height-1, :, 2) = 255;
                 canvas(i:i+stripe_height-1, :, 3) = 0;
             end
-        case 'Blue'
+        case 'blue'
             if mod(floor(i/stripe_height), 3) == 2
                 canvas(i:i+stripe_height-1, :, 1) = 0;
                 canvas(i:i+stripe_height-1, :, 2) = 0;
@@ -152,7 +162,8 @@ for ii = 1:length(idxImageHeight)
     blue_testImageOneStripe(ii)  = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),3);
 end
 
-% Get the color correction coefficient per each channel.
+% Get the color correction coefficient per each channel. Here, we simply
+% match the mean R, G, B values independently.
 coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
 coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
 coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
@@ -164,21 +175,23 @@ colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCor
 colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
 
 % Display the images
-figure;
-% Original image.
-subplot(1,3,1);
-imshow(uint8(resized_testImage));
-title('Original');
+if verbose
+    figure;
+    % Original image.
+    subplot(1,3,1);
+    imshow(uint8(resized_testImage));
+    title('Original');
 
-% Image with stripes.
-subplot(1,3,2);
-imshow(uint8(testImageOneStripe));
-title('From the canvas');
+    % Image with stripes.
+    subplot(1,3,2);
+    imshow(uint8(testImageOneStripe));
+    title('From the canvas');
 
-% Color corrected image.
-subplot(1,3,3);
-imshow(uint8(colorCorrected_testImage));
-title('Color correction');
+    % Color corrected image.
+    subplot(1,3,3);
+    imshow(uint8(colorCorrected_testImage));
+    title('Color correction');
+end
 
 %% Now add the color corrected image to the canvas.
 %
@@ -190,7 +203,8 @@ correctedImage_y = floor((canvas_height - testImage_height) * position_corrected
 
 % Place the main image onto the canvas
 for ii = 1:length(idxImageHeight)
-    canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = ...
+        colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
 end
 
 %% Fianlly, add a test image at the center.
@@ -203,7 +217,8 @@ if strcmp(whichCenterImage,'color')
 
     % Place the main image onto the canvas
     for ii = 1:length(idxImageHeight)
-        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = ...
+            colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
     end
 end
 
