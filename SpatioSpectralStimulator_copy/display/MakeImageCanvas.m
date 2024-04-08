@@ -9,7 +9,13 @@
 %% Initialize.
 clear; close all;
 
-%% Place a main image on the canvas.
+%% Set variables.
+%
+% Choose which image to display at the center either 'stripes' or
+% 'color'.
+whichCenterImage = 'color';
+
+%% Place a original image on the canvas.
 %
 % Load your main image
 testImage = imread('Semin.png');
@@ -43,14 +49,11 @@ end
 
 % Set the position to place the original image. Set the position of this
 % image and the locations of the following images will be automatically
-% updated. 
+% updated.
 position_testImage_x = 0.2;
 position_testImage_y = 0.5;
 testImage_x = floor((canvas_width - testImage_width) * position_testImage_x) + 1;
 testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) + 1;
-
-% Place the test image onto the canvas.
-canvas(testImage_y:testImage_y+testImage_height-1, testImage_x:testImage_x+testImage_width-1, :) = resized_testImage;
 
 %% Add stripes on the background.
 %
@@ -71,6 +74,23 @@ end
 % Place the main image onto the canvas
 for ii = 1:length(idxImageHeight)
     canvas(testImage_y+idxImageHeight(ii)-1, testImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+end
+
+%% We will add the same image with stripes at the center if we want.
+%
+% Put another image before the next section so that both images could place
+% before the lines.
+if strcmp(whichCenterImage, 'stripes')
+    % Set the image location.
+    position_centerImage_x = 0.5;
+    position_centerImage_y = 0.5;
+    centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
+    centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
+
+    % Place the main image onto the canvas
+    for ii = 1:length(idxImageHeight)
+        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    end
 end
 
 %% Draw one color of the stripes on top of the image.
@@ -171,6 +191,20 @@ correctedImage_y = floor((canvas_height - testImage_height) * position_corrected
 % Place the main image onto the canvas
 for ii = 1:length(idxImageHeight)
     canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+end
+
+%% Fianlly, add a test image at the center.
+if strcmp(whichCenterImage,'color')
+    % Set the position to place the corrected image.
+    position_centerImage_x = 0.5;
+    position_centerImage_y = 0.5;
+    centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
+    centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
+
+    % Place the main image onto the canvas
+    for ii = 1:length(idxImageHeight)
+        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    end
 end
 
 %% Display the final image canvas.
