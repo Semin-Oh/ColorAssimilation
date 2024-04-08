@@ -22,8 +22,8 @@ canvas_height = 1080;
 canvas = zeros(canvas_height, canvas_width, 3);
 
 % Define the size of the main image
-testImage_width = canvas_width*0.3;
-testImage_height = canvas_height*0.4;
+testImage_width = canvas_width*0.2;
+testImage_height = canvas_height*0.3;
 
 % Resize the main image to fit in the canvas
 resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
@@ -41,13 +41,15 @@ for hh = 1:testImage_height
     end
 end
 
-% Calculate the position to place the image at the center
+% Set the position to place the original image. Set the position of this
+% image and the locations of the following images will be automatically
+% updated. 
 position_testImage_x = 0.2;
 position_testImage_y = 0.5;
 testImage_x = floor((canvas_width - testImage_width) * position_testImage_x) + 1;
 testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) + 1;
 
-% Place the main image onto the canvas
+% Place the test image onto the canvas.
 canvas(testImage_y:testImage_y+testImage_height-1, testImage_x:testImage_x+testImage_width-1, :) = resized_testImage;
 
 %% Add stripes on the background.
@@ -161,7 +163,7 @@ title('Color correction');
 %% Now add the color corrected image to the canvas.
 %
 % Set the position to place the corrected image.
-position_correctedImage_x = 0.8;
+position_correctedImage_x = 1-position_testImage_x;
 position_correctedImage_y = 0.5;
 correctedImage_x = floor((canvas_width - testImage_width) * position_correctedImage_x) + 1;
 correctedImage_y = floor((canvas_height - testImage_height) * position_correctedImage_y) + 1;
