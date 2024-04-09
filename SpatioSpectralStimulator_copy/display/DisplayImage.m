@@ -31,17 +31,18 @@ try
     %% Make image canvas to present.
     %
     % Set variables.
-    sizeCanvas = [1920 1080];
-    position_leftImage_x = 0.3;
+    sizeCanvas = [windowRect(3) windowRect(4)];
+    position_leftImage_x = 0.35;
     whichColorStripes = 'red';
     whichCenterImage = 'stripes';
     stripe_height_pixel = 5;
-
+    verbose = false;
+    
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
     imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,...
-        'position_leftImage_x',position_leftImage_x,'whichColorStripes','red','whichCenterImage',whichCenterImage,...
-        'stripe_height_pixel',5);
+        'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
+        'stripe_height_pixel',stripe_height_pixel,'verbose',verbose);
     
     %% Make PTB image texture.
     %
@@ -63,7 +64,7 @@ try
     % Get a key stroke to close the screen.
     KbStrokeWait;
     CloseScreen;
-
+    
 catch
     % If error occurs, close the screen.
     CloseScreen;
