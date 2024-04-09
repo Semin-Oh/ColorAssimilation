@@ -75,9 +75,14 @@ canvas_height = options.sizeCanvas(2);
 % Create a blank canvas.
 canvas = zeros(canvas_height, canvas_width, 3);
 
-% Define the size of the test image.
-testImage_width = canvas_width * 0.1;
-testImage_height = canvas_height * 0.3;
+% Get the size of original input image.
+[originalImage_height originalImage_width ~] = size(testImage);
+ratioWidthToHeight_original = originalImage_width/originalImage_height;
+
+% Define the size of the test image. For now, we keep the original
+% height:width ratio.
+testImage_height = canvas_height * 0.15;
+testImage_width = testImage_height * ratioWidthToHeight_original;
 
 % Resize the test image to fit in the canvas.
 resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
