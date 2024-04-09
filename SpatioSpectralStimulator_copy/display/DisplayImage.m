@@ -19,9 +19,6 @@ else
     fprintf('No such directory exist: %s \n',testfiledir);
 end
 
-%% Set variables.
-
-
 %% Start here, if error occurs, we automatically close the PTB screen.
 try
     %% Load the image data.
@@ -33,9 +30,12 @@ try
    
     %% Make image canvas to present.
     %
+    % Set variables.
+    sizeCanvas = [1920 1080];
+
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
-    imageCanvas = MakeImageCanvas(testImage);
+    imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas);
     
     %% Make PTB image texture.
     %
@@ -51,7 +51,7 @@ try
         'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
     
     %% Flip the PTB texture to display the image on the projector.
-    FlipImageTexture(imageTexture, window, imageWindowRect,'verbose',false);
+    FlipImageTexture(imageTexture, window, windowRect,'verbose',false);
     disp('Image is now displaying...\n');
 
     % Get a key stroke to close the screen.
