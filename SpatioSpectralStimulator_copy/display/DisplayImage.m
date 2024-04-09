@@ -32,10 +32,16 @@ try
     %
     % Set variables.
     sizeCanvas = [1920 1080];
+    position_leftImage_x = 0.3;
+    whichColorStripes = 'red';
+    whichCenterImage = 'stripes';
+    stripe_height_pixel = 5;
 
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
-    imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas);
+    imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,...
+        'position_leftImage_x',position_leftImage_x,'whichColorStripes','red','whichCenterImage',whichCenterImage,...
+        'stripe_height_pixel',5);
     
     %% Make PTB image texture.
     %
