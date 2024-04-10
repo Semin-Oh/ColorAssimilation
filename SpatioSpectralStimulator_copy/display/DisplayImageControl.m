@@ -11,6 +11,8 @@
 %    10/09/23  smo    - Modified it.
 %    03/28/24  smo    - Modified it for color assimiliation project in
 %                       Giessen.
+%    04/10/24  smo    - Made it to be able to control image elements in
+%                       real time.
 
 %% Initialize.
 close all; clear;
@@ -113,7 +115,7 @@ try
             CloseScreen;
 
             % Display the last setting.
-            fprintf('Current canvas setting: Stripe height (%d), Image position (%.2f), Image size (%.2f) \n', ...
+            fprintf('Current canvas setting: Stripe height = (%d), Image position = (%.2f), Image size = (%.2f) \n', ...
                 stripe_height_pixel, position_leftImage_x, testImageSize);
         end
     end
