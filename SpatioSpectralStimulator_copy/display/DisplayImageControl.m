@@ -38,13 +38,19 @@ try
     % Set variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
     position_leftImage_x = 0.35;
-    whichColorStripes = 'red';
-    whichCenterImage = 'stripes';
+    colorStripesOptions = {'red','green','blue'};
+    idxColorStripes = 1;
+    centerImageOptions = {'stripes','color'};
+    idxCenterImage = 1;
     stripe_height_pixel = 5;
     verbose = false;
 
     % Make a loop here to update the canvas in real time.
     while 1
+        % Set the color of stripes and which image to put in the center.
+        whichColorStripes = colorStripesOptions{idxColorStripes};
+        whichCenterImage = centerImageOptions{idxCenterImage};
+
         % Here we generate an image canvas so that we can present thos whole
         % image as a stimulus.
         imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,...
@@ -83,6 +89,20 @@ try
             stripe_height_pixel = stripe_height_pixel+1;
         elseif strcmp(keyPressed,'DownArrow')
             stripe_height_pixel = stripe_height_pixel-1;
+        elseif strcmp(keyPressed,'LeftArrow')
+            position_leftImage_x = position_leftImage_x-0.005;
+        elseif strcmp(keyPressed,'RightArrow')
+            position_leftImage_x = position_leftImage_x+0.005;
+        elseif strcmp(keyPressed,'c')
+            idxColorStripes = idxColorStripes+1;
+            if idxColorStripes > length(colorStripesOptions)
+                idxColorStripes = 1;
+            end
+        elseif strcmp(keyPressed,'v')
+            idxCenterImage = idxCenterImage+1;
+            if idxCenterImage > length(centerImageOptions)
+                idxCenterImage = 1;
+            end
         else
             % Close the screen for the other key press.
             CloseScreen;
