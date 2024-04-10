@@ -37,6 +37,7 @@ try
     %
     % Set variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
+    testImageSize = 0.15;
     position_leftImage_x = 0.35;
     colorStripesOptions = {'red','green','blue'};
     idxColorStripes = 1;
@@ -53,7 +54,7 @@ try
 
         % Here we generate an image canvas so that we can present thos whole
         % image as a stimulus.
-        imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,...
+        imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
             'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
             'stripe_height_pixel',stripe_height_pixel,'verbose',verbose);
 
@@ -103,9 +104,17 @@ try
             if idxCenterImage > length(centerImageOptions)
                 idxCenterImage = 1;
             end
+        elseif strcmp(keyPressed,']}')
+            testImageSize = testImageSize + 0.01;
+        elseif strcmp(keyPressed,'[{')
+            testImageSize = testImageSize - 0.01;
         else
             % Close the screen for the other key press.
             CloseScreen;
+
+            % Display the last setting.
+            fprintf('Current canvas setting: Stripe height (%d), Image position (%.2f), Image size (%.2f) \n', ...
+                stripe_height_pixel, position_leftImage_x, testImageSize);
         end
     end
 

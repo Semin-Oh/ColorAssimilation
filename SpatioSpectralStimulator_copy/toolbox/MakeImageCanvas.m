@@ -22,6 +22,9 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               psychtoolbox for the project.
 %
 % Optional key/value pairs:
+%    testImageSize            - Decide the size of the test images. It
+%                               is decided by the ratio of the height of
+%                               the canvas. Default to 0.15.
 %    whichCenterImage         - Decide which image to place at the center
 %                               of the canvas. For the experiment, we will
 %                               put either the input image with stripes
@@ -58,6 +61,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %% Set variables.
 arguments
     testImage
+    options.testImageSize = 0.15
     options.whichCenterImage = 'color'
     options.stripe_height_pixel (1,1) = 5
     options.whichColorStripes = 'red'
@@ -81,7 +85,7 @@ ratioWidthToHeight_original = originalImage_width/originalImage_height;
 
 % Define the size of the test image. For now, we keep the original
 % height:width ratio.
-testImage_height = canvas_height * 0.15;
+testImage_height = canvas_height * options.testImageSize;
 testImage_width = testImage_height * ratioWidthToHeight_original;
 
 % Resize the test image to fit in the canvas.
