@@ -49,6 +49,12 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               you want to present the image. Default to
 %                               [1920 1080] as [width height] of the
 %                               screen in pixe.
+%   numColorCorrectChannel    - The number of channels to correct when
+%                               generating color corrected image. You can
+%                               set this value to 1 if you want to correct
+%                               only the targeting channel, otherwise it
+%                               will correct all three channels. Default to
+%                               1.
 %   verbose                   - Control the plot and alarm messages.
 %                               Default to false.
 %
@@ -68,6 +74,7 @@ arguments
     options.position_leftImage_x (1,1) = 0.1
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
+    options.numColorCorrectChannel (1,1) = 1
 end
 
 % Define the size of the canvas.
@@ -215,9 +222,28 @@ coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
 
 % Color correct the original image.
 colorCorrected_testImage = resized_testImage;
-colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
-colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+
+% Here, we can either correct one target channel or all channels.
+%
+% For example, when we generate red corrected image, we can either only
+% correct the red channel or all three channels. Still thinking about
+% what's more logical way to do.
+if options.numColorCorrectChannel == 1
+    % Correct only the targeting channel, while the others remain the same.
+    switch options.whichColorStripes
+        case 'red'
+            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+        case 'green'
+            colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+        case 'blue'
+            colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+    end
+else
+    % Correct all three channels.
+    colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+    colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+    colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+end
 
 % Display the images
 if (options.verbose)

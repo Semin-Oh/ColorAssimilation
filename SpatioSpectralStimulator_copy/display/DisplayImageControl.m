@@ -46,6 +46,8 @@ try
     centerImageOptions = {'stripes','color'};
     idxCenterImage = 1;
     stripe_height_pixel = 5;
+    numColorCorrectChannelOptions = [1 3];
+    numColorCorrectChannel = 1;
     verbose = false;
 
     % Make a loop here to update the canvas in real time.
@@ -58,7 +60,7 @@ try
         % image as a stimulus.
         imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
             'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
-            'stripe_height_pixel',stripe_height_pixel,'verbose',verbose);
+            'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
         %% Make PTB image texture.
         %
@@ -88,26 +90,38 @@ try
         end
 
         % Update the canvas based on the above key press.
+        %
+        % Increase the stripe height.
         if strcmp(keyPressed,'UpArrow')
             stripe_height_pixel = stripe_height_pixel+1;
+            % Decrease the stripe height.
         elseif strcmp(keyPressed,'DownArrow')
             stripe_height_pixel = stripe_height_pixel-1;
+            % Increase the gap between the left and the right images.
         elseif strcmp(keyPressed,'LeftArrow')
             position_leftImage_x = position_leftImage_x-0.005;
+            % Decrease the gap between the left and the right images.
         elseif strcmp(keyPressed,'RightArrow')
             position_leftImage_x = position_leftImage_x+0.005;
+            % Change the color of the stripes to place on the test image.
         elseif strcmp(keyPressed,'c')
             idxColorStripes = idxColorStripes+1;
             if idxColorStripes > length(colorStripesOptions)
                 idxColorStripes = 1;
             end
+            % Switch the centered image either the stripes or color corrected.
         elseif strcmp(keyPressed,'v')
             idxCenterImage = idxCenterImage+1;
             if idxCenterImage > length(centerImageOptions)
                 idxCenterImage = 1;
             end
+            % Switch the number of the channels to be corrected.
+        elseif strcmp(keyPressed,'n')
+            numColorCorrectChannel = setdiff(numColorCorrectChannelOptions,numColorCorrectChannel);
+            % Make the test image larger.
         elseif strcmp(keyPressed,']}')
             testImageSize = testImageSize + 0.01;
+            % Make the test images smaller.
         elseif strcmp(keyPressed,'[{')
             testImageSize = testImageSize - 0.01;
         else
