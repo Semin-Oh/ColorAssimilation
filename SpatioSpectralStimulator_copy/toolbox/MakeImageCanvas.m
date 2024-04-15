@@ -70,6 +70,8 @@ function [canvas] = MakeImageCanvas(testImage,options)
 
 % History:
 %    04/09/24    smo    - Made it as a function.
+%    04/15/24    smo    - Added a new color correction method after meeting
+%                         with Karl.
 
 %% Set variables.
 arguments
@@ -89,6 +91,11 @@ end
 % Define the size of the canvas.
 canvas_width = options.sizeCanvas(1);
 canvas_height = options.sizeCanvas(2);
+
+% Define the index of the color stripes. This index will control when we
+% generate a color corrected image.
+colorStripeOptions = {'red','green','blue'};
+idxColorStripe = find(strcmp(colorStripeOptions, options.whichColorStripes));
 
 %% Create a canvas to place images on.
 %
@@ -266,8 +273,8 @@ if options.numColorCorrectChannel == 1
     % Correct only the targeting channel, while the others remain the same.
     switch options.whichColorStripes
         case 'red'
-            % colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (options.intensityStripe-resized_testImage(:,:,1));
+            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+            % colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (options.intensityStripe-resized_testImage(:,:,1));
         case 'green'
             colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
         case 'blue'
