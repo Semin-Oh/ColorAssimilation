@@ -37,6 +37,10 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               of the image. This will make color
 %                               assimilation phenomena. Choose among 'red',
 %                               'green', 'blue'. Default to 'red'.
+%   intensityStripe           - Decide the intensity of the stripe in
+%                               pixel. For now, it is decided on 8-bit
+%                               system, so it should be within the range of
+%                               0-255. Default to 255, the maximum.
 %   position_leftImage_x      - Define the position of the left sided image
 %                               on the canvas. This will decide the
 %                               positions of all three images on the
@@ -74,6 +78,7 @@ arguments
     options.whichCenterImage = 'color'
     options.stripe_height_pixel (1,1) = 5
     options.whichColorStripes = 'red'
+    options.intensityStripe (1,1) = 255
     options.position_leftImage_x (1,1) = 0.1
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
@@ -134,13 +139,13 @@ testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) +
 for i = 1 : options.stripe_height_pixel : canvas_height
     if mod(floor(i/options.stripe_height_pixel), 3) == 0
         % Red
-        canvas(i:i+options.stripe_height_pixel-1, :, 1) = 255;
+        canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
     elseif mod(floor(i/options.stripe_height_pixel), 3) == 1
         % Green.
-        canvas(i:i+options.stripe_height_pixel-1, :, 2) = 255;
+        canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
     else
         % Blue.
-        canvas(i:i+options.stripe_height_pixel-1, :, 3) = 255;
+        canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
     end
 end
 
@@ -175,21 +180,21 @@ for i = 1 : options.stripe_height_pixel : canvas_height
     switch options.whichColorStripes
         case 'red'
             if mod(floor(i/options.stripe_height_pixel), 3) == 0
-                canvas(i:i+options.stripe_height_pixel-1, :, 1) = 255;
+                canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
                 canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
                 canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
             end
         case 'green'
             if mod(floor(i/options.stripe_height_pixel), 3) == 1
                 canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 2) = 255;
+                canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
                 canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
             end
         case 'blue'
             if mod(floor(i/options.stripe_height_pixel), 3) == 2
                 canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
                 canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 3) = 255;
+                canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
             end
     end
 end
@@ -245,8 +250,7 @@ switch options.colorCorrectMethod
         % Find the number of the intensity of the stripes within the image.
         % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
         % we set the stipe height as 5 pixel.
-        intensityStripe = 255;
-        ratioStripes = length(find(targetCh_testImageOneStripe == intensityStripe))./length(targetCh_testImageOneStripe);
+        ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
 end
 
 % Color correct the original image. We get the resized original image and
@@ -263,7 +267,7 @@ if options.numColorCorrectChannel == 1
     switch options.whichColorStripes
         case 'red'
             % colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (255-colorCorrected_testImage(:,:,1));
+            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (options.intensityStripe-resized_testImage(:,:,1));
         case 'green'
             colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
         case 'blue'
