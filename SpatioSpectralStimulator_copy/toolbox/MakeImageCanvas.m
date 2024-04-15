@@ -49,6 +49,9 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               you want to present the image. Default to
 %                               [1920 1080] as [width height] of the
 %                               screen in pixe.
+%   colorCorrectMethod        - Decide the color correcting method that
+%                               corresponds to the test image with stripes
+%                               on. Default to 'mean'.
 %   numColorCorrectChannel    - The number of channels to correct when
 %                               generating color corrected image. You can
 %                               set this value to 1 if you want to correct
@@ -74,6 +77,7 @@ arguments
     options.position_leftImage_x (1,1) = 0.1
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
+    options.colorCorrectMethod = 'mean'
     options.numColorCorrectChannel (1,1) = 1
 end
 
@@ -100,7 +104,8 @@ resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
 
 % Find the location where the image content exist. The idea here is to
 % treat the black (0, 0, 0) part as a background and it will be excluded in
-% this index.
+% this index. Therefore, the number of pixels of the image content is the
+% same as the length of either 'idxImageHeight' or 'idxImageWidth'.
 idxImageHeight = [];
 idxImageWidth = [];
 bgSetting = 0;
@@ -128,11 +133,14 @@ testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) +
 % Generate the background with horizontal stripes
 for i = 1 : options.stripe_height_pixel : canvas_height
     if mod(floor(i/options.stripe_height_pixel), 3) == 0
-        canvas(i:i+options.stripe_height_pixel-1, :, 1) = 255; % Red
+        % Red
+        canvas(i:i+options.stripe_height_pixel-1, :, 1) = 255;
     elseif mod(floor(i/options.stripe_height_pixel), 3) == 1
-        canvas(i:i+options.stripe_height_pixel-1, :, 2) = 255; % Green
+        % Green.
+        canvas(i:i+options.stripe_height_pixel-1, :, 2) = 255;
     else
-        canvas(i:i+options.stripe_height_pixel-1, :, 3) = 255; % Blue
+        % Blue.
+        canvas(i:i+options.stripe_height_pixel-1, :, 3) = 255;
     end
 end
 
@@ -216,11 +224,33 @@ end
 
 % Get the color correction coefficient per each channel. Here, we simply
 % match the mean R, G, B values independently.
-coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
-coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
-coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
+switch options.colorCorrectMethod
+    case 'mean'
+        coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
+        coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
+        coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
+    case 'add'
+        % Calculate the proportion of the pixels that are stripes within
+        % the image. This should be close to 1/3 (~33%) as we place three
+        % different stripes - red, green, and blue - repeatedly.
+        switch options.whichColorStripes
+            case 'red'
+                targetCh_testImageOneStripe = red_testImageOneStripe;
+            case 'green'
+                targetCh_testImageOneStripe = green_testImageOneStripe;
+            case 'blue'
+                targetCh_testImageOneStripe = blue_testImageOneStripe;
+        end
 
-% Color correct the original image.
+        % Find the number of the intensity of the stripes within the image.
+        % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
+        % we set the stipe height as 5 pixel.
+        intensityStripe = 255;
+        ratioStripes = length(find(targetCh_testImageOneStripe == intensityStripe))./length(targetCh_testImageOneStripe);
+end
+
+% Color correct the original image. We get the resized original image and
+% correct color in the next step to this image.
 colorCorrected_testImage = resized_testImage;
 
 % Here, we can either correct one target channel or all channels.
@@ -232,7 +262,8 @@ if options.numColorCorrectChannel == 1
     % Correct only the targeting channel, while the others remain the same.
     switch options.whichColorStripes
         case 'red'
-            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+            % colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (255-colorCorrected_testImage(:,:,1));
         case 'green'
             colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
         case 'blue'
