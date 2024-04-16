@@ -291,11 +291,25 @@ switch options.colorCorrectMethod
 
         % Color correction happens here. Here we only correct one targeting
         % channel.
-        colorCorrectionPerPixel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
-        colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixel;
+        colorCorrectionPerPixelOneChannel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
+        colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
 end
 
-% Display the images
+% Remove the background of the color corrected image.
+colorCorrected_testImage_temp = zeros(size(colorCorrected_testImage));
+for ii = 1:length(idxImageHeight)
+    colorCorrected_testImage_temp(idxImageHeight(ii),idxImageWidth(ii),:) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+end
+colorCorrected_testImage = colorCorrected_testImage_temp;
+
+% Get color information of the color corrected image for comparison.
+for ii = 1:length(idxImageHeight)
+    red_colorCorrectedImage(ii)   = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
+    green_colorCorrectedImage(ii) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
+    blue_colorCorrectedImage(ii)  = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
+end
+
+% Display the images if you want.
 if (options.verbose)
     % Make a new figure.
     figure;
@@ -358,4 +372,10 @@ if (options.verbose)
     figure;
     imshow(canvas);
     title('Simulated screen image')
+end
+
+%% Check how color information is changed.
+if (options.verbose)
+    figure;
+    
 end
