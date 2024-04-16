@@ -50,6 +50,11 @@ try
     numColorCorrectChannel = 1;
     verbose = false;
 
+    % More variables to control the image canvas in real time.
+    unit_imagePosition = 0.05;
+    unit_testImage_size = 0.05;
+    unit_height_pixel = 5;
+
     % Make a loop here to update the canvas in real time.
     while 1
         % Set the color of stripes and which image to put in the center.
@@ -93,16 +98,16 @@ try
         %
         % Increase the stripe height.
         if strcmp(keyPressed,'UpArrow')
-            stripe_height_pixel = stripe_height_pixel+1;
+            stripe_height_pixel = stripe_height_pixel+unit_height_pixel;
             % Decrease the stripe height.
         elseif strcmp(keyPressed,'DownArrow')
-            stripe_height_pixel = stripe_height_pixel-1;
+            stripe_height_pixel = stripe_height_pixel-unit_height_pixel;
             % Increase the gap between the left and the right images.
         elseif strcmp(keyPressed,'LeftArrow')
-            position_leftImage_x = position_leftImage_x-0.005;
+            position_leftImage_x = position_leftImage_x-unit_imagePosition;
             % Decrease the gap between the left and the right images.
         elseif strcmp(keyPressed,'RightArrow')
-            position_leftImage_x = position_leftImage_x+0.005;
+            position_leftImage_x = position_leftImage_x+unit_imagePosition;
             % Change the color of the stripes to place on the test image.
         elseif strcmp(keyPressed,'c')
             idxColorStripes = idxColorStripes+1;
@@ -120,10 +125,10 @@ try
             numColorCorrectChannel = setdiff(numColorCorrectChannelOptions,numColorCorrectChannel);
             % Make the test image larger.
         elseif strcmp(keyPressed,']}')
-            testImageSize = testImageSize + 0.01;
+            testImageSize = testImageSize + unit_testImage_size;
             % Make the test images smaller.
         elseif strcmp(keyPressed,'[{')
-            testImageSize = testImageSize - 0.01;
+            testImageSize = testImageSize - unit_testImage_size;
         else
             % Close the screen for the other key press.
             CloseScreen;

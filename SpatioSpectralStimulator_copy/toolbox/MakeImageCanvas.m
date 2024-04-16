@@ -70,13 +70,13 @@ function [canvas] = MakeImageCanvas(testImage,options)
 
 % History:
 %    04/09/24    smo    - Made it as a function.
-%    04/15/24    smo    - Added a new color correction method after meeting
+%    04/16/24    smo    - Added a new color correction method after meeting
 %                         with Karl.
 
 %% Set variables.
 arguments
     testImage
-    options.testImageSize = 0.15
+    options.testImageSize = 0.40
     options.whichCenterImage = 'color'
     options.stripe_height_pixel (1,1) = 5
     options.whichColorStripes = 'red'
@@ -84,7 +84,7 @@ arguments
     options.position_leftImage_x (1,1) = 0.1
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
-    options.colorCorrectMethod = 'mean'
+    options.colorCorrectMethod = 'add'
     options.numColorCorrectChannel (1,1) = 1
 end
 
@@ -208,11 +208,13 @@ end
 
 %% Make color corrected image.
 %
-% Here, we generate a color corrected image that has the same average RGB
-% values as the image with colored stripe on it.
+% Get the cropped part of the test image. This image still has the stripes
+% on the background.
 testImageCrop = canvas(testImage_y:testImage_y+testImage_height-1, testImage_x:testImage_x+testImage_width-1, :);
 
-% Get the part of the image where single stripe on.
+% Extract the test image where single stripe on. This image does not have
+% the stripes on the background, only the part where the test image exist.
+% The size of the images are the same.
 testImageOneStripe = zeros(size(testImageCrop));
 for ii = 1:length(idxImageHeight)
     testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),:) = testImageCrop(idxImageHeight(ii), idxImageWidth(ii), :);
@@ -234,13 +236,41 @@ for ii = 1:length(idxImageHeight)
     blue_testImageOneStripe(ii)  = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),3);
 end
 
-% Get the color correction coefficient per each channel. Here, we simply
-% match the mean R, G, B values independently.
+% We color correct the original image. We get the resized original
+% image and correct color in the next step to this image.
+colorCorrected_testImage = resized_testImage;
+
+% Here we choose which method to color correct the image
 switch options.colorCorrectMethod
+    % For this method, get the color correction coefficient per each channel.
+    % Here, we simply match the mean R, G, B values independently.
     case 'mean'
         coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
         coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
         coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
+
+        % Here, we can either correct one target channel or all channels.
+        %
+        % For example, when we generate red corrected image, we can either only
+        % correct the red channel or all three channels. Still thinking about
+        % what's more logical way to do.
+        if options.numColorCorrectChannel == 1
+            % Correct only the targeting channel, while the others remain the same.
+            switch options.whichColorStripes
+                case 'red'
+                    colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+                case 'green'
+                    colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+                case 'blue'
+                    colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+            end
+        else
+            % Correct all three channels.
+            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+            colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+            colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+        end
+
     case 'add'
         % Calculate the proportion of the pixels that are stripes within
         % the image. This should be close to 1/3 (~33%) as we place three
@@ -258,33 +288,11 @@ switch options.colorCorrectMethod
         % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
         % we set the stipe height as 5 pixel.
         ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
-end
 
-% Color correct the original image. We get the resized original image and
-% correct color in the next step to this image.
-colorCorrected_testImage = resized_testImage;
-
-% Here, we can either correct one target channel or all channels.
-%
-% For example, when we generate red corrected image, we can either only
-% correct the red channel or all three channels. Still thinking about
-% what's more logical way to do.
-if options.numColorCorrectChannel == 1
-    % Correct only the targeting channel, while the others remain the same.
-    switch options.whichColorStripes
-        case 'red'
-            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-            % colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1) + ratioStripes .* (options.intensityStripe-resized_testImage(:,:,1));
-        case 'green'
-            colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
-        case 'blue'
-            colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
-    end
-else
-    % Correct all three channels.
-    colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-    colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
-    colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+        % Color correction happens here. Here we only correct one targeting
+        % channel.
+        colorCorrectionPerPixel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
+        colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixel;
 end
 
 % Display the images

@@ -1,6 +1,12 @@
 % DisplayImage.
 %
-% This displays an image on the DLP using the Psychtoolbox.
+% This displays an image on the DLP using the Psychtoolbox. This is an
+% initial version using the Psychtoolbox, but it does not have a function
+% to control the image canvas in real time. Try 'DisplayImageControl' for
+% interactive control of the image canvas.
+%
+% See also:
+%    DisplayImageControl.
 
 % History:
 %    10/09/23  smo    - Modified it.

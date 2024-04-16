@@ -1,7 +1,11 @@
 %% MakeImageCanvas_demo.
 %
 % This routine generates the image canvas to test color assimilation
-% phenomena.
+% phenomena. This does not use the Psychtoolbox and the function to make an
+% image canvas.
+%
+% See also:
+%    DisplayImage, MakeImageCanvas.
 
 % History:
 %    04/08/24    smo    - Started on it.
