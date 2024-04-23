@@ -375,7 +375,25 @@ if (options.verbose)
 end
 
 %% Check how color information is changed.
+%
+% Get the mean RGB values.
+meanRed_testImage = mean(red_testImage);
+meanRed_testImageOneStripe = mean(red_testImageOneStripe);
+meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
+
+% Compare the digital RGB values across the images.
 if (options.verbose)
-    figure;
-    
+    figure; hold on;
+    plot(green_testImage,red_testImage,'k+');
+    plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
+    plot(green_colorCorrectedImage,red_colorCorrectedImage,'ro');
+    xlabel('dG','fontsize',13);
+    ylabel('dR','fontsize',13);
+    legend(sprintf('Original (%.1f)', meanRed_testImage),...
+        sprintf('Stripes (%.1f)', meanRed_testImageOneStripe),...
+        sprintf('Color-corrected (%.1f)',meanRed_colorCorrectedImage),...
+        'Location','southeast','fontsize',13);
+    xlim([0 255]);
+    ylim([0 255]);
+    title('Image profile comparison - dRGB','fontsize',13)
 end
