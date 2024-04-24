@@ -377,44 +377,78 @@ end
 %% Check how color information is changed.
 %
 % Get the mean RGB values.
+
+% Original image.
 meanRed_testImage = mean(red_testImage);
+meanGreen_testImage = mean(green_testImage);
+meanBlue_testImage = mean(blue_testImage);
+
+% Image with stripes.
 meanRed_testImageOneStripe = mean(red_testImageOneStripe);
+meanGreen_testImageOneStripe = mean(green_testImageOneStripe);
+meanBlue_testImageOneStripe = mean(blue_testImageOneStripe);
+
+% Color corrected image.
 meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
+meanGreen_colorCorrectedImage = mean(green_colorCorrectedImage);
+meanBlue_colorCorrectedImage = mean(blue_colorCorrectedImage);
 
 % Plot the comparison results across images.
 if (options.verbose)
     % Compare the digital RGB values across the images in 3-D.
-    figure; 
-    subplot(1,2,1);
+    figure;
+    markerColorOptions = {'r','g','b'};
+    sgtitle('Image profile comparison');
+    subplot(1,4,1);
     scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
     scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'ko');
-    scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,'ro');
+    scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
     xlabel('dR','fontsize',13);
     ylabel('dG','fontsize',13);
     zlabel('dB','fontsize',13);
-    legend(sprintf('Original (%.1f)', meanRed_testImage),...
-        sprintf('Stripes (%.1f)', meanRed_testImageOneStripe),...
-        sprintf('Color-corrected (%.1f)',meanRed_colorCorrectedImage),...
-        'Location','northeast','fontsize',11);
+    legend('Original','Stripes','Color-correct','Location','northeast','fontsize',11);
     xlim([0 255]);
     ylim([0 255]);
     zlim([0 255]);
     grid on;
     title('3D (dRGB)','fontsize',11);
-    
-    % Comparison in 2-D.
-    subplot(1,2,2); hold on;
+
+    % Comparison in 2-D: dG vs. dR.
+    subplot(1,4,2); hold on;
     plot(green_testImage,red_testImage,'k+');
     plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
-    plot(green_colorCorrectedImage,red_colorCorrectedImage,'ro');
+    plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
     xlabel('dG','fontsize',13);
     ylabel('dR','fontsize',13);
-    legend(sprintf('Original (%.1f)', meanRed_testImage),...
-        sprintf('Stripes (%.1f)', meanRed_testImageOneStripe),...
-        sprintf('Color-corrected (%.1f)',meanRed_colorCorrectedImage),...
-        'Location','southeast','fontsize',11);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
     xlim([0 255]);
     ylim([0 255]);
     grid on;
-    title('2D (dR vs. dG)','fontsize',11);
+    title('2D (dG vs. dR)','fontsize',11);
+
+    % Comparison in 2-D: dG vs. dB.
+    subplot(1,4,3); hold on;
+    plot(green_testImage,blue_testImage,'k+');
+    plot(green_testImageOneStripe,blue_testImageOneStripe,'ko');
+    plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+    xlabel('dG','fontsize',13);
+    ylabel('dB','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    grid on;
+    title('2D (dG vs. dB)','fontsize',11);
+
+    % Comparison in 2-D: dR vs. dB.
+    subplot(1,4,4); hold on;
+    plot(red_testImage,blue_testImage,'k+');
+    plot(red_testImageOneStripe,blue_testImageOneStripe,'ko');
+    plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+    xlabel('dR','fontsize',13);
+    ylabel('dB','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    grid on;
+    title('2D (dR vs. dB)','fontsize',11);
 end
