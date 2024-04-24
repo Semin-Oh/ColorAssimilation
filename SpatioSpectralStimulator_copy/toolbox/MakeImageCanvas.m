@@ -381,9 +381,29 @@ meanRed_testImage = mean(red_testImage);
 meanRed_testImageOneStripe = mean(red_testImageOneStripe);
 meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
 
-% Compare the digital RGB values across the images.
+% Plot the comparison results across images.
 if (options.verbose)
-    figure; hold on;
+    % Compare the digital RGB values across the images in 3-D.
+    figure; 
+    subplot(1,2,1);
+    scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
+    scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'ko');
+    scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,'ro');
+    xlabel('dR','fontsize',13);
+    ylabel('dG','fontsize',13);
+    zlabel('dB','fontsize',13);
+    legend(sprintf('Original (%.1f)', meanRed_testImage),...
+        sprintf('Stripes (%.1f)', meanRed_testImageOneStripe),...
+        sprintf('Color-corrected (%.1f)',meanRed_colorCorrectedImage),...
+        'Location','northeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    zlim([0 255]);
+    grid on;
+    title('3D (dRGB)','fontsize',11);
+    
+    % Comparison in 2-D.
+    subplot(1,2,2); hold on;
     plot(green_testImage,red_testImage,'k+');
     plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
     plot(green_colorCorrectedImage,red_colorCorrectedImage,'ro');
@@ -392,8 +412,9 @@ if (options.verbose)
     legend(sprintf('Original (%.1f)', meanRed_testImage),...
         sprintf('Stripes (%.1f)', meanRed_testImageOneStripe),...
         sprintf('Color-corrected (%.1f)',meanRed_colorCorrectedImage),...
-        'Location','southeast','fontsize',13);
+        'Location','southeast','fontsize',11);
     xlim([0 255]);
     ylim([0 255]);
-    title('Image profile comparison - dRGB','fontsize',13)
+    grid on;
+    title('2D (dR vs. dG)','fontsize',11);
 end
