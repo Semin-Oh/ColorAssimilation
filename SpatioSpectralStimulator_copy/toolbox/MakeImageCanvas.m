@@ -14,7 +14,9 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    project.
 %
 % Inputs:
-%    image                    - An input image to generate a canvas.
+%    image                    - An input image to generate a canvas. This
+%                               can be empty ('[]') if you want to generate
+%                               canvas without image.
 %
 % Outputs:
 %    canvas                   - Output image with three corrected images.
@@ -72,6 +74,9 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    04/09/24    smo    - Made it as a function.
 %    04/16/24    smo    - Added a new color correction method after meeting
 %                         with Karl.
+%    04/25/24    smo    - Added an option to make a canvas without image so
+%                         that we can generate a null canvas with only
+%                         stripes.
 
 %% Set variables.
 arguments
@@ -103,42 +108,44 @@ idxColorStripe = find(strcmp(colorStripeOptions, options.whichColorStripes));
 canvas = zeros(canvas_height, canvas_width, 3);
 
 % Get the size of original input image.
-[originalImage_height originalImage_width ~] = size(testImage);
-ratioWidthToHeight_original = originalImage_width/originalImage_height;
+if ~isempty(testImage)
+    [originalImage_height originalImage_width ~] = size(testImage);
+    ratioWidthToHeight_original = originalImage_width/originalImage_height;
 
-% Define the size of the test image. For now, we keep the original
-% height:width ratio.
-testImage_height = canvas_height * options.testImageSize;
-testImage_width = testImage_height * ratioWidthToHeight_original;
+    % Define the size of the test image. For now, we keep the original
+    % height:width ratio.
+    testImage_height = canvas_height * options.testImageSize;
+    testImage_width = testImage_height * ratioWidthToHeight_original;
 
-% Resize the test image to fit in the canvas.
-resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
+    % Resize the test image to fit in the canvas.
+    resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
 
-% Find the location where the image content exist. The idea here is to
-% treat the black (0, 0, 0) part as a background and it will be excluded in
-% this index. Therefore, the number of pixels of the image content is the
-% same as the length of either 'idxImageHeight' or 'idxImageWidth'.
-idxImageHeight = [];
-idxImageWidth = [];
-bgSetting = 0;
-for hh = 1:testImage_height
-    for ww = 1:testImage_width
-        sum = resized_testImage(hh,ww,1)+resized_testImage(hh,ww,2)+resized_testImage(hh,ww,3);
-        if ~(sum == bgSetting)
-            idxImageHeight(end+1) = hh;
-            idxImageWidth(end+1) = ww;
+    % Find the location where the image content exist. The idea here is to
+    % treat the black (0, 0, 0) part as a background and it will be excluded in
+    % this index. Therefore, the number of pixels of the image content is the
+    % same as the length of either 'idxImageHeight' or 'idxImageWidth'.
+    idxImageHeight = [];
+    idxImageWidth = [];
+    bgSetting = 0;
+    for hh = 1:testImage_height
+        for ww = 1:testImage_width
+            sum = resized_testImage(hh,ww,1)+resized_testImage(hh,ww,2)+resized_testImage(hh,ww,3);
+            if ~(sum == bgSetting)
+                idxImageHeight(end+1) = hh;
+                idxImageWidth(end+1) = ww;
+            end
         end
     end
-end
 
-% Set the position to place the original image. The locations of the
-% following images will be automatically updated based on this. For now, we
-% always put all images at the center of the horizontal axis (set
-% position_testImage_y to 0.5).
-position_testImage_x = options.position_leftImage_x;
-position_testImage_y = 0.5;
-testImage_x = floor((canvas_width - testImage_width) * position_testImage_x) + 1;
-testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) + 1;
+    % Set the position to place the original image. The locations of the
+    % following images will be automatically updated based on this. For now, we
+    % always put all images at the center of the horizontal axis (set
+    % position_testImage_y to 0.5).
+    position_testImage_x = options.position_leftImage_x;
+    position_testImage_y = 0.5;
+    testImage_x = floor((canvas_width - testImage_width) * position_testImage_x) + 1;
+    testImage_y = floor((canvas_height - testImage_height) * position_testImage_y) + 1;
+end
 
 %% Add stripes on the background.
 %
@@ -157,210 +164,215 @@ for i = 1 : options.stripe_height_pixel : canvas_height
 end
 
 % Place the main image onto the canvas
-for ii = 1:length(idxImageHeight)
-    canvas(testImage_y+idxImageHeight(ii)-1, testImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+if ~isempty(testImage)
+    for ii = 1:length(idxImageHeight)
+        canvas(testImage_y+idxImageHeight(ii)-1, testImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    end
 end
 
 %% We will add the same image with stripes at the center if we want.
 %
 % Put another image before the next section so that both images could place
 % before the lines.
-if strcmp(options.whichCenterImage, 'stripes')
-    % Set the image location.
-    position_centerImage_x = 0.5;
-    position_centerImage_y = 0.5;
-    centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
-    centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
+if ~isempty(testImage)
+    if strcmp(options.whichCenterImage, 'stripes')
+        % Set the image location.
+        position_centerImage_x = 0.5;
+        position_centerImage_y = 0.5;
+        centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
+        centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
 
-    % Place the main image onto the canvas
-    for ii = 1:length(idxImageHeight)
-        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
-    end
-end
-
-%% Draw one color of the stripes on top of the image.
-%
-% This part will simulate the color assimilation phenomena.
-%
-% Add stripe on top of the image here.
-for i = 1 : options.stripe_height_pixel : canvas_height
-    switch options.whichColorStripes
-        case 'red'
-            if mod(floor(i/options.stripe_height_pixel), 3) == 0
-                canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
-                canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
-            end
-        case 'green'
-            if mod(floor(i/options.stripe_height_pixel), 3) == 1
-                canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
-                canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
-            end
-        case 'blue'
-            if mod(floor(i/options.stripe_height_pixel), 3) == 2
-                canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
-                canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
-            end
-    end
-end
-
-%% Make color corrected image.
-%
-% Get the cropped part of the test image. This image still has the stripes
-% on the background.
-testImageCrop = canvas(testImage_y:testImage_y+testImage_height-1, testImage_x:testImage_x+testImage_width-1, :);
-
-% Extract the test image where single stripe on. This image does not have
-% the stripes on the background, only the part where the test image exist.
-% The size of the images are the same.
-testImageOneStripe = zeros(size(testImageCrop));
-for ii = 1:length(idxImageHeight)
-    testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),:) = testImageCrop(idxImageHeight(ii), idxImageWidth(ii), :);
-end
-
-% Extract color information per each channel.
-%
-% Original image.
-for ii = 1:length(idxImageHeight)
-    red_testImage(ii)   = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
-    green_testImage(ii) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
-    blue_testImage(ii)  = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
-end
-
-% Image with stripes.
-for ii = 1:length(idxImageHeight)
-    red_testImageOneStripe(ii)   = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),1);
-    green_testImageOneStripe(ii) = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),2);
-    blue_testImageOneStripe(ii)  = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),3);
-end
-
-% We color correct the original image. We get the resized original
-% image and correct color in the next step to this image.
-colorCorrected_testImage = resized_testImage;
-
-% Here we choose which method to color correct the image
-switch options.colorCorrectMethod
-    % For this method, get the color correction coefficient per each channel.
-    % Here, we simply match the mean R, G, B values independently.
-    case 'mean'
-        coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
-        coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
-        coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
-
-        % Here, we can either correct one target channel or all channels.
-        %
-        % For example, when we generate red corrected image, we can either only
-        % correct the red channel or all three channels. Still thinking about
-        % what's more logical way to do.
-        if options.numColorCorrectChannel == 1
-            % Correct only the targeting channel, while the others remain the same.
-            switch options.whichColorStripes
-                case 'red'
-                    colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-                case 'green'
-                    colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
-                case 'blue'
-                    colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
-            end
-        else
-            % Correct all three channels.
-            colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
-            colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
-            colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+        % Place the main image onto the canvas
+        for ii = 1:length(idxImageHeight)
+            canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
         end
+    end
 
-    case 'add'
-        % Calculate the proportion of the pixels that are stripes within
-        % the image. This should be close to 1/3 (~33%) as we place three
-        % different stripes - red, green, and blue - repeatedly.
+
+    %% Draw one color of the stripes on top of the image.
+    %
+    % This part will simulate the color assimilation phenomena.
+    %
+    % Add stripe on top of the image here.
+    for i = 1 : options.stripe_height_pixel : canvas_height
         switch options.whichColorStripes
             case 'red'
-                targetCh_testImageOneStripe = red_testImageOneStripe;
+                if mod(floor(i/options.stripe_height_pixel), 3) == 0
+                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
+                end
             case 'green'
-                targetCh_testImageOneStripe = green_testImageOneStripe;
+                if mod(floor(i/options.stripe_height_pixel), 3) == 1
+                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
+                end
             case 'blue'
-                targetCh_testImageOneStripe = blue_testImageOneStripe;
+                if mod(floor(i/options.stripe_height_pixel), 3) == 2
+                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
+                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
+                end
         end
+    end
 
-        % Find the number of the intensity of the stripes within the image.
-        % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
-        % we set the stipe height as 5 pixel.
-        ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
+    %% Make color corrected image.
+    %
+    % Get the cropped part of the test image. This image still has the stripes
+    % on the background.
+    testImageCrop = canvas(testImage_y:testImage_y+testImage_height-1, testImage_x:testImage_x+testImage_width-1, :);
 
-        % Color correction happens here. Here we only correct one targeting
-        % channel.
-        colorCorrectionPerPixelOneChannel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
-        colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
-end
+    % Extract the test image where single stripe on. This image does not have
+    % the stripes on the background, only the part where the test image exist.
+    % The size of the images are the same.
+    testImageOneStripe = zeros(size(testImageCrop));
+    for ii = 1:length(idxImageHeight)
+        testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),:) = testImageCrop(idxImageHeight(ii), idxImageWidth(ii), :);
+    end
 
-% Remove the background of the color corrected image.
-colorCorrected_testImage_temp = zeros(size(colorCorrected_testImage));
-for ii = 1:length(idxImageHeight)
-    colorCorrected_testImage_temp(idxImageHeight(ii),idxImageWidth(ii),:) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
-end
-colorCorrected_testImage = colorCorrected_testImage_temp;
-
-% Get color information of the color corrected image for comparison.
-for ii = 1:length(idxImageHeight)
-    red_colorCorrectedImage(ii)   = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
-    green_colorCorrectedImage(ii) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
-    blue_colorCorrectedImage(ii)  = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
-end
-
-% Display the images if you want.
-if (options.verbose)
-    % Make a new figure.
-    figure;
-
+    % Extract color information per each channel.
+    %
     % Original image.
-    subplot(1,3,1);
-    imshow(uint8(resized_testImage));
-    title('Original');
+    for ii = 1:length(idxImageHeight)
+        red_testImage(ii)   = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
+        green_testImage(ii) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
+        blue_testImage(ii)  = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
+    end
 
     % Image with stripes.
-    subplot(1,3,2);
-    imshow(uint8(testImageOneStripe));
-    title('From the canvas');
-
-    % Color corrected image.
-    subplot(1,3,3);
-    imshow(uint8(colorCorrected_testImage));
-    title('Color correction');
-end
-
-%% Now add the color corrected image to the canvas.
-%
-% Set the position to place the corrected image.
-position_correctedImage_x = 1-position_testImage_x;
-position_correctedImage_y = 0.5;
-correctedImage_x = floor((canvas_width - testImage_width) * position_correctedImage_x) + 1;
-correctedImage_y = floor((canvas_height - testImage_height) * position_correctedImage_y) + 1;
-
-% Place the image onto the canvas.
-for ii = 1:length(idxImageHeight)
-    canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = ...
-        colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
-end
-
-%% Fianlly, add a test image at the center.
-%
-% We will place either an original image with stripes or color corrected
-% image at the center to evaluate. Here, we add color corrected image at
-% the center.
-if strcmp(options.whichCenterImage,'color')
-
-    % Set the position to place the corrected image.
-    position_centerImage_x = 0.5;
-    position_centerImage_y = 0.5;
-    centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
-    centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
-
-    % Place the main image onto the canvas
     for ii = 1:length(idxImageHeight)
-        canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = ...
+        red_testImageOneStripe(ii)   = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),1);
+        green_testImageOneStripe(ii) = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),2);
+        blue_testImageOneStripe(ii)  = testImageOneStripe(idxImageHeight(ii),idxImageWidth(ii),3);
+    end
+
+    % We color correct the original image. We get the resized original
+    % image and correct color in the next step to this image.
+    colorCorrected_testImage = resized_testImage;
+
+    % Here we choose which method to color correct the image
+    switch options.colorCorrectMethod
+        % For this method, get the color correction coefficient per each channel.
+        % Here, we simply match the mean R, G, B values independently.
+        case 'mean'
+            coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
+            coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
+            coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
+
+            % Here, we can either correct one target channel or all channels.
+            %
+            % For example, when we generate red corrected image, we can either only
+            % correct the red channel or all three channels. Still thinking about
+            % what's more logical way to do.
+            if options.numColorCorrectChannel == 1
+                % Correct only the targeting channel, while the others remain the same.
+                switch options.whichColorStripes
+                    case 'red'
+                        colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+                    case 'green'
+                        colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+                    case 'blue'
+                        colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+                end
+            else
+                % Correct all three channels.
+                colorCorrected_testImage(:,:,1) = colorCorrected_testImage(:,:,1).*coeffColorCorrect_red;
+                colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2).*coeffColorCorrect_green;
+                colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
+            end
+
+        case 'add'
+            % Calculate the proportion of the pixels that are stripes within
+            % the image. This should be close to 1/3 (~33%) as we place three
+            % different stripes - red, green, and blue - repeatedly.
+            switch options.whichColorStripes
+                case 'red'
+                    targetCh_testImageOneStripe = red_testImageOneStripe;
+                case 'green'
+                    targetCh_testImageOneStripe = green_testImageOneStripe;
+                case 'blue'
+                    targetCh_testImageOneStripe = blue_testImageOneStripe;
+            end
+
+            % Find the number of the intensity of the stripes within the image.
+            % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
+            % we set the stipe height as 5 pixel.
+            ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
+
+            % Color correction happens here. Here we only correct one targeting
+            % channel.
+            colorCorrectionPerPixelOneChannel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
+            colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
+    end
+
+    % Remove the background of the color corrected image.
+    colorCorrected_testImage_temp = zeros(size(colorCorrected_testImage));
+    for ii = 1:length(idxImageHeight)
+        colorCorrected_testImage_temp(idxImageHeight(ii),idxImageWidth(ii),:) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    end
+    colorCorrected_testImage = colorCorrected_testImage_temp;
+
+    % Get color information of the color corrected image for comparison.
+    for ii = 1:length(idxImageHeight)
+        red_colorCorrectedImage(ii)   = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
+        green_colorCorrectedImage(ii) = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
+        blue_colorCorrectedImage(ii)  = colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
+    end
+
+    % Display the images if you want.
+    if (options.verbose)
+        % Make a new figure.
+        figure;
+
+        % Original image.
+        subplot(1,3,1);
+        imshow(uint8(resized_testImage));
+        title('Original');
+
+        % Image with stripes.
+        subplot(1,3,2);
+        imshow(uint8(testImageOneStripe));
+        title('From the canvas');
+
+        % Color corrected image.
+        subplot(1,3,3);
+        imshow(uint8(colorCorrected_testImage));
+        title('Color correction');
+    end
+
+    %% Now add the color corrected image to the canvas.
+    %
+    % Set the position to place the corrected image.
+    position_correctedImage_x = 1-position_testImage_x;
+    position_correctedImage_y = 0.5;
+    correctedImage_x = floor((canvas_width - testImage_width) * position_correctedImage_x) + 1;
+    correctedImage_y = floor((canvas_height - testImage_height) * position_correctedImage_y) + 1;
+
+    % Place the image onto the canvas.
+    for ii = 1:length(idxImageHeight)
+        canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = ...
             colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+    end
+
+    %% Fianlly, add a test image at the center.
+    %
+    % We will place either an original image with stripes or color corrected
+    % image at the center to evaluate. Here, we add color corrected image at
+    % the center.
+    if strcmp(options.whichCenterImage,'color')
+
+        % Set the position to place the corrected image.
+        position_centerImage_x = 0.5;
+        position_centerImage_y = 0.5;
+        centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
+        centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
+
+        % Place the main image onto the canvas
+        for ii = 1:length(idxImageHeight)
+            canvas(centerImage_y+idxImageHeight(ii)-1, centerImage_x+idxImageWidth(ii)-1, :) = ...
+                colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
+        end
     end
 end
 
@@ -376,79 +388,79 @@ end
 
 %% Check how color information is changed.
 %
-% Get the mean RGB values.
+if ~isempty(testImage)
+    % Get the mean RGB values of the original image.
+    meanRed_testImage = mean(red_testImage);
+    meanGreen_testImage = mean(green_testImage);
+    meanBlue_testImage = mean(blue_testImage);
 
-% Original image.
-meanRed_testImage = mean(red_testImage);
-meanGreen_testImage = mean(green_testImage);
-meanBlue_testImage = mean(blue_testImage);
+    % Image with stripes.
+    meanRed_testImageOneStripe = mean(red_testImageOneStripe);
+    meanGreen_testImageOneStripe = mean(green_testImageOneStripe);
+    meanBlue_testImageOneStripe = mean(blue_testImageOneStripe);
 
-% Image with stripes.
-meanRed_testImageOneStripe = mean(red_testImageOneStripe);
-meanGreen_testImageOneStripe = mean(green_testImageOneStripe);
-meanBlue_testImageOneStripe = mean(blue_testImageOneStripe);
+    % Color corrected image.
+    meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
+    meanGreen_colorCorrectedImage = mean(green_colorCorrectedImage);
+    meanBlue_colorCorrectedImage = mean(blue_colorCorrectedImage);
 
-% Color corrected image.
-meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
-meanGreen_colorCorrectedImage = mean(green_colorCorrectedImage);
-meanBlue_colorCorrectedImage = mean(blue_colorCorrectedImage);
+    % Plot the comparison results across images.
+    if (options.verbose)
+        % Compare the digital RGB values across the images in 3-D.
+        figure;
+        markerColorOptions = {'r','g','b'};
+        sgtitle('Image profile comparison');
+        subplot(1,4,1);
+        scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
+        scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'ko');
+        scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        xlabel('dR','fontsize',13);
+        ylabel('dG','fontsize',13);
+        zlabel('dB','fontsize',13);
+        legend('Original','Stripes','Color-correct','Location','northeast','fontsize',11);
+        xlim([0 255]);
+        ylim([0 255]);
+        zlim([0 255]);
+        grid on;
+        title('3D (dRGB)','fontsize',11);
 
-% Plot the comparison results across images.
-if (options.verbose)
-    % Compare the digital RGB values across the images in 3-D.
-    figure;
-    markerColorOptions = {'r','g','b'};
-    sgtitle('Image profile comparison');
-    subplot(1,4,1);
-    scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
-    scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'ko');
-    scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
-    xlabel('dR','fontsize',13);
-    ylabel('dG','fontsize',13);
-    zlabel('dB','fontsize',13);
-    legend('Original','Stripes','Color-correct','Location','northeast','fontsize',11);
-    xlim([0 255]);
-    ylim([0 255]);
-    zlim([0 255]);
-    grid on;
-    title('3D (dRGB)','fontsize',11);
+        % Comparison in 2-D: dG vs. dR.
+        subplot(1,4,2); hold on;
+        plot(green_testImage,red_testImage,'k+');
+        plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
+        plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        xlabel('dG','fontsize',13);
+        ylabel('dR','fontsize',13);
+        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+        xlim([0 255]);
+        ylim([0 255]);
+        grid on;
+        title('2D (dG vs. dR)','fontsize',11);
 
-    % Comparison in 2-D: dG vs. dR.
-    subplot(1,4,2); hold on;
-    plot(green_testImage,red_testImage,'k+');
-    plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
-    plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
-    xlabel('dG','fontsize',13);
-    ylabel('dR','fontsize',13);
-    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-    xlim([0 255]);
-    ylim([0 255]);
-    grid on;
-    title('2D (dG vs. dR)','fontsize',11);
+        % Comparison in 2-D: dG vs. dB.
+        subplot(1,4,3); hold on;
+        plot(green_testImage,blue_testImage,'k+');
+        plot(green_testImageOneStripe,blue_testImageOneStripe,'ko');
+        plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        xlabel('dG','fontsize',13);
+        ylabel('dB','fontsize',13);
+        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+        xlim([0 255]);
+        ylim([0 255]);
+        grid on;
+        title('2D (dG vs. dB)','fontsize',11);
 
-    % Comparison in 2-D: dG vs. dB.
-    subplot(1,4,3); hold on;
-    plot(green_testImage,blue_testImage,'k+');
-    plot(green_testImageOneStripe,blue_testImageOneStripe,'ko');
-    plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
-    xlabel('dG','fontsize',13);
-    ylabel('dB','fontsize',13);
-    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-    xlim([0 255]);
-    ylim([0 255]);
-    grid on;
-    title('2D (dG vs. dB)','fontsize',11);
-
-    % Comparison in 2-D: dR vs. dB.
-    subplot(1,4,4); hold on;
-    plot(red_testImage,blue_testImage,'k+');
-    plot(red_testImageOneStripe,blue_testImageOneStripe,'ko');
-    plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
-    xlabel('dR','fontsize',13);
-    ylabel('dB','fontsize',13);
-    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-    xlim([0 255]);
-    ylim([0 255]);
-    grid on;
-    title('2D (dR vs. dB)','fontsize',11);
+        % Comparison in 2-D: dR vs. dB.
+        subplot(1,4,4); hold on;
+        plot(red_testImage,blue_testImage,'k+');
+        plot(red_testImageOneStripe,blue_testImageOneStripe,'ko');
+        plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        xlabel('dR','fontsize',13);
+        ylabel('dB','fontsize',13);
+        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+        xlim([0 255]);
+        ylim([0 255]);
+        grid on;
+        title('2D (dR vs. dB)','fontsize',11);
+    end
 end

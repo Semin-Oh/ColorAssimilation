@@ -1,0 +1,111 @@
+% RunExperiment.
+%
+% This is a running code for color assimilation project.
+%
+% See also:
+%    DisplayImage, DisplayImageControl.
+
+% History:
+%    04/25/24  smo    - Started on it.
+
+%% Initialize.
+close all; clear;
+
+%% Add repository to path.
+testfiledir = '/home/gegenfurtn er/Desktop/SEMIN/SpatioSpectralStimulator_copy';
+if isfolder(testfiledir)
+    addpath(testfiledir);
+    fprintf('Directory has been added to the path!: %s \n',testfiledir);
+else
+    fprintf('No such directory exist: %s \n',testfiledir);
+end
+
+%% Start here, if error occurs, we automatically close the PTB screen.
+try
+    %% Load the image data.
+    testImage = imread('SeminFace.png');
+
+    %% Open the PTB screen.
+    initialScreenSetting = [0.5 0.5 0.5]';
+    [window windowRect] = OpenPlainScreen(initialScreenSetting);
+
+    %% Set variables.
+    sizeCanvas = [windowRect(3) windowRect(4)];
+    testImageSize = 0.15;
+    position_leftImage_x = 0.35;
+    colorStripesOptions = {'red','green','blue'};
+    idxColorStripes = 1;
+    centerImageOptions = {'stripes','color'};
+    idxCenterImage = 1;
+    stripe_height_pixel = 5;
+    numColorCorrectChannelOptions = [1 3];
+    numColorCorrectChannel = 1;
+    verbose = false;
+
+    %% Make a null canvas with no images.
+    nullCanvas = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+        'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
+        'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
+
+    %% Make image canvas to present.
+    while 1
+        % Set the color of stripes and which image to put in the center.
+        whichColorStripes = colorStripesOptions{idxColorStripes};
+        whichCenterImage = centerImageOptions{idxCenterImage};
+
+        % Here we generate an image canvas so that we can present thos whole
+        % image as a stimulus.
+        imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+            'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
+            'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
+
+        %% Make PTB image texture.
+        %
+        % Here, we make the PTB texture first, then  we will flip the image in the
+        % next section. For making multiple images, we may want to make all the
+        % image textures in advance, then flip the images. This way, we can
+        % guarantte to have the same flip time between the image presentations.
+        %
+        % Also, we will choose which location on the screen to present the image.
+        ratioHorintalScreen = 0.5;
+        ratioVerticalScreen = 0.5;
+        [imageTexture imageWindowRect rng] = MakeImageTexture(imageCanvas, window, windowRect, ...
+            'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
+
+        %% Flip the PTB texture to display the image on the projector.
+        FlipImageTexture(imageTexture, window, windowRect,'verbose',false);
+        disp('Image is now displaying...\n');
+
+        % Wait for a key press
+        while true
+            [keyIsDown, ~, keyCode] = KbCheck;
+            if keyIsDown
+                keyPressed = KbName(keyCode);
+                disp(['Key pressed: ' keyPressed]);
+                break;
+            end
+        end
+
+        % Get a response here. Subjects would press either left of right
+        % arrow key.
+        if  strcmp(keyPressed,'LeftArrow')
+            rawData = 0;
+        elseif strcmp(keyPressed,'RightArrow')
+            rawData = 1;
+        else
+            % Close the screen for the other key press.
+            CloseScreen;
+        end
+    end
+
+catch
+    % If error occurs, close the screen.
+    CloseScreen;
+    tmpE = lasterror;
+
+    % Display the error message.
+    tmpE.message
+end
+
+%% Save the data.
+
