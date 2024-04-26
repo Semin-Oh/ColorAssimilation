@@ -23,7 +23,7 @@ end
 %% Start here, if error occurs, we automatically close the PTB screen.
 try
     %% Load the image data.
-    testImage = imread('SeminFace.png');
+    image = imread('SeminFace.png');
 
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
@@ -43,7 +43,7 @@ try
     verbose = false;
 
     %% Make a null canvas with no images.
-    nullCanvas = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+    nullStimulus = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
         'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
         'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
@@ -55,7 +55,7 @@ try
 
         % Here we generate an image canvas so that we can present thos whole
         % image as a stimulus.
-        imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+        testStimulus = MakeImageCanvas(image,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
             'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
             'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
@@ -69,11 +69,11 @@ try
         % Also, we will choose which location on the screen to present the image.
         ratioHorintalScreen = 0.5;
         ratioVerticalScreen = 0.5;
-        [imageTexture imageWindowRect rng] = MakeImageTexture(imageCanvas, window, windowRect, ...
+        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testStimulus, window, windowRect, ...
             'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
 
         %% Flip the PTB texture to display the image on the projector.
-        FlipImageTexture(imageTexture, window, windowRect,'verbose',false);
+        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
         disp('Image is now displaying...\n');
 
         % Wait for a key press
@@ -108,4 +108,6 @@ catch
 end
 
 %% Save the data.
-
+SAVEDATA = false;
+if (SAVEDATA)
+end
