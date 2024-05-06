@@ -7,17 +7,37 @@
 
 % History:
 %    04/25/24  smo    - Started on it.
+%    05/06/24  smo    - Updated to run a single trial. It needs to be
+%                       tested.
 
 %% Initialize.
 close all; clear;
 
+%% Get computer info to recognize the path to add.
+sysInfo = GetComputerInfo();
+
+% Set the file dir differently depending on the computer.
+switch sysInfo.userShortName
+    case 'semin'
+        % Office computer.
+        baseFiledir = '~/Documents/MATLAB';
+
+        % SET THE NAME OF THE LINUX COMPUTER HERE.
+    case
+        % Lap Linux computer.
+        baseFiledir = '/home/gegenfurtner/Desktop/semin';
+end
+
 %% Add repository to path.
-testfiledir = '/home/gegenfurtner/Desktop/SEMIN/';
+projectName = 'ColorAssimilation';
+testFiledir = fullfile(baseFiledir,projectName);
+
+%% Add repository to path.
 if isfolder(testfiledir)
     addpath(testfiledir);
-    fprintf('Directory has been added to the path!: %s \n',testfiledir);
+    fprintf('Directory has been added to the path!: %s \n',testiledir);
 else
-    fprintf('No such directory exist: %s \n',testfiledir);
+    fprintf('No such directory exist: %s \n',testFiledir);
 end
 
 %% Some parameters will be typed for convenience.
@@ -42,9 +62,17 @@ end
 %% Starting from here to the end, if error occurs, we automatically close the PTB screen.
 try
     %% Load the original face images.
-    image = imread('SeminFace.png');
+    imageFilename = 'SeminFace.png';
+    imageFiledir = fullfile(testFiledir,'image','RawImages');
+    image = imread(fullfile(imageFiledir,imageFilename));
 
-    %% Set image variables.
+    %% Open the PTB screen.
+    initialScreenSetting = [0.5 0.5 0.5]';
+    [window windowRect] = OpenPlainScreen(initialScreenSetting);
+
+    %% Set variables.
+    %
+    % Image variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
     testImageSize = 0.15;
     position_leftImage_x = 0.35;
@@ -55,13 +83,17 @@ try
     numColorCorrectChannelOptions = [1 3];
     numColorCorrectChannel = 1;
 
+    % Image position variables.
     ratioHorintalScreen = 0.5;
     ratioVerticalScreen = 0.5;
 
-    % Set experimental variables.
+    % Experimental variables.
     nTrials = 100;
     t_preIntervalSec = 0.5;
     t_postIntervalSec = 1;
+    SAVETHERESULTS = false;
+
+    % etc.
     verbose = false;
 
     %% Make a null stimulus.
@@ -99,7 +131,7 @@ try
     %
     % Display a null image.
     FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
-    
+
     % Make a loop of the experiment until it hits the target number of trials.
     for tt = 1:nTrials
         % Press any button to display a test image. Here we used two
@@ -166,6 +198,19 @@ catch
 end
 
 %% Save the data.
-SAVEDATA = false;
-if (SAVEDATA)
+if (SAVETHERESULTS)
+    saveFiledir = fullfile(testFiledir,'data');
+
+    % Make folder with subject name if it does not exist.
+    saveFoldername = fullfile(saveFiledir,subjectName,colorStripesOptions(idxStripeColor));
+    if ~exist(saveFoldername, 'dir')
+        mkdir(saveFoldername);
+    end
+
+    % Set the file name and save. We will update the name of the folder
+    % later once we set on the experimental settings.
+    dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+    saveFilename = fullfile(saveFoldername,colorStripesOptions(idxStripeColor),...
+        sprintf('%s_%s_%s',subjectName,colorStripesOptions(idxStripeColor),dayTimestr));
+    save(saveFilename,'rawData');
 end
