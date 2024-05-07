@@ -130,7 +130,7 @@ try
     %% Set the initial screen for instruction.
     imageSize = size(nullImage,2);
     messageInitialImage_1stLine = 'Press any button to start';
-    messageInitialImage_2ndLine = 'Image display demo';
+    messageInitialImage_2ndLine = 'The experiment';
     initialInstructionImage = insertText(nullImage,[30 imageSize/2-40; 30 imageSize/2+40],{messageInitialImage_1stLine messageInitialImage_2ndLine},...
         'fontsize',70,'Font','FreeSansBold','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
@@ -180,6 +180,10 @@ try
                     fprintf('A key pressed = (%s) \n',keyPressed);
                     break;
                 else
+                    % Close the screen for the other key press. This part will be
+                    % deleted or speify a key to close the screen.
+                    CloseScreen;
+
                     % Otherwise, the loop lasts until it receives a valid
                     % key.
                     fprintf('Press a key either (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2});
@@ -195,10 +199,6 @@ try
             rawData.data = 0;
         elseif strcmp(keyPressed,'RightArrow')
             rawData.data = 1;
-        else
-            % Close the screen for the other key press. This part will be
-            % deleted or speify a key to close the screen.
-            CloseScreen;
         end
     end
 
