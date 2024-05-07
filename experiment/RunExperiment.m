@@ -26,6 +26,9 @@ switch sysInfo.userShortName
     case 'gegenfurtner'
         % Lap Linux computer.
         baseFiledir = '/home/gegenfurtner/Desktop/semin';
+    otherwise
+        % This is for Semin's laptop.
+        baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
 end
 
 %% Add repository to path.
@@ -33,9 +36,9 @@ projectName = 'ColorAssimilation';
 testFiledir = fullfile(baseFiledir,projectName);
 
 %% Add repository to path.
-if isfolder(testfiledir)
-    addpath(testfiledir);
-    fprintf('Directory has been added to the path!: %s \n',testiledir);
+if isfolder(testFiledir)
+    addpath(testFiledir);
+    fprintf('Directory has been added to the path!: %s \n',testFiledir);
 else
     fprintf('No such directory exist: %s \n',testFiledir);
 end
@@ -76,24 +79,26 @@ try
     sizeCanvas = [windowRect(3) windowRect(4)];
     testImageSize = 0.15;
     position_leftImage_x = 0.35;
-    colorStripesOptions = {'red','green','blue'};
-    centerImageOptions = {'stripes','color'};
-    idxCenterImage = 1;
     stripe_height_pixel = 5;
     numColorCorrectChannelOptions = [1 3];
     numColorCorrectChannel = 1;
+    colorStripesOptions = {'red','green','blue'};
+    centerImageOptions = {'stripes','color'};
+    idxCenterImage = 1;
+    whichColorStripes = colorStripesOptions{idxStripeColor};
+    whichCenterImage = centerImageOptions{idxCenterImage};
 
     % Image position variables.
     ratioHorintalScreen = 0.5;
     ratioVerticalScreen = 0.5;
 
     % Experimental variables.
-    nTrials = 5;
+    nTrials = 3;
     t_preIntervalSec = 0.5;
     t_postIntervalSec = 1;
-    SAVETHERESULTS = false;
 
     % etc.
+    SAVETHERESULTS = true;
     verbose = false;
 
     %% Make a null stimulus.
@@ -110,10 +115,6 @@ try
 
     %% Make test stimulus.
     %
-    % Set the color of stripes and which image to put in the center.
-    whichColorStripes = colorStripesOptions{idxStripeColor};
-    whichCenterImage = centerImageOptions{idxCenterImage};
-
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
     testImage = MakeImageCanvas(image,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
@@ -128,17 +129,30 @@ try
 
 
     %% Set the initial screen for instruction.
-    imageSize = size(nullImage,2);
-    messageInitialImage_1stLine = 'Press any button to start';
-    messageInitialImage_2ndLine = 'The experiment';
-    initialInstructionImage = insertText(nullImage,[30 imageSize/2-40; 30 imageSize/2+40],{messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',70,'Font','FreeSansBold','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
+    imageSize = size(nullImage);
+    messageInitialImage_1stLine = 'Press any button';
+    messageInitialImage_2ndLine = 'To start the experiment';
+    ratioMessageInitialHorz = 0.4;
+    ratioMessageInitialVert = 0.03;
+    initialInstructionImage = insertText(nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
+        {messageInitialImage_1stLine messageInitialImage_2ndLine},...
+        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
 
-    % Display the initial screen.
-    SetScreenImage(initialInstructionImage, window, windowRect,'verbose',true);
+    % Make an image texture of the initial image.
+    [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
     
+    % Display the initial screen.
+    FlipImageTexture(initialInstructionImageTexture, window, windowRect,'verbose',false);
+
     % Get any key press to proceed.
-    pause;
+    while true
+        [keyIsDown, ~, keyCode] = KbCheck;
+        if keyIsDown
+            keyPressed = KbName(keyCode);
+            disp(['Key pressed: ' keyPressed]);
+            break;
+        end
+    end
     disp('Experiment is going to be started!');
 
     %% Get one evaluation. Later on, this part will be made as a function.
@@ -148,12 +162,22 @@ try
 
     % Make a loop of the experiment until it hits the target number of trials.
     for tt = 1:nTrials
-        % Press any button to display a test image. Here we used two
-        % separate 'pause' functions. First one is to get a key press, the
-        % other one makes a slight time delay before displaying a test
-        % stimulus.
-        disp('Press any key to display a test image');
-        pause;
+        % Get any key press to proceed. This is for the very first trial.
+        % For the other trials, 
+        if tt == 1
+            disp('Press any key to display a test image');
+            while true
+                [keyIsDown, ~, keyCode] = KbCheck;
+                if keyIsDown
+                    keyPressed = KbName(keyCode);
+                    disp(['Key pressed: ' keyPressed]);
+                    break;
+                end
+            end
+        end
+
+        % Make a tiny delay between the null and test test stimulus. We may
+        % want to delete this part later on.
         pause(t_preIntervalSec);
 
         % Diplay a test image.
@@ -173,7 +197,6 @@ try
             [keyIsDown, ~, keyCode] = KbCheck;
             if keyIsDown
                 keyPressed = KbName(keyCode);
-                disp(['Key pressed: ' keyPressed]);
 
                 % Break the loop if a valid key was pressed.
                 if ismember(keyPressed,keyPressOptions)
@@ -200,6 +223,9 @@ try
         elseif strcmp(keyPressed,'RightArrow')
             rawData.data = 1;
         end
+
+        % Show the progress.
+        fprintf('Experiment progress - (%d/%d) \n',tt,nTrials);
     end
 
 catch
@@ -209,22 +235,29 @@ catch
 
     % Display the error message.
     tmpE.message
+    tmpE.stack.name
+    tmpE.stack.line
 end
+
+%% Close the PTB screen once the experiment is done.
+CloseScreen;
 
 %% Save the data.
 if (SAVETHERESULTS)
     saveFiledir = fullfile(testFiledir,'data');
 
     % Make folder with subject name if it does not exist.
-    saveFoldername = fullfile(saveFiledir,subjectName,colorStripesOptions(idxStripeColor));
+    saveFoldername = fullfile(saveFiledir,subjectName,colorStripesOptions{idxStripeColor});
     if ~exist(saveFoldername, 'dir')
         mkdir(saveFoldername);
+        fprintf('Folder has been successfully created: \n (%s) \n',saveFoldername);
     end
 
     % Set the file name and save. We will update the name of the folder
     % later once we set on the experimental settings.
     dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-    saveFilename = fullfile(saveFoldername,colorStripesOptions(idxStripeColor),...
-        sprintf('%s_%s_%s',subjectName,colorStripesOptions(idxStripeColor),dayTimestr));
+    saveFilename = fullfile(saveFoldername,...
+        sprintf('%s_%s_%s',subjectName,colorStripesOptions{idxStripeColor},dayTimestr));
     save(saveFilename,'rawData');
+    disp('Data has been saved successfully!');
 end
