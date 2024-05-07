@@ -23,7 +23,7 @@ switch sysInfo.userShortName
         baseFiledir = '~/Documents/MATLAB';
 
         % SET THE NAME OF THE LINUX COMPUTER HERE.
-    case
+    case 'gegenfurtner'
         % Lap Linux computer.
         baseFiledir = '/home/gegenfurtner/Desktop/semin';
 end
@@ -88,7 +88,7 @@ try
     ratioVerticalScreen = 0.5;
 
     % Experimental variables.
-    nTrials = 100;
+    nTrials = 5;
     t_preIntervalSec = 0.5;
     t_postIntervalSec = 1;
     SAVETHERESULTS = false;
@@ -97,7 +97,7 @@ try
     verbose = false;
 
     %% Make a null stimulus.
-    nullStimulus = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+    nullImage = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
         'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
         'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
@@ -105,7 +105,7 @@ try
     %
     % We make all PTB texture in advance so that we can minimize the frame
     % break-up because of the time spent making image texture.
-    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullStimulus, window, windowRect, ...
+    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullImage, window, windowRect, ...
         'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
 
     %% Make test stimulus.
@@ -116,16 +116,30 @@ try
 
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
-    testStimulus = MakeImageCanvas(image,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
+    testImage = MakeImageCanvas(image,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
         'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
         'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
     % Make PTB image texture.
-    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testStimulus, window, windowRect, ...
+    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, ...
         'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
 
-    %% Save the null and test images.
+    %% Save the null and test images. If images exist, load them.
 
+
+    %% Set the initial screen for instruction.
+    imageSize = size(nullImage,2);
+    messageInitialImage_1stLine = 'Press any button to start';
+    messageInitialImage_2ndLine = 'Image display demo';
+    initialInstructionImage = insertText(nullImage,[30 imageSize/2-40; 30 imageSize/2+40],{messageInitialImage_1stLine messageInitialImage_2ndLine},...
+        'fontsize',70,'Font','FreeSansBold','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
+
+    % Display the initial screen.
+    SetScreenImage(initialInstructionImage, window, windowRect,'verbose',true);
+    
+    % Get any key press to proceed.
+    pause;
+    disp('Experiment is going to be started!');
 
     %% Get one evaluation. Later on, this part will be made as a function.
     %
