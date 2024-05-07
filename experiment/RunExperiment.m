@@ -9,6 +9,7 @@
 %    04/25/24  smo    - Started on it.
 %    05/06/24  smo    - Updated to run a single trial. It needs to be
 %                       tested.
+%    05/07/24  smo    - Routine is working.
 
 %% Initialize.
 close all; clear;
@@ -215,13 +216,13 @@ try
         end
 
         % Collect the key press info here.
-        rawData.key = keyPressed;
+        rawData.key{tt} = keyPressed;
 
         % Convert the response here.
         if  strcmp(keyPressed,'LeftArrow')
-            rawData.data = 0;
+            rawData.data(tt) = 0;
         elseif strcmp(keyPressed,'RightArrow')
-            rawData.data = 1;
+            rawData.data(tt) = 1;
         end
 
         % Show the progress.
