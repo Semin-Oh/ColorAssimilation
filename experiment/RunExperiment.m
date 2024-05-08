@@ -77,31 +77,32 @@ try
     %% Set variables.
     %
     % Image variables.
-    sizeCanvas = [windowRect(3) windowRect(4)];
-    testImageSize = 0.15;
-    position_leftImage_x = 0.35;
-    stripe_height_pixel = 5;
-    numColorCorrectChannelOptions = [1 3];
-    numColorCorrectChannel = 1;
-    colorStripesOptions = {'red','green','blue'};
-    centerImageOptions = {'stripes','color'};
-    idxCenterImage = 1;
-    whichColorStripes = colorStripesOptions{idxStripeColor};
-    whichCenterImage = centerImageOptions{idxCenterImage};
+    imageParams.sizeCanvans = [windowRect(3) windowRect(4)];
+    imageParams.testImageSize = 0.15;
+    imageParams.position_leftImage_x = 0.35;
+    imageParams.stripeHeightPixel = 5;
+    imageParams.nChannelsColorCorrectOptions = [1 3];
+    imageParams.nChannelsColorCorrect = 1;
+    imageParams.colorStripesOptions = {'red','green','blue'};
+    imageParams.centerImageOptions = {'stripes','color'};
+    imageParams.idxCenterImage = 1;
+    imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
+    whichCenterImage = imageParams.centerImageOptions{imageParams.idxCenterImage};
 
     % Experimental variables.
-    nTrials = 3;
-    t_preIntervalSec = 0.5;
-    t_postIntervalSec = 1;
+    expParams.nTrials = 3;
+    expParams.t_preIntervalSec = 0.5;
+    expParams.t_postIntervalSec = 1;
+    expParams.subjectName = subjectName;
 
     % etc.
     SAVETHERESULTS = true;
     verbose = false;
 
     %% Make a null stimulus.
-    nullImage = MakeImageCanvas([],'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
-        'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
+    nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+        'stripe_height_pixel',imageParams.stripeHeightPixel,'numColorCorrectChannel',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
     % Make a PTB image texture.
     %
@@ -113,9 +114,9 @@ try
     %
     % Here we generate an image canvas so that we can present thos whole
     % image as a stimulus.
-    testImage = MakeImageCanvas(image,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
-        'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
+    testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+        'stripe_height_pixel',imageParams.stripeHeightPixel,'numColorCorrectChannel',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
     % Make PTB image texture.
     [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
@@ -131,7 +132,7 @@ try
     ratioMessageInitialVert = 0.03;
     initialInstructionImage = insertText(nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
+        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
     % Make an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
@@ -156,7 +157,7 @@ try
     FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
 
     % Make a loop of the experiment until it hits the target number of trials.
-    for tt = 1:nTrials
+    for tt = 1:expParams.nTrials
         % Get any key press to proceed. This is for the very first trial.
         % For the other trials, 
         if tt == 1
@@ -173,14 +174,14 @@ try
 
         % Make a tiny delay between the null and test test stimulus. We may
         % want to delete this part later on.
-        pause(t_preIntervalSec);
+        pause(expParams.t_preIntervalSec);
 
         % Diplay a test image.
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying for (%.f s)...\n',t_postIntervalSec);
+        fprintf('Test image is now displaying for (%.f s)...\n',expParams.t_postIntervalSec);
 
         % Make a time delay before bringing the null stimulus back again.
-        pause(t_postIntervalSec);
+        pause(expParams.t_postIntervalSec);
 
         % Display a null image again after the presenation of the test stimulus.
         FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
@@ -220,7 +221,7 @@ try
         end
 
         % Show the progress.
-        fprintf('Experiment progress - (%d/%d) \n',tt,nTrials);
+        fprintf('Experiment progress - (%d/%d) \n',tt,expParams.nTrials);
     end
 
 catch
@@ -242,7 +243,7 @@ if (SAVETHERESULTS)
     saveFiledir = fullfile(testFiledir,'data');
 
     % Make folder with subject name if it does not exist.
-    saveFoldername = fullfile(saveFiledir,subjectName,colorStripesOptions{idxStripeColor});
+    saveFoldername = fullfile(saveFiledir,subjectName,imageParams.colorStripesOptions{idxStripeColor});
     if ~exist(saveFoldername, 'dir')
         mkdir(saveFoldername);
         fprintf('Folder has been successfully created: \n (%s) \n',saveFoldername);
@@ -252,7 +253,7 @@ if (SAVETHERESULTS)
     % later once we set on the experimental settings.
     dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
     saveFilename = fullfile(saveFoldername,...
-        sprintf('%s_%s_%s',subjectName,colorStripesOptions{idxStripeColor},dayTimestr));
-    save(saveFilename,'rawData');
+        sprintf('%s_%s_%s',subjectName,imageParams.colorStripesOptions{idxStripeColor},dayTimestr));
+    save(saveFilename,'rawData','imageParams','expParams');
     disp('Data has been saved successfully!');
 end
