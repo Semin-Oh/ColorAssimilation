@@ -89,10 +89,6 @@ try
     whichColorStripes = colorStripesOptions{idxStripeColor};
     whichCenterImage = centerImageOptions{idxCenterImage};
 
-    % Image position variables.
-    ratioHorintalScreen = 0.5;
-    ratioVerticalScreen = 0.5;
-
     % Experimental variables.
     nTrials = 3;
     t_preIntervalSec = 0.5;
@@ -111,8 +107,7 @@ try
     %
     % We make all PTB texture in advance so that we can minimize the frame
     % break-up because of the time spent making image texture.
-    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullImage, window, windowRect, ...
-        'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
+    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullImage, window, windowRect, 'verbose', false);
 
     %% Make test stimulus.
     %
@@ -123,8 +118,7 @@ try
         'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
 
     % Make PTB image texture.
-    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, ...
-        'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
+    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
 
     %% Save the null and test images. If images exist, load them.
 
