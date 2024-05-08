@@ -84,15 +84,16 @@ try
     imageParams.nChannelsColorCorrectOptions = [1 3];
     imageParams.nChannelsColorCorrect = 1;
     imageParams.colorStripesOptions = {'red','green','blue'};
+    imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
+    
     imageParams.centerImageOptions = {'stripes','color'};
     imageParams.idxCenterImage = 1;
-    imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
     whichCenterImage = imageParams.centerImageOptions{imageParams.idxCenterImage};
 
     % Experimental variables.
     expParams.nTrials = 3;
-    expParams.t_preIntervalSec = 0.5;
-    expParams.t_postIntervalSec = 1;
+    expParams.preIntervalDelaySec = 0.5;
+    expParams.postIntervalDelaySec = 1;
     expParams.subjectName = subjectName;
 
     % etc.
@@ -102,7 +103,7 @@ try
     %% Make a null stimulus.
     nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
         'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripe_height_pixel',imageParams.stripeHeightPixel,'numColorCorrectChannel',imageParams.nChannelsColorCorrect,'verbose',verbose);
+        'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
     % Make a PTB image texture.
     %
@@ -116,7 +117,7 @@ try
     % image as a stimulus.
     testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
         'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripe_height_pixel',imageParams.stripeHeightPixel,'numColorCorrectChannel',imageParams.nChannelsColorCorrect,'verbose',verbose);
+        'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
     % Make PTB image texture.
     [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
@@ -174,14 +175,14 @@ try
 
         % Make a tiny delay between the null and test test stimulus. We may
         % want to delete this part later on.
-        pause(expParams.t_preIntervalSec);
+        pause(expParams.preIntervalDelaySec);
 
         % Diplay a test image.
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying for (%.f s)...\n',expParams.t_postIntervalSec);
+        fprintf('Test image is now displaying for (%.f s)...\n',expParams.postIntervalDelaySec);
 
         % Make a time delay before bringing the null stimulus back again.
-        pause(expParams.t_postIntervalSec);
+        pause(expParams.postIntervalDelaySec);
 
         % Display a null image again after the presenation of the test stimulus.
         FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);

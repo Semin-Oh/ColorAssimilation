@@ -32,7 +32,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               put either the input image with stripes
 %                               ('stripes') on or color corrected image
 %                               ('color'). Default to 'color'.
-%   stripe_height_pixel       - Define the height of each horizontal stripe
+%   stripeHeightPixel         - Define the height of each horizontal stripe
 %                               on the background of the cavas. It's in
 %                               pixel unit and default to 5.
 %   whichColorStripes         - Define the color of stripes to place on top
@@ -58,7 +58,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %   colorCorrectMethod        - Decide the color correcting method that
 %                               corresponds to the test image with stripes
 %                               on. Default to 'mean'.
-%   numColorCorrectChannel    - The number of channels to correct when
+%   nChannelsColorCorrect     - The number of channels to correct when
 %                               generating color corrected image. You can
 %                               set this value to 1 if you want to correct
 %                               only the targeting channel, otherwise it
@@ -83,14 +83,14 @@ arguments
     testImage
     options.testImageSize = 0.40
     options.whichCenterImage = 'color'
-    options.stripe_height_pixel (1,1) = 5
+    options.stripeHeightPixel (1,1) = 5
     options.whichColorStripes = 'red'
     options.intensityStripe (1,1) = 255
     options.position_leftImage_x (1,1) = 0.1
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
     options.colorCorrectMethod = 'add'
-    options.numColorCorrectChannel (1,1) = 1
+    options.nChannelsColorCorrect (1,1) = 1
 end
 
 % Define the size of the canvas.
@@ -150,16 +150,16 @@ end
 %% Add stripes on the background.
 %
 % Generate the background with horizontal stripes
-for i = 1 : options.stripe_height_pixel : canvas_height
-    if mod(floor(i/options.stripe_height_pixel), 3) == 0
+for i = 1 : options.stripeHeightPixel : canvas_height
+    if mod(floor(i/options.stripeHeightPixel), 3) == 0
         % Red
-        canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
-    elseif mod(floor(i/options.stripe_height_pixel), 3) == 1
+        canvas(i:i+options.stripeHeightPixel-1, :, 1) = options.intensityStripe;
+    elseif mod(floor(i/options.stripeHeightPixel), 3) == 1
         % Green.
-        canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
+        canvas(i:i+options.stripeHeightPixel-1, :, 2) = options.intensityStripe;
     else
         % Blue.
-        canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
+        canvas(i:i+options.stripeHeightPixel-1, :, 3) = options.intensityStripe;
     end
 end
 
@@ -194,25 +194,25 @@ if ~isempty(testImage)
     % This part will simulate the color assimilation phenomena.
     %
     % Add stripe on top of the image here.
-    for i = 1 : options.stripe_height_pixel : canvas_height
+    for i = 1 : options.stripeHeightPixel : canvas_height
         switch options.whichColorStripes
             case 'red'
-                if mod(floor(i/options.stripe_height_pixel), 3) == 0
-                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = options.intensityStripe;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
+                if mod(floor(i/options.stripeHeightPixel), 3) == 0
+                    canvas(i:i+options.stripeHeightPixel-1, :, 1) = options.intensityStripe;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 2) = 0;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 3) = 0;
                 end
             case 'green'
-                if mod(floor(i/options.stripe_height_pixel), 3) == 1
-                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = options.intensityStripe;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = 0;
+                if mod(floor(i/options.stripeHeightPixel), 3) == 1
+                    canvas(i:i+options.stripeHeightPixel-1, :, 1) = 0;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 2) = options.intensityStripe;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 3) = 0;
                 end
             case 'blue'
-                if mod(floor(i/options.stripe_height_pixel), 3) == 2
-                    canvas(i:i+options.stripe_height_pixel-1, :, 1) = 0;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 2) = 0;
-                    canvas(i:i+options.stripe_height_pixel-1, :, 3) = options.intensityStripe;
+                if mod(floor(i/options.stripeHeightPixel), 3) == 2
+                    canvas(i:i+options.stripeHeightPixel-1, :, 1) = 0;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 2) = 0;
+                    canvas(i:i+options.stripeHeightPixel-1, :, 3) = options.intensityStripe;
                 end
         end
     end
@@ -265,7 +265,7 @@ if ~isempty(testImage)
             % For example, when we generate red corrected image, we can either only
             % correct the red channel or all three channels. Still thinking about
             % what's more logical way to do.
-            if options.numColorCorrectChannel == 1
+            if options.nChannelsColorCorrect == 1
                 % Correct only the targeting channel, while the others remain the same.
                 switch options.whichColorStripes
                     case 'red'
