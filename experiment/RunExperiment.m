@@ -67,8 +67,8 @@ end
 try
     %% Load the original face images.
     imageFilename = 'SeminFace.png';
-    imageFiledir = fullfile(testFiledir,'image','RawImages');
-    image = imread(fullfile(imageFiledir,imageFilename));
+    rawImageFiledir = fullfile(testFiledir,'image','RawImages');
+    image = imread(fullfile(rawImageFiledir,imageFilename));
 
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
@@ -85,7 +85,7 @@ try
     imageParams.nChannelsColorCorrect = 1;
     imageParams.colorStripesOptions = {'red','green','blue'};
     imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
-    
+
     imageParams.centerImageOptions = {'stripes','color'};
     imageParams.idxCenterImage = 1;
     whichCenterImage = imageParams.centerImageOptions{imageParams.idxCenterImage};
@@ -97,33 +97,57 @@ try
     expParams.subjectName = subjectName;
 
     % etc.
+    MAKENEWTESTIMAGE = true;
     SAVETHERESULTS = true;
     verbose = false;
 
-    %% Make a null stimulus.
-    nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
+    %% Make the test images. If the images exist, just load them.
+    %
+    % Get the directory where the test images are saved.
+    testImageFiledir = fullfile(testFiledir,'image','TestImages');
 
-    % Make a PTB image texture.
+    if (MAKENEWTESTIMAGE)
+        % a) Make a null stimulus.
+        nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+            'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
+
+        % b) Make test stimulus.
+        testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+            'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
+
+        % c) Save the images. Make a new folder if the directory does not exist.
+        testImageFoldername = fullfile(testImageFiledir,subjectName,imageParams.colorStripesOptions{idxStripeColor});
+        if ~exist(testImageFoldername, 'dir')
+            mkdir(testImageFoldername);
+            fprintf('Folder has been successfully created: \n (%s) \n',testImageFoldername);
+        end
+
+        % Set the file name and save the images.
+        dayTimestr = datestr(now,'yyyy-mm-dd');
+        saveFilename = fullfile(saveFoldername,...
+            sprintf('TestImages_%s_%s',imageParams.colorStripesOptions{idxStripeColor},dayTimestr));
+        save(saveFilename,'nullImage','testImage');
+        disp('Test images have been saved successfully!');
+
+    else
+        % Load the images if they exist.
+        testImageFilename = GetMostRecentFileName(testImageFiledir,'TestImages*');
+        load(testImageFilename);
+        disp('Test images have been loaded successfully!');
+    end
+
+    %% Make the PTB textures of the null and test images.
     %
     % We make all PTB texture in advance so that we can minimize the frame
     % break-up because of the time spent making image texture.
+    %
+    % Null image.
     [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullImage, window, windowRect, 'verbose', false);
 
-    %% Make test stimulus.
-    %
-    % Here we generate an image canvas so that we can present thos whole
-    % image as a stimulus.
-    testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
-        'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
-
-    % Make PTB image texture.
+    % Test images.
     [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
-
-    %% Save the null and test images. If images exist, load them.
-
 
     %% Set the initial screen for instruction.
     imageSize = size(nullImage);
@@ -137,7 +161,7 @@ try
 
     % Make an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
-    
+
     % Display the initial screen.
     FlipImageTexture(initialInstructionImageTexture, window, windowRect,'verbose',false);
 
@@ -160,7 +184,7 @@ try
     % Make a loop of the experiment until it hits the target number of trials.
     for tt = 1:expParams.nTrials
         % Get any key press to proceed. This is for the very first trial.
-        % For the other trials, 
+        % For the other trials,
         if tt == 1
             disp('Press any key to display a test image');
             while true
