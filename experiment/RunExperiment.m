@@ -97,14 +97,15 @@ try
     expParams.subjectName = subjectName;
 
     % etc.
-    MAKENEWTESTIMAGE = true;
+    MAKENEWTESTIMAGE = false;
     SAVETHERESULTS = true;
     verbose = false;
 
     %% Make the test images. If the images exist, just load them.
     %
     % Get the directory where the test images are saved.
-    testImageFiledir = fullfile(testFiledir,'image','TestImages');
+    testImageFiledir = fullfile(testFiledir,'image','TestImages',...
+        imageParams.colorStripesOptions{idxStripeColor});
 
     if (MAKENEWTESTIMAGE)
         % a) Make a null stimulus.
@@ -118,22 +119,21 @@ try
             'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
         % c) Save the images. Make a new folder if the directory does not exist.
-        testImageFoldername = fullfile(testImageFiledir,subjectName,imageParams.colorStripesOptions{idxStripeColor});
-        if ~exist(testImageFoldername, 'dir')
-            mkdir(testImageFoldername);
-            fprintf('Folder has been successfully created: \n (%s) \n',testImageFoldername);
+        if ~exist(testImageFiledir, 'dir')
+            mkdir(testImageFiledir);
+            fprintf('Folder has been successfully created: \n (%s) \n',testImageFiledir);
         end
 
         % Set the file name and save the images.
-        dayTimestr = datestr(now,'yyyy-mm-dd');
-        saveFilename = fullfile(saveFoldername,...
+        dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+        saveFilename = fullfile(testImageFiledir,...
             sprintf('TestImages_%s_%s',imageParams.colorStripesOptions{idxStripeColor},dayTimestr));
         save(saveFilename,'nullImage','testImage');
         disp('Test images have been saved successfully!');
 
     else
         % Load the images if they exist.
-        testImageFilename = GetMostRecentFileName(testImageFiledir,'TestImages*');
+        testImageFilename = GetMostRecentFileName(testImageFiledir,'TestImages_');
         load(testImageFilename);
         disp('Test images have been loaded successfully!');
     end
