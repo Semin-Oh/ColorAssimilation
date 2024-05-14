@@ -66,7 +66,7 @@ end
 %% Starting from here to the end, if error occurs, we automatically close the PTB screen.
 try
     %% Load the original face images.
-    imageFilename = 'SeminFace.png';
+    imageFilename = 'RawImage_1.png';
     rawImageFiledir = fullfile(testFiledir,'image','RawImages');
     image = imread(fullfile(rawImageFiledir,imageFilename));
 
