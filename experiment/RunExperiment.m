@@ -32,7 +32,7 @@ switch sysInfo.userShortName
         baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
 end
 
-%% Add repository to path.
+%% Set repository name.
 projectName = 'ColorAssimilation';
 testFiledir = fullfile(baseFiledir,projectName);
 
@@ -76,6 +76,17 @@ try
 
     %% Set variables.
     %
+    % Screen variables. The physical lengths of the monitor were measured
+    % manually considering the curvature.
+    screenParams.screen_x_pixel = 5120;
+    screenParams.screen_y_pixel = 1440;
+    screenParams.screen_x_cm  = 119.2;
+    screenParams.screen_y_cm  = 33.5;
+    % From the chinrest to the center screen.
+    screenParams.screenDistance_cm = 100;
+    % Gap between the screens. It was measured manually.
+    screenParams.screenGap_cm = 2.5; 
+
     % Image variables.
     imageParams.sizeCanvans = [windowRect(3) windowRect(4)];
     imageParams.testImageSize = 0.15;
