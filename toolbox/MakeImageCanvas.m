@@ -412,8 +412,8 @@ if ~isempty(testImage)
         sgtitle('Image profile comparison');
         subplot(1,4,1);
         scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
-        scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'ko');
-        scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        scatter3(red_testImageOneStripe,green_testImageOneStripe,blue_testImageOneStripe,'k.');
+        scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
         xlabel('dR','fontsize',13);
         ylabel('dG','fontsize',13);
         zlabel('dB','fontsize',13);
@@ -427,8 +427,8 @@ if ~isempty(testImage)
         % Comparison in 2-D: dG vs. dR.
         subplot(1,4,2); hold on;
         plot(green_testImage,red_testImage,'k+');
-        plot(green_testImageOneStripe,red_testImageOneStripe,'ko');
-        plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        plot(green_testImageOneStripe,red_testImageOneStripe,'k.');
+        plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
         xlabel('dG','fontsize',13);
         ylabel('dR','fontsize',13);
         legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
@@ -440,8 +440,8 @@ if ~isempty(testImage)
         % Comparison in 2-D: dG vs. dB.
         subplot(1,4,3); hold on;
         plot(green_testImage,blue_testImage,'k+');
-        plot(green_testImageOneStripe,blue_testImageOneStripe,'ko');
-        plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        plot(green_testImageOneStripe,blue_testImageOneStripe,'k.');
+        plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
         xlabel('dG','fontsize',13);
         ylabel('dB','fontsize',13);
         legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
@@ -453,8 +453,8 @@ if ~isempty(testImage)
         % Comparison in 2-D: dR vs. dB.
         subplot(1,4,4); hold on;
         plot(red_testImage,blue_testImage,'k+');
-        plot(red_testImageOneStripe,blue_testImageOneStripe,'ko');
-        plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'o'));
+        plot(red_testImageOneStripe,blue_testImageOneStripe,'k.');
+        plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
         xlabel('dR','fontsize',13);
         ylabel('dB','fontsize',13);
         legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
@@ -527,8 +527,8 @@ if ~isempty(testImage)
 
         % Plot it.
         figure; hold on;
-        plot(xyY_testImage(1,:),xyY_testImage(2,:),'k.');
-        plot(xyY_testImageOneStripe(1,:),xyY_testImageOneStripe(2,:),'k+');
+        plot(xyY_testImage(1,:),xyY_testImage(2,:),'k+');
+        plot(xyY_testImageOneStripe(1,:),xyY_testImageOneStripe(2,:),'k.');
         plot(xyY_colorCorrectedImage(1,:),xyY_colorCorrectedImage(2,:),'r.');
 
         % Display gamut. For now, it's set to sRGB for convenience.
