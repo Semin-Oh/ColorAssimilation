@@ -13,6 +13,8 @@
 %                       Giessen.
 %    04/10/24  smo    - Made it to be able to control image elements in
 %                       real time.
+%    06/19/24  smo    - Added one more variable to control: Level of color
+%                       correction.
 
 %% Initialize.
 close all; clear;
@@ -48,12 +50,14 @@ try
     stripe_height_pixel = 5;
     numColorCorrectChannelOptions = [1 3];
     numColorCorrectChannel = 1;
+    intensityColorCorrect = 0;
     verbose = false;
 
     % More variables to control the image canvas in real time.
-    unit_imagePosition = 0.05;
-    unit_testImage_size = 0.05;
-    unit_height_pixel = 5;
+    stepsize_imagePosition = 0.05;
+    stepsize_testImage_size = 0.05;
+    stepsize_height_pixel = 5;
+    stepsize_intensityColorCorrect = 0.1;
 
     % Make a loop here to update the canvas in real time.
     while 1
@@ -65,7 +69,8 @@ try
         % image as a stimulus.
         imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
             'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
-            'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'verbose',verbose);
+            'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'intensityColorCorrect',intensityColorCorrect,...
+            'verbose',verbose);
 
         %% Make PTB image texture.
         %
@@ -98,16 +103,16 @@ try
         %
         % Increase the stripe height.
         if strcmp(keyPressed,'UpArrow')
-            stripe_height_pixel = stripe_height_pixel+unit_height_pixel;
+            stripe_height_pixel = stripe_height_pixel+stepsize_height_pixel;
             % Decrease the stripe height.
         elseif strcmp(keyPressed,'DownArrow')
-            stripe_height_pixel = stripe_height_pixel-unit_height_pixel;
+            stripe_height_pixel = stripe_height_pixel-stepsize_height_pixel;
             % Increase the gap between the left and the right images.
         elseif strcmp(keyPressed,'LeftArrow')
-            position_leftImage_x = position_leftImage_x-unit_imagePosition;
+            position_leftImage_x = position_leftImage_x-stepsize_imagePosition;
             % Decrease the gap between the left and the right images.
         elseif strcmp(keyPressed,'RightArrow')
-            position_leftImage_x = position_leftImage_x+unit_imagePosition;
+            position_leftImage_x = position_leftImage_x+stepsize_imagePosition;
             % Change the color of the stripes to place on the test image.
         elseif strcmp(keyPressed,'c')
             idxColorStripes = idxColorStripes+1;
@@ -125,10 +130,16 @@ try
             numColorCorrectChannel = setdiff(numColorCorrectChannelOptions,numColorCorrectChannel);
             % Make the test image larger.
         elseif strcmp(keyPressed,']}')
-            testImageSize = testImageSize + unit_testImage_size;
+            testImageSize = testImageSize + stepsize_testImage_size;
             % Make the test images smaller.
         elseif strcmp(keyPressed,'[{')
-            testImageSize = testImageSize - unit_testImage_size;
+            testImageSize = testImageSize - stepsize_testImage_size;
+            % Make the test image more saturated.
+        elseif strcmp(keyPressed,'p')
+            intensityColorCorrect = intensityColorCorrect + stepsize_intensityColorCorrect;
+            % Make the test image less saturated.
+        elseif strcmp(keyPressed,'o')
+            intensityColorCorrect = intensityColorCorrect - stepsize_intensityColorCorrect;
         else
             % Close the screen for the other key press.
             CloseScreen;

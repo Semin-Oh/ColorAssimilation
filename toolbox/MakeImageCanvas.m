@@ -64,6 +64,11 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               only the targeting channel, otherwise it
 %                               will correct all three channels. Default to
 %                               1.
+%   intensityColorCorrect     - Decide the amount of color correction on
+%                               the test image. If it sets to zero, the
+%                               amount of color correction would be solely
+%                               decided by the ratio of the stripes on the
+%                               image with stripes. Default to 0.
 %   verbose                   - Control the plot and alarm messages.
 %                               Default to false.
 %
@@ -77,6 +82,8 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    04/25/24    smo    - Added an option to make a canvas without image so
 %                         that we can generate a null canvas with only
 %                         stripes.
+%    06/19/24    smo    - Added an option to control the intensity of the
+%                         color correction after meeting with Karl.
 
 %% Set variables.
 arguments
@@ -91,6 +98,7 @@ arguments
     options.sizeCanvas (1,2) = [1920 1080]
     options.colorCorrectMethod = 'add'
     options.nChannelsColorCorrect (1,1) = 1
+    options.intensityColorCorrect (1,1) = 0
 end
 
 % Define the size of the canvas.
@@ -188,8 +196,7 @@ if ~isempty(testImage)
         end
     end
 
-
-    %% Draw one color of the stripes on top of the image.
+    %% Draw one color of the stripes on top of the image.   
     %
     % This part will simulate the color assimilation phenomena.
     %
@@ -301,8 +308,26 @@ if ~isempty(testImage)
             ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
 
             % Color correction happens here. Here we only correct one targeting
-            % channel.
-            colorCorrectionPerPixelOneChannel = ratioStripes .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
+            % channel. 
+            % 
+            % We also added the optional variable 'intensityColorCorrect'
+            % to control the level of color correction on the test image.
+            % We may use this feature in the experiment if we decide to do
+            % color matching experiment. It controls in ratio scale and the
+            % final scale ('ratioColorCorrect') should be within 0-1.
+            ratioColorCorrect = ratioStripes + options.intensityColorCorrect;
+
+            % Check if the scaling factor is within the range 0-1.
+            maxRatioColorCorrect = 1;
+            minRatioColorCorrect = 0;
+            if ratioColorCorrect > maxRatioColorCorrect
+                ratioColorCorrect = maxRatioColorCorrect;
+            elseif ratioColorCorrect < minRatioColorCorrect
+                ratioColorCorrect = minRatioColorCorrect;
+            end
+
+            % Color correction happens here.
+            colorCorrectionPerPixelOneChannel = ratioColorCorrect .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
             colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
     end
 
