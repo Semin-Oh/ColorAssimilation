@@ -15,12 +15,13 @@
 %                       real time.
 %    06/19/24  smo    - Added one more variable to control: Level of color
 %                       correction.
+%    06/20/24  smo    - Corrected directory and variable names.
 
 %% Initialize.
 close all; clear;
 
 %% Add repository to path.
-testfiledir = '/home/gegenfurtn er/Desktop/SEMIN/SpatioSpectralStimulator_copy';
+testfiledir = '/home/gegenfurtner/Desktop/SEMIN/ColorAssimilation';
 if isfolder(testfiledir)
     addpath(testfiledir);
     fprintf('Directory has been added to the path!: %s \n',testfiledir);
@@ -31,7 +32,7 @@ end
 %% Start here, if error occurs, we automatically close the PTB screen.
 try
     %% Load the image data.
-    testImage = imread('SeminFace.png');
+    testImage = imread('face_1.png');
 
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
@@ -41,7 +42,7 @@ try
     %
     % Set variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
-    testImageSize = 0.15;
+    testImageSize = 0.5;
     position_leftImage_x = 0.35;
     colorStripesOptions = {'red','green','blue'};
     idxColorStripes = 1;
@@ -55,7 +56,7 @@ try
 
     % More variables to control the image canvas in real time.
     stepsize_imagePosition = 0.05;
-    stepsize_testImage_size = 0.05;
+    stepsize_testImage_size = 0.1;
     stepsize_height_pixel = 5;
     stepsize_intensityColorCorrect = 0.1;
 
@@ -69,7 +70,7 @@ try
         % image as a stimulus.
         imageCanvas = MakeImageCanvas(testImage,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
             'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'whichCenterImage',whichCenterImage,...
-            'stripe_height_pixel',stripe_height_pixel,'numColorCorrectChannel',numColorCorrectChannel,'intensityColorCorrect',intensityColorCorrect,...
+            'stripeHeightPixel',stripe_height_pixel,'nChannelsColorCorrect',numColorCorrectChannel,'intensityColorCorrect',intensityColorCorrect,...
             'verbose',verbose);
 
         %% Make PTB image texture.
