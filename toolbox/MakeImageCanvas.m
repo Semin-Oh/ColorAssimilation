@@ -529,7 +529,7 @@ if ~isempty(testImage)
         RGB_testImageLinear(1,:) = RGB_testImageNorm(1,:).^gamma_R;
         RGB_testImageLinear(2,:) = RGB_testImageNorm(2,:).^gamma_G;
         RGB_testImageLinear(3,:) = RGB_testImageNorm(3,:).^gamma_B;
-        XYZ_testImage = M_RGB2XYZ * RGB_testImageNorm;
+        XYZ_testImage = M_RGB2XYZ * RGB_testImageLinear;
         xyY_testImage = XYZToxyY(XYZ_testImage);
 
         % Test image with stripes.
