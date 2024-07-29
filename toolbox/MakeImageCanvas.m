@@ -84,6 +84,8 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                         stripes.
 %    06/19/24    smo    - Added an option to control the intensity of the
 %                         color correction after meeting with Karl.
+%    07/29/24    smo    - Substituting the part converting from the digital
+%                         RGB to the CIE XYZ values with the function.
 
 %% Set variables.
 arguments
@@ -196,7 +198,7 @@ if ~isempty(testImage)
         end
     end
 
-    %% Draw one color of the stripes on top of the image.   
+    %% Draw one color of the stripes on top of the image.
     %
     % This part will simulate the color assimilation phenomena.
     %
@@ -308,8 +310,8 @@ if ~isempty(testImage)
             ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
 
             % Color correction happens here. Here we only correct one targeting
-            % channel. 
-            % 
+            % channel.
+            %
             % We also added the optional variable 'intensityColorCorrect'
             % to control the level of color correction on the test image.
             % We may use this feature in the experiment if we decide to do
@@ -518,36 +520,19 @@ if ~isempty(testImage)
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
         M_RGB2XYZ = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
 
-        % Now calculate the CIE XYZ values of the image profile. Make sure
-        % the class of the RGB matrix is 'double' so that it can be
-        % multiplied by the conversion matrix.
-        nInputLevels = 255;
-
         % Original test image.
         RGB_testImage = [red_testImage; green_testImage; blue_testImage];
-        RGB_testImageNorm = double(RGB_testImage)./nInputLevels;
-        RGB_testImageLinear(1,:) = RGB_testImageNorm(1,:).^gamma_R;
-        RGB_testImageLinear(2,:) = RGB_testImageNorm(2,:).^gamma_G;
-        RGB_testImageLinear(3,:) = RGB_testImageNorm(3,:).^gamma_B;
-        XYZ_testImage = M_RGB2XYZ * RGB_testImageLinear;
+        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ,gamma_RGB)
         xyY_testImage = XYZToxyY(XYZ_testImage);
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
-        RGB_testImageOneStripeNorm = double(RGB_testImageOneStripe)./nInputLevels;
-        RGB_testImageOneStripeLinear(1,:) = RGB_testImageOneStripeNorm(1,:).^gamma_R;
-        RGB_testImageOneStripeLinear(2,:) = RGB_testImageOneStripeNorm(2,:).^gamma_G;
-        RGB_testImageOneStripeLinear(3,:) = RGB_testImageOneStripeNorm(3,:).^gamma_B;
-        XYZ_testImageOneStripe = M_RGB2XYZ * RGB_testImageOneStripeLinear;
+        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripeLinear,M_RGB2XYZ,gamma_RGB);
         xyY_testImageOneStripe = XYZToxyY(XYZ_testImageOneStripe);
 
         % Color corrected image.
         RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
-        RGB_colorCorrectedImageNorm = double(RGB_colorCorrectedImage)./nInputLevels;
-        RGB_colorCorrectedImageLinear(1,:) = RGB_colorCorrectedImageNorm(1,:).^gamma_R;
-        RGB_colorCorrectedImageLinear(2,:) = RGB_colorCorrectedImageNorm(2,:).^gamma_G;
-        RGB_colorCorrectedImageLinear(3,:) = RGB_colorCorrectedImageNorm(3,:).^gamma_B;
-        XYZ_colorCorrectedImage = M_RGB2XYZ * RGB_colorCorrectedImageLinear;
+        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImageLinear,M_RGB2XYZ,gamma_RGB);
         xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
 
         % Plot it.
