@@ -97,7 +97,7 @@ try
     imageParams.colorStripesOptions = {'red','green','blue'};
     imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
 
-    imageParams.centerImageOptions = {'stripes','color'};
+    imageParams.centerImageOptions = {'stripes','color','none'};
     imageParams.idxCenterImage = 1;
     whichCenterImage = imageParams.centerImageOptions{imageParams.idxCenterImage};
 
