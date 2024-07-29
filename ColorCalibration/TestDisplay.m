@@ -25,6 +25,13 @@ spdData = load(testFilenameSpd);
 testFilenameGammatable = fullfile(testFiledir,'gammatable.mat');
 gammatableData = load(testFilenameGammatable);
 
+%% Spectra.
+
+%% Chromaticity diagram.
+
+%% Additivity test.
+
+
 %% Gamma curves.
 %
 % Read out the data.
@@ -37,7 +44,3 @@ if (verbose)
     figure; hold on;
    
 end
-
-%% Chromaticity diagram.
-
-%% Additivity test.
