@@ -11,6 +11,8 @@ clear all; close all;
 %% Load the calibration data.
 %
 % Load the spectrum data.
+testFiledir = '/Users/semin/Documents/MATLAB/ColorAssimilation/ColorCalibration/rawdata';
+testFilename = 
 
 % Load the photometer data.
 
