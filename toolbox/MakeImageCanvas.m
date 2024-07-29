@@ -503,7 +503,7 @@ if ~isempty(testImage)
         % We will use the gamma and luminance values per each channel from
         % the calibration data though.
         %
-        % Calibration date. This is based on 10-bit and we will interpolate
+        % Calibration data. This is based on 10-bit and we will interpolate
         % it to use for 8-bit display. This values are read from the file
         % 'Calibration_Periphery_ExtendedWindow_CenterMonitor_1_20_23'.
         inputRGB10bit = [2	4	8	16	32	64	128	197	266	335	404	473	507	508	509	510	511	512	513	514	515	516	517	542	610	679	748	817	886	955	1024];
@@ -521,23 +521,23 @@ if ~isempty(testImage)
         gamma_B = CalculateGamma(inputRGB10bit,output10bit_B);
         gamma_RGB = CalculateGamma(inputRGB10bit,output10bit_RGB);
 
-        % Matrix to convert from the linear RGB to XYZ (sRGB).
+        % Matrix to convert from the linear RGB to XYZ.
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
-        M_RGB2XYZ = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
+        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
 
         % Original test image.
         RGB_testImage = [red_testImage; green_testImage; blue_testImage];
-        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ,gamma_RGB)
+        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB)
         xyY_testImage = XYZToxyY(XYZ_testImage);
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
-        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripeLinear,M_RGB2XYZ,gamma_RGB);
+        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripeLinear,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_testImageOneStripe = XYZToxyY(XYZ_testImageOneStripe);
 
         % Color corrected image.
         RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
-        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImageLinear,M_RGB2XYZ,gamma_RGB);
+        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImageLinear,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
 
         % Plot it.
