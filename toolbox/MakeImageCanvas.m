@@ -31,7 +31,12 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               of the canvas. For the experiment, we will
 %                               put either the input image with stripes
 %                               ('stripes') on or color corrected image
-%                               ('color'). Default to 'color'.
+%                               ('color'). Default to 'color'. If you don't
+%                               want to have the image at the center,
+%                               simply enter anything other than 'stripes'
+%                               and 'color'. For example, if you set it as
+%                               'none', there will be no centered image
+%                               appeared.
 %   stripeHeightPixel         - Define the height of each horizontal stripe
 %                               on the background of the cavas. It's in
 %                               pixel unit and default to 5.
