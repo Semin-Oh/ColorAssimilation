@@ -3,7 +3,7 @@
 % This routine checks and shows the basic characteristics of the display.
 
 % History:
-%    07/29/24    smo    - Started on it. 
+%    07/29/24    smo    - Started on it.
 %    07/30/24    smo    - Now plotting spectra, CIE xy coordinates, gamma
 %                         curve, and also optimizing gamma.
 
@@ -93,7 +93,48 @@ for ii = 1:nChannels
     XYZ_right{ii} = 683 * T_XYZ * spd_right(:,:,ii);
     XYZ_center{ii} = 683 * T_XYZ * spd_center(:,:,ii);
 
-    % Calculate the xy coordinates.
+
+end
+
+% Black correction if you want.
+BLACKCORRECTION = true;
+if (BLACKCORRECTION)
+    for ii = 1:nChannels
+        % Find the index for the black per each channel. For some channels,
+        % the low input setting results show 'NaN' as it was not strong
+        % enough to be measured with the spectrometer. Here, we find the
+        % lowest measurable point to define it as a black.
+        nInputLevels = size(XYZ_left{1},2);
+        
+        % Left.
+        for idx = 1:nInputLevels
+            % Find the first column with actual numbers.
+            if any(~isnan(XYZ_left{ii}(:,idx)))
+                return;
+            end
+        end
+            
+            % If any negative numbers included, move on to next column.
+            if any(idx)
+            end
+        
+
+
+        % Set the black levels here. For convinience, we set the black as
+        % the lowest value per each channel.
+        XYZ_left_black(:,ii) = XYZ_left{ii}(:,1);
+        XYZ_right_black(:,ii) = XYZ_right{ii}(:,1);
+        XYZ_center_black(:,ii) = XYZ_center{ii}(:,1);
+
+        % Black correction happens here.
+        XYZ_left{ii} = XYZ_left{ii} - XYZ_left_black(:,ii);
+        XYZ_right{ii} = XYZ_right{ii} - XYZ_right_black(:,ii);
+        XYZ_center{ii} = XYZ_center{ii} - XYZ_center_black(:,ii);
+    end
+end
+
+% Calculate the CIE xy coordinates.
+for ii = 1:nChannels
     xyY_left{ii} = XYZToxyY(XYZ_left{ii});
     xyY_right{ii} = XYZToxyY(XYZ_right{ii});
     xyY_center{ii} = XYZToxyY(XYZ_center{ii});
@@ -118,7 +159,7 @@ if (verbose)
             case 3
                 xyY_temp = xyY_right;
         end
-        
+
         % Make a loop for plotting all channels per each display.
         for ii = 1:nChannels
             plot(xyY_temp{ii}(1,:),xyY_temp{ii}(2,:),'o','color',markerColorOptions{ii});
