@@ -103,28 +103,68 @@ if (BLACKCORRECTION)
         % Find the index for the black per each channel. For some channels,
         % the low input setting results show 'NaN' as it was not strong
         % enough to be measured with the spectrometer. Here, we find the
-        % lowest measurable point to define it as a black.
-        nInputLevels = size(XYZ_left{1},2);
-        
-        % Left.
-        for idx = 1:nInputLevels
-            % Find the first column with actual numbers.
-            if any(~isnan(XYZ_left{ii}(:,idx)))
-                return;
+        % lowest measurable point to define it as a black. Check if all
+        % entries are valid numbers.
+        %
+        % Left display.
+        idx = 1;
+        while 1
+            % Check if the entry contains Nan.
+            if ~isnan(XYZ_left{ii}(:,idx))
+                % Check if any value is negative.
+                if ~any(XYZ_left{ii}(:,idx)<0)
+                    break
+                end
             end
-        end
-            
-            % If any negative numbers included, move on to next column.
-            if any(idx)
-            end
-        
 
+            % Move on to the next column to search.
+            idx = idx + 1;
+        end
+
+        % Set the index here.
+        idxBlack_left = idx;
+
+        % Right display.
+        idx = 1;
+        while 1
+            % Check if the entry contains Nan.
+            if ~isnan(XYZ_right{ii}(:,idx))
+                % Check if any value is negative.
+                if ~any(XYZ_right{ii}(:,idx)<0)
+                    break
+                end
+            end
+
+            % Move on to the next column to search.
+            idx = idx + 1;
+        end
+
+        % Set the index here.
+        idxBlack_right = idx;
+
+        % Center display.
+        idx = 1;
+        while 1
+            % Check if the entry contains Nan.
+            if ~isnan(XYZ_center{ii}(:,idx))
+                % Check if any value is negative.
+                if ~any(XYZ_center{ii}(:,idx)<0)
+                    break
+                end
+            end
+
+            % Move on to the next column to search.
+            idx = idx + 1;
+        end
+
+        % Set the index here.
+        idxBlack_center = idx;
 
         % Set the black levels here. For convinience, we set the black as
         % the lowest value per each channel.
-        XYZ_left_black(:,ii) = XYZ_left{ii}(:,1);
-        XYZ_right_black(:,ii) = XYZ_right{ii}(:,1);
-        XYZ_center_black(:,ii) = XYZ_center{ii}(:,1);
+        XYZ_left_black(:,ii) = XYZ_left{ii}(:,idxBlack_left);
+        XYZ_right_black(:,ii) = XYZ_right{ii}(:,idxBlack_right);
+        XYZ_center_black(:,ii) = XYZ_center{ii}(:,idxBlack_center);
 
         % Black correction happens here.
         XYZ_left{ii} = XYZ_left{ii} - XYZ_left_black(:,ii);
