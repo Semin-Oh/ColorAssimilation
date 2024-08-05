@@ -92,12 +92,10 @@ for ii = 1:nChannels
     XYZ_left{ii} = 683 * T_XYZ * spd_left(:,:,ii);
     XYZ_right{ii} = 683 * T_XYZ * spd_right(:,:,ii);
     XYZ_center{ii} = 683 * T_XYZ * spd_center(:,:,ii);
-
-
 end
 
 % Black correction if you want.
-BLACKCORRECTION = true;
+BLACKCORRECTION = false;
 if (BLACKCORRECTION)
     for ii = 1:nChannels
         % Find the index for the black per each channel. For some channels,
@@ -180,6 +178,11 @@ for ii = 1:nChannels
     xyY_center{ii} = XYZToxyY(XYZ_center{ii});
 end
 
+% Get the display gamut coordinates.
+xyY_left_gamut = [xyY_left{1}(:,end) xyY_left{2}(:,end) xyY_left{3}(:,end)];
+xyY_right_gamut = [xyY_right{1}(:,end) xyY_right{2}(:,end) xyY_right{3}(:,end)];
+xyY_center_gamut = [xyY_center{1}(:,end) xyY_center{2}(:,end) xyY_center{3}(:,end)];
+
 % Plot it.
 if (verbose)
     figure; hold on;
@@ -217,9 +220,28 @@ if (verbose)
         % sRGB.
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
         plot([xyY_sRGB(1,:) xyY_sRGB(1,1)], [xyY_sRGB(2,:) xyY_sRGB(2,1)],'k-','LineWidth',1);
-
-        % ADD LEGEND
     end
+
+    % Display gamma.
+    figure; hold on;
+    plot([xyY_left_gamut(1,:) xyY_left_gamut(1,1)], [xyY_left_gamut(2,:) xyY_left_gamut(2,1)],'o-','LineWidth',2);
+    plot([xyY_right_gamut(1,:) xyY_right_gamut(1,1)], [xyY_right_gamut(2,:) xyY_left_gamut(2,1)],'*--','LineWidth',2);
+    plot([xyY_right_gamut(1,:) xyY_right_gamut(1,1)], [xyY_right_gamut(2,:) xyY_left_gamut(2,1)],'.:','LineWidth',2);
+
+    % Planckian locus.
+    T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+    plot([T_xy(1,:) T_xy(1,1)], [T_xy(2,:) T_xy(2,1)], 'k-');
+
+    % sRGB.
+    xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
+    plot([xyY_sRGB(1,:) xyY_sRGB(1,1)], [xyY_sRGB(2,:) xyY_sRGB(2,1)],'k-','LineWidth',1);
+
+    xlabel('CIE x');
+    ylabel('CIE y');
+    xlim([0 1]);
+    ylim([0 1]);
+    title('Display gamut on the CIE xy coordinates');
+    legend('Left','Right','Center','sRGB')
 end
 
 %% Gamma curves.
@@ -274,5 +296,3 @@ for ii = 1:nChannels
         title(sprintf('%s',channelOptions{ii}));
     end
 end
-
-%% Additivity test.
