@@ -226,14 +226,14 @@ try
 
         % Wait for a key press. Subjects would press either left of right
         % arrow key.
-        keyPressOptions = {'LeftArrow','RightArrow'};
+        keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
         while true
             [keyIsDown, ~, keyCode] = KbCheck;
             if keyIsDown
                 keyPressed = KbName(keyCode);
 
                 % Break the loop if a valid key was pressed.
-                if ismember(keyPressed,keyPressOptions)
+                if ismember(keyPressed,'RightArrow')
                     fprintf('A key pressed = (%s) \n',keyPressed);
                     break;
                 else
@@ -252,9 +252,9 @@ try
         rawData.key{tt} = keyPressed;
 
         % Convert the response here.
-        if  strcmp(keyPressed,'LeftArrow')
+        if  strcmp(keyPressed,'DownArrow')
             rawData.data(tt) = 0;
-        elseif strcmp(keyPressed,'RightArrow')
+        elseif strcmp(keyPressed,'UpArrow')
             rawData.data(tt) = 1;
         end
 
