@@ -112,7 +112,7 @@ try
     SAVETHERESULTS = true;
     verbose = false;
 
-    %% Make the test images. If the images exist, just load them.
+    %% Make the test images. 
     %
     % Get the directory where the test images are saved.
     testImageFiledir = fullfile(testFiledir,'image','TestImages',...
