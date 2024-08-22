@@ -1,6 +1,6 @@
 % RunExperiment.
 %
-% This is an experiment running code for color assimilation project.
+% This is a running code for color assimilation project.
 %
 % See also:
 %    DisplayImage, DisplayImageControl.
@@ -10,8 +10,6 @@
 %    05/06/24  smo    - Updated to run a single trial. It needs to be
 %                       tested.
 %    05/07/24  smo    - Routine is working.
-%    08/22/24  smo    - Updated to do color matching task (old version does
-%                       2-AFC task).
 
 %% Initialize.
 close all; clear;
