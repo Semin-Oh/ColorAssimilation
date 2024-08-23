@@ -10,8 +10,6 @@
 %    05/06/24  smo    - Updated to run a single trial. It needs to be
 %                       tested.
 %    05/07/24  smo    - Routine is working.
-%    08/22/24  smo    - Updated to do color matching task (old version does
-%                       2-AFC task).
 
 %% Initialize.
 close all; clear;
@@ -46,7 +44,7 @@ else
     fprintf('No such directory exist: %s \n',testFiledir);
 end
 
-%% Some parameters will be typed for convenience.
+%% Get info on the experiment.
 %
 % 1) Subject name.
 inputMessageName = 'Enter subject name: ';
@@ -96,13 +94,11 @@ try
     imageParams.stripeHeightPixel = 5;
     imageParams.nChannelsColorCorrectOptions = [1 3];
     imageParams.nChannelsColorCorrect = 1;
+    imageParams.centerImageOptions = {'stripes','color','none'};
+    imageParams.whichCenterImage = 'none';
     imageParams.colorStripesOptions = {'red','green','blue'};
     imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
-
-    imageParams.centerImageOptions = {'stripes','color','none'};
-    imageParams.idxCenterImage = 1;
-    whichCenterImage = imageParams.centerImageOptions{imageParams.idxCenterImage};
-
+    
     % Experimental variables.
     expParams.nTrials = 3;
     expParams.preIntervalDelaySec = 0.5;
@@ -123,12 +119,12 @@ try
     if (MAKENEWTESTIMAGE)
         % a) Make a null stimulus.
         nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
             'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
         % b) Make test stimulus.
         testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',whichCenterImage,...
+            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
             'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
 
         % c) Save the images. Make a new folder if the directory does not exist.
