@@ -310,8 +310,7 @@ if ~isempty(testImage)
             end
 
             % Find the number of the intensity of the stripes within the image.
-            % 'ratioStripes' should be close to 1/3 (~33%). It is 0.3327 when
-            % we set the stipe height as 5 pixel.
+            % 'ratioStripes' should be close to 1/3 (~33%).
             ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
 
             % Color correction happens here. Here we only correct one targeting
@@ -334,8 +333,23 @@ if ~isempty(testImage)
             end
 
             % Color correction happens here.
+            %
+            % Target channel.
             colorCorrectionPerPixelOneChannel = ratioColorCorrect .* (options.intensityStripe - resized_testImage(:,:,idxColorStripe));
             colorCorrected_testImage(:,:,idxColorStripe) = colorCorrected_testImage(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
+
+            % The other channels. Commented out for now, we can think about
+            % correcting the other channels as well. When we also correct
+            % the other channels, it basically gives the same result as the
+            % above 'mean' method. It makes the test image a little too
+            % saturated by eye. The number 2 and 3 should be updated below
+            % to make it work correctly per different target channel.
+            %
+            % colorCorrectionPerPixelOneChannel = ratioColorCorrect .* resized_testImage(:,:,2);
+            % colorCorrected_testImage(:,:,2) = colorCorrected_testImage(:,:,2) - colorCorrectionPerPixelOneChannel;
+            %
+            % colorCorrectionPerPixelOneChannel = ratioColorCorrect .* resized_testImage(:,:,3);
+            % colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3) - colorCorrectionPerPixelOneChannel;
     end
 
     % Remove the background of the color corrected image.
@@ -425,16 +439,19 @@ if ~isempty(testImage)
     meanRed_testImage = mean(red_testImage);
     meanGreen_testImage = mean(green_testImage);
     meanBlue_testImage = mean(blue_testImage);
+    meanRGB_testImage = [meanRed_testImage; meanGreen_testImage; meanBlue_testImage];
 
     % Image with stripes.
     meanRed_testImageOneStripe = mean(red_testImageOneStripe);
     meanGreen_testImageOneStripe = mean(green_testImageOneStripe);
     meanBlue_testImageOneStripe = mean(blue_testImageOneStripe);
+    meanRGB_testImageOneStripe = [meanRed_testImageOneStripe; meanGreen_testImageOneStripe; meanBlue_testImageOneStripe];
 
     % Color corrected image.
     meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
     meanGreen_colorCorrectedImage = mean(green_colorCorrectedImage);
     meanBlue_colorCorrectedImage = mean(blue_colorCorrectedImage);
+    meanRGB_colorCorrectedImage = [meanRed_colorCorrectedImage; meanGreen_colorCorrectedImage; meanBlue_colorCorrectedImage];
 
     % Plot the comparison results across images.
     if (options.verbose)
