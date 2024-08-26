@@ -527,17 +527,17 @@ if ~isempty(testImage)
 
         % Original test image.
         RGB_testImage = [red_testImage; green_testImage; blue_testImage];
-        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB)
+        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_testImage = XYZToxyY(XYZ_testImage);
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
-        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripeLinear,M_RGB2XYZ_sRGB,gamma_RGB);
+        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripe,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_testImageOneStripe = XYZToxyY(XYZ_testImageOneStripe);
 
         % Color corrected image.
         RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
-        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImageLinear,M_RGB2XYZ_sRGB,gamma_RGB);
+        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
 
         % Plot it.
