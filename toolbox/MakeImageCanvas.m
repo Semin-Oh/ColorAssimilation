@@ -69,11 +69,11 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                               only the targeting channel, otherwise it
 %                               will correct all three channels. Default to
 %                               1.
-%   intensityColorCorrect     - Decide the amount of color correction on
-%                               the test image. If it sets to zero, the
+%   intensityColorCorrect     - Decide the color correction power on
+%                               the test image. If it sets to empty, the
 %                               amount of color correction would be solely
 %                               decided by the ratio of the stripes on the
-%                               image with stripes. Default to 0.
+%                               image with stripes. Default to empty.
 %   verbose                   - Control the plot and alarm messages.
 %                               Default to false.
 %
@@ -105,7 +105,7 @@ arguments
     options.sizeCanvas (1,2) = [1920 1080]
     options.colorCorrectMethod = 'add'
     options.nChannelsColorCorrect (1,1) = 1
-    options.intensityColorCorrect (1,1) = 0
+    options.intensityColorCorrect = []
 end
 
 % Define the size of the canvas.
@@ -313,15 +313,14 @@ if ~isempty(testImage)
             % 'ratioStripes' should be close to 1/3 (~33%).
             ratioStripes = length(find(targetCh_testImageOneStripe == options.intensityStripe))./length(targetCh_testImageOneStripe);
 
-            % Color correction happens here. Here we only correct one targeting
-            % channel.
-            %
-            % We also added the optional variable 'intensityColorCorrect'
-            % to control the level of color correction on the test image.
-            % We may use this feature in the experiment if we decide to do
-            % color matching experiment. It controls in ratio scale and the
-            % final scale ('ratioColorCorrect') should be within 0-1.
-            ratioColorCorrect = ratioStripes + options.intensityColorCorrect;
+            % Color correction happens here. Here we only correct one
+            % targeting channel. The final scale ('ratioColorCorrect')
+            % should be within the range 0-1.
+            if ~isempty(options.intensityColorCorrect)
+                ratioColorCorrect = options.intensityColorCorrect;
+            else
+                ratioColorCorrect = ratioStripes;
+            end
 
             % Check if the scaling factor is within the range 0-1.
             maxRatioColorCorrect = 1;
