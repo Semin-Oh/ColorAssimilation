@@ -3,18 +3,20 @@
 % This is an experiment running code for color assimilation project.
 %
 % See also:
-%    DisplayImage, DisplayImageControl.
+%    DisplayImage, DisplayImageControl, MakeTestImages.
 
 % History:
 %    04/25/24  smo    - Started on it.
 %    05/06/24  smo    - Updated to run a single trial. It needs to be
 %                       tested.
 %    05/07/24  smo    - Routine is working.
+%    08/29/24  smo    - Deleted the part making images. We will make images
+%                       in the separate routine.
 
 %% Initialize.
 close all; clear;
 
-%% Get computer info to recognize the path to add.
+%% Add the repository to the path.
 sysInfo = GetComputerInfo();
 
 % Set the file dir differently depending on the computer.
@@ -32,11 +34,11 @@ switch sysInfo.userShortName
         baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
 end
 
-%% Set repository name.
+% Set repository name.
 projectName = 'ColorAssimilation';
 testFiledir = fullfile(baseFiledir,projectName);
 
-%% Add repository to path.
+% Add to the path here.
 if isfolder(testFiledir)
     addpath(testFiledir);
     fprintf('Directory has been added to the path!: %s \n',testFiledir);
@@ -44,13 +46,15 @@ else
     fprintf('No such directory exist: %s \n',testFiledir);
 end
 
-%% Get info on the experiment.
+%% Get some input to initiate.
 %
-% 1) Subject name.
+% We will get the subject and test image (red, green, or blue) info.
+%
+% Subject name.
 inputMessageName = 'Enter subject name: ';
 subjectName = input(inputMessageName, 's');
 
-% 2) Stripe color.
+% Decide which stripe color to test.
 while 1
     inputMessageIdxStripeColor = 'Which color of stripes to test [1:red,2:green,3:blue]: ';
     idxStripeColor = input(inputMessageIdxStripeColor);
@@ -62,18 +66,30 @@ while 1
 
     disp('Choose among the options [1:red,2:green,3:blue]');
 end
+stripeColorOptions = {'red','green','blue'};
+stripeColorToTest = stripeColorOptions{idxStripeColor};
+
+% Practice trials.
+while 1
+    inputMessagePracticeTrials = 'Practice trials before main experiment? [Y, N]: ';
+    ansPracticeTrials = input(inputMessagePracticeTrials, 's');
+    ansOptions = {'Y' 'N'};
+
+    if ismember(ansPracticeTrials, ansOptions)
+        break
+    end
+
+    disp('Type either Y or N!');
+end
+
+if (strcmp(ansPracticeTrials,'Y'))
+    PRACTICETRIALS = true;
+elseif (strcmp(ansPracticeTrials,'N'))
+    PRACTICETRIALS = false;
+end
 
 %% Starting from here to the end, if error occurs, we automatically close the PTB screen.
 try
-    %% Load the original face images.
-    imageFilename = 'RawImage_1.png';
-    rawImageFiledir = fullfile(testFiledir,'image','RawImages');
-    image = imread(fullfile(rawImageFiledir,imageFilename));
-
-    %% Open the PTB screen.
-    initialScreenSetting = [0.5 0.5 0.5]';
-    [window windowRect] = OpenPlainScreen(initialScreenSetting);
-
     %% Set variables.
     %
     % Screen variables. The physical lengths of the monitor were measured
@@ -85,86 +101,43 @@ try
     % From the chinrest to the center screen.
     screenParams.screenDistance_cm = 100;
     % Gap between the screens. It was measured manually.
-    screenParams.screenGap_cm = 2.5; 
+    screenParams.screenGap_cm = 2.5;
 
-    % Image variables.
-    imageParams.sizeCanvans = [windowRect(3) windowRect(4)];
-    imageParams.testImageSize = 0.15;
-    imageParams.position_leftImage_x = 0.35;
-    imageParams.stripeHeightPixel = 5;
-    imageParams.nChannelsColorCorrectOptions = [1 3];
-    imageParams.nChannelsColorCorrect = 1;
-    imageParams.centerImageOptions = {'stripes','color','none'};
-    imageParams.whichCenterImage = 'none';
-    imageParams.colorStripesOptions = {'red','green','blue'};
-    imageParams.whichColorStripes = imageParams.colorStripesOptions{idxStripeColor};
-    
     % Experimental variables.
     expParams.nTrials = 3;
     expParams.preIntervalDelaySec = 0.5;
     expParams.postIntervalDelaySec = 1;
     expParams.subjectName = subjectName;
+    % expParams.beepSound = true;
+    % expParams.expKeyType = 'keyboard';
 
     % etc.
-    MAKENEWTESTIMAGE = false;
     SAVETHERESULTS = true;
     verbose = false;
 
-    %% Make the test images. 
+    %% Load test images.
     %
     % Get the directory where the test images are saved.
-    testImageFiledir = fullfile(testFiledir,'image','TestImages',...
-        imageParams.colorStripesOptions{idxStripeColor});
+    testImageFiledir = fullfile(testFiledir,'image','TestImages');
 
-    if (MAKENEWTESTIMAGE)
-        % a) Make a null stimulus.
-        nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
-            'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
+    % Load the images here. We will load the corresponding test images
+    % according to stripe color input received at the beginning.
+    testImageFilename = GetMostRecentFileName(testImageFiledir,append('TestImages_',stripeColorToTest));
+    images = load(testImageFilename);
 
-        % b) Make test stimulus.
-        testImage = MakeImageCanvas(image,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-            'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
-            'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',verbose);
+    %% Open the PTB screen.
+    initialScreenSetting = [0.5 0.5 0.5]';
+    [window windowRect] = OpenPlainScreen(initialScreenSetting);
 
-        % c) Save the images. Make a new folder if the directory does not exist.
-        if ~exist(testImageFiledir, 'dir')
-            mkdir(testImageFiledir);
-            fprintf('Folder has been successfully created: \n (%s) \n',testImageFiledir);
-        end
-
-        % Set the file name and save the images.
-        dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-        saveFilename = fullfile(testImageFiledir,...
-            sprintf('TestImages_%s_%s',imageParams.colorStripesOptions{idxStripeColor},dayTimestr));
-        save(saveFilename,'nullImage','testImage');
-        disp('Test images have been saved successfully!');
-
-    else
-        % Load the images if they exist.
-        testImageFilename = GetMostRecentFileName(testImageFiledir,'TestImages_');
-        load(testImageFilename);
-        disp('Test images have been loaded successfully!');
-    end
-
-    %% Make the PTB textures of the null and test images.
+    %% Display the initial screen on the null image.
     %
-    % We make all PTB texture in advance so that we can minimize the frame
-    % break-up because of the time spent making image texture.
-    %
-    % Null image.
-    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(nullImage, window, windowRect, 'verbose', false);
-
-    % Test images.
-    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
-
-    %% Set the initial screen for instruction.
+    % Set the initial screen with written instruction.
     imageSize = size(nullImage);
     messageInitialImage_1stLine = 'Press any button';
     messageInitialImage_2ndLine = 'To start the experiment';
     ratioMessageInitialHorz = 0.4;
     ratioMessageInitialVert = 0.03;
-    initialInstructionImage = insertText(nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
+    initialInstructionImage = insertText(images.nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
         'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
@@ -185,78 +158,87 @@ try
     end
     disp('Experiment is going to be started!');
 
-    %% Get one evaluation. Later on, this part will be made as a function.
+    %% Color matching experiment happens here.
     %
     % Display a null image.
+    [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
     FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
 
-    % Make a loop of the experiment until it hits the target number of trials.
-    for tt = 1:expParams.nTrials
-        % Get any key press to proceed. This is for the very first trial.
-        % For the other trials,
-        if tt == 1
-            disp('Press any key to display a test image');
-            while true
-                [keyIsDown, ~, keyCode] = KbCheck;
-                if keyIsDown
-                    keyPressed = KbName(keyCode);
-                    disp(['Key pressed: ' keyPressed]);
-                    break;
+    % Display the initial test image. We will start with either the no
+    % color correction image or the maximum color corrected image. For now,
+    % it is set as starting with the raw image with no color correction.
+    idxTestImage = 1;
+    idxColorCorrectImage = 1;
+    nColorCorrectImages = size(images.testImage,2);
+
+    testImage = images.testImage{idxTestImage,idxColorCorrectImage};
+    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+    FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+    fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+
+    % Color matching happens here using the key press.
+    keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
+
+    while true
+        [keyIsDown, ~, keyCode] = KbCheck;
+        if keyIsDown
+            keyPressed = KbName(keyCode);
+
+            % Break the loop if the key for decision ('RightArrow') was
+            % pressed.
+            if strcmp(keyPressed,'RightArrow')
+                fprintf('A key pressed = (%s) \n',keyPressed);
+                break;
+
+                % Update the test image with less color correction.
+            elseif strcmp(keyPressed,'DownArrow')
+                idxColorCorrectImage = idxColorCorrectImage - 1;
+
+                % Set the index within the feasible range.
+                if idxColorCorrectImage < 1
+                    idxColorCorrectImage = 1;
+                elseif idxColorCorrectImage > nColorCorrectImages;
+                    idxColorCorrectImage = nColorCorrectImages;
                 end
+
+                % Update the image here.
+                testImage = images.testImage{idxTestImage,idxColorCorrectImage};
+                [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+
+                % Update the test image with stronger color correction.
+            elseif strcmp(keyPressed,'UpArrow')
+                idxColorCorrectImage = idxColorCorrectImage + 1;
+
+                % Set the index within the feasible range.
+                if idxColorCorrectImage < 1
+                    idxColorCorrectImage = 1;
+                elseif idxColorCorrectImage > nColorCorrectImages;
+                    idxColorCorrectImage = nColorCorrectImages;
+                end
+
+                % Update the image here.
+                testImage = images.testImage{idxTestImage,idxColorCorrectImage};
+                [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+
+            else
+                % Show a message to press a valid key press.
+                fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
             end
         end
-
-        % Make a tiny delay between the null and test test stimulus. We may
-        % want to delete this part later on.
-        pause(expParams.preIntervalDelaySec);
-
-        % Diplay a test image.
-        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying for (%.f s)...\n',expParams.postIntervalDelaySec);
-
-        % Make a time delay before bringing the null stimulus back again.
-        pause(expParams.postIntervalDelaySec);
-
-        % Display a null image again after the presenation of the test stimulus.
-        FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
-
-        % Wait for a key press. Subjects would press either left of right
-        % arrow key.
-        keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
-        while true
-            [keyIsDown, ~, keyCode] = KbCheck;
-            if keyIsDown
-                keyPressed = KbName(keyCode);
-
-                % Break the loop if a valid key was pressed.
-                if ismember(keyPressed,'RightArrow')
-                    fprintf('A key pressed = (%s) \n',keyPressed);
-                    break;
-                else
-                    % Close the screen for the other key press. This part will be
-                    % deleted or speify a key to close the screen.
-                    CloseScreen;
-
-                    % Otherwise, the loop lasts until it receives a valid
-                    % key.
-                    fprintf('Press a key either (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2});
-                end
-            end
-        end
-
-        % Collect the key press info here.
-        rawData.key{tt} = keyPressed;
-
-        % Convert the response here.
-        if  strcmp(keyPressed,'DownArrow')
-            rawData.data(tt) = 0;
-        elseif strcmp(keyPressed,'UpArrow')
-            rawData.data(tt) = 1;
-        end
-
-        % Show the progress.
-        fprintf('Experiment progress - (%d/%d) \n',tt,expParams.nTrials);
     end
+
+    % Collect the key press data here.
+    data.matchingIntensityColorCorrect = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
+    
+    % Make a time delay before bringing the null stimulus back again.
+    pause(expParams.postIntervalDelaySec);
+
+    % Show the progress.
+    fprintf('Experiment progress - (%d/%d) \n',tt,expParams.nTrials);
 
 catch
     % If error occurs, close the screen.
@@ -277,17 +259,17 @@ if (SAVETHERESULTS)
     saveFiledir = fullfile(testFiledir,'data');
 
     % Make folder with subject name if it does not exist.
-    saveFoldername = fullfile(saveFiledir,subjectName,imageParams.colorStripesOptions{idxStripeColor});
+    saveFoldername = fullfile(saveFiledir,subjectName);
     if ~exist(saveFoldername, 'dir')
         mkdir(saveFoldername);
-        fprintf('Folder has been successfully created: \n (%s) \n',saveFoldername);
+        fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
     end
 
     % Set the file name and save. We will update the name of the folder
     % later once we set on the experimental settings.
     dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
     saveFilename = fullfile(saveFoldername,...
-        sprintf('%s_%s_%s',subjectName,imageParams.colorStripesOptions{idxStripeColor},dayTimestr));
-    save(saveFilename,'rawData','imageParams','expParams');
+        sprintf('%s_%s_%s',subjectName,stripeColorToTest,dayTimestr));
+    save(saveFilename,'data','imageParams','expParams');
     disp('Data has been saved successfully!');
 end

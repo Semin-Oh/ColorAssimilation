@@ -22,8 +22,13 @@ screenParams.screenDistance_cm = 100;
 screenParams.screenGap_cm = 2.5;
 
 % Image variables.
-% imageParams.sizeCanvans = [5120 1440];
-imageParams.sizeCanvans = [1920 1080];
+imageParams.displayType = 'curvedisplay';
+switch imageParams.displayType
+    case 'curvedisplay'
+        imageParams.sizeCanvans = [5120 1440];
+    case 'laptop'
+        imageParams.sizeCanvans = [1920 1080];
+end
 imageParams.testImageSize = 0.5;
 imageParams.position_leftImage_x = 0.35;
 imageParams.stripeHeightPixel = 5;
@@ -32,7 +37,7 @@ imageParams.whichCenterImage = 'none';
 
 % Set the range of different intensity to correct the test image. Default
 % to ~0.33 when it's set to empty.
-imageParams.nTestPoints = 1;
+imageParams.nTestPoints = 10;
 imageParams.intensityColorCorrect = linspace(0,1,imageParams.nTestPoints);
 
 % etc.
