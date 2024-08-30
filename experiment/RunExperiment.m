@@ -12,6 +12,9 @@
 %    05/07/24  smo    - Routine is working.
 %    08/29/24  smo    - Deleted the part making images. We will make images
 %                       in the separate routine.
+%    08/30/24  smo    - First draft of doing color matching task with
+%                       multiple test images and repeatitions. Needs to be
+%                       tested.
 
 %% Initialize.
 close all; clear;
@@ -104,7 +107,7 @@ try
     screenParams.screenGap_cm = 2.5;
 
     % Experimental variables.
-    expParams.nTrials = 3;
+    expParams.nRepeat = 5;
     expParams.preIntervalDelaySec = 0.5;
     expParams.postIntervalDelaySec = 1;
     expParams.subjectName = subjectName;
@@ -124,6 +127,38 @@ try
     % according to stripe color input received at the beginning.
     testImageFilename = GetMostRecentFileName(testImageFiledir,append('TestImages_',stripeColorToTest));
     images = load(testImageFilename);
+
+    %% Set the randomization order of displaying the test images.
+    %
+    % Get the info of the number of different test images.
+    expParams.nTestImages = size(images.testImage,1);
+
+    % Set the random order of displaying the test images. For now, we will
+    % display the different test images randomly mixed with faces and eggs.
+    %
+    % The array should look like the number of test images x the number of
+    % repeatitions per each test image. For example, if there are 5 test
+    % images and repeat each test image for 10 times, the array should look
+    % like 5x10.
+    for rr = 1:expParams.nRepeat
+        expParams.randOrder(:,rr) = randperm(expParams.nTestImages)';
+    end
+
+    % Sanity check.
+    if any(or(size(expParams.randOrder,1) ~= expParams.nTestImages,...
+            size(expParams.randOrder,2) ~= expParams.nRepeat))
+        error('The random order array size does not match!');
+    end
+
+    % Get the random order of initial test images to display. When doing
+    % color matching, we will display either raw (no color correction) or
+    % the maximum corrected image on the right.
+    %
+    % Here, we set 1 for the raw image and 2 for the max corrected image.
+    initialImageRaw = 1;
+    initialImageMax = 2;
+    expParams.idxRandOrderInitial = randi([initialImageRaw initialImageMax], size(expParams.randOrder));
+    expParams.idxRandOrderInitial(expParams.idxRandOrderInitial == initialImageMax) = images.imageParams.nTestPoints;
 
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
@@ -164,81 +199,85 @@ try
     [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
     FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
 
-    % Display the initial test image. We will start with either the no
-    % color correction image or the maximum color corrected image. For now,
-    % it is set as starting with the raw image with no color correction.
-    idxTestImage = 1;
-    idxColorCorrectImage = 1;
-    nColorCorrectImages = size(images.testImage,2);
+    % First loop for the number of trials.
+    for rr = 1:expParams.nRepeat
 
-    testImage = images.testImage{idxTestImage,idxColorCorrectImage};
-    [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
-    FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-    fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+        % Second loop for different test images. We will display them
+        % together in randomized order.
+        for ii = 1:expParams.nTestImages
+            idxImage = expParams.randOrder(ii,rr);
+            idxColorCorrectImage = expParams.idxRandOrderInitial(ii,rr);
+            testImage = images.testImage{idxImage,idxColorCorrectImage};
 
-    % Color matching happens here using the key press.
-    keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
+            % Display the test image.
+            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+            FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+            fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
-    while true
-        [keyIsDown, ~, keyCode] = KbCheck;
-        if keyIsDown
-            keyPressed = KbName(keyCode);
+            % This block completes a one evaluation. Get a key press.
+            keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
+            while true
+                [keyIsDown, ~, keyCode] = KbCheck;
+                if keyIsDown
+                    keyPressed = KbName(keyCode);
 
-            % Break the loop if the key for decision ('RightArrow') was
-            % pressed.
-            if strcmp(keyPressed,'RightArrow')
-                fprintf('A key pressed = (%s) \n',keyPressed);
-                break;
+                    % Break the loop if the key for decision ('RightArrow') was
+                    % pressed.
+                    if strcmp(keyPressed,'RightArrow')
+                        fprintf('A key pressed = (%s) \n',keyPressed);
+                        break;
 
-                % Update the test image with less color correction.
-            elseif strcmp(keyPressed,'DownArrow')
-                idxColorCorrectImage = idxColorCorrectImage - 1;
+                        % Update the test image with less color correction.
+                    elseif strcmp(keyPressed,'DownArrow')
+                        idxColorCorrectImage = idxColorCorrectImage - 1;
 
-                % Set the index within the feasible range.
-                if idxColorCorrectImage < 1
-                    idxColorCorrectImage = 1;
-                elseif idxColorCorrectImage > nColorCorrectImages;
-                    idxColorCorrectImage = nColorCorrectImages;
+                        % Set the index within the feasible range.
+                        if idxColorCorrectImage < 1
+                            idxColorCorrectImage = 1;
+                        elseif idxColorCorrectImage > nColorCorrectImages;
+                            idxColorCorrectImage = nColorCorrectImages;
+                        end
+
+                        % Update the image here.
+                        testImage = images.testImage{idxImage,idxColorCorrectImage};
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+
+                        % Update the test image with stronger color correction.
+                    elseif strcmp(keyPressed,'UpArrow')
+                        idxColorCorrectImage = idxColorCorrectImage + 1;
+
+                        % Set the index within the feasible range.
+                        if idxColorCorrectImage < 1
+                            idxColorCorrectImage = 1;
+                        elseif idxColorCorrectImage > nColorCorrectImages;
+                            idxColorCorrectImage = nColorCorrectImages;
+                        end
+
+                        % Update the image here.
+                        testImage = images.testImage{idxTestImage,idxColorCorrectImage};
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+
+                    else
+                        % Show a message to press a valid key press.
+                        fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
+                    end
                 end
-
-                % Update the image here.
-                testImage = images.testImage{idxTestImage,idxColorCorrectImage};
-                [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
-                FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
-
-                % Update the test image with stronger color correction.
-            elseif strcmp(keyPressed,'UpArrow')
-                idxColorCorrectImage = idxColorCorrectImage + 1;
-
-                % Set the index within the feasible range.
-                if idxColorCorrectImage < 1
-                    idxColorCorrectImage = 1;
-                elseif idxColorCorrectImage > nColorCorrectImages;
-                    idxColorCorrectImage = nColorCorrectImages;
-                end
-
-                % Update the image here.
-                testImage = images.testImage{idxTestImage,idxColorCorrectImage};
-                [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
-                FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
-
-            else
-                % Show a message to press a valid key press.
-                fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
             end
+
+            % Collect the key press data here.
+            data.matchingIntensityColorCorrect(ii,rr) = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
+
+            % Make a time delay before bringing the null stimulus back again.
+            pause(expParams.postIntervalDelaySec);
+
+            % Show the progress.
+            fprintf('Experiment progress - (%d/%d) \n',rr,expParams.nRepeat);
         end
     end
-
-    % Collect the key press data here.
-    data.matchingIntensityColorCorrect = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
-    
-    % Make a time delay before bringing the null stimulus back again.
-    pause(expParams.postIntervalDelaySec);
-
-    % Show the progress.
-    fprintf('Experiment progress - (%d/%d) \n',tt,expParams.nTrials);
 
 catch
     % If error occurs, close the screen.
