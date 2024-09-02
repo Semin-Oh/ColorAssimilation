@@ -115,7 +115,7 @@ try
     % expParams.expKeyType = 'keyboard';
 
     % etc.
-    SAVETHERESULTS = true;
+    SAVETHERESULTS = false;
     verbose = false;
 
     %% Load test images.
@@ -167,7 +167,7 @@ try
     %% Display the initial screen on the null image.
     %
     % Set the initial screen with written instruction.
-    imageSize = size(nullImage);
+    imageSize = size(images.nullImage);
     messageInitialImage_1stLine = 'Press any button';
     messageInitialImage_2ndLine = 'To start the experiment';
     ratioMessageInitialHorz = 0.4;
@@ -234,15 +234,15 @@ try
                         % Set the index within the feasible range.
                         if idxColorCorrectImage < 1
                             idxColorCorrectImage = 1;
-                        elseif idxColorCorrectImage > nColorCorrectImages;
-                            idxColorCorrectImage = nColorCorrectImages;
+                        elseif idxColorCorrectImage > images.imageParams.nTestPoints;
+                            idxColorCorrectImage = images.imageParams.nTestPoints;
                         end
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
                         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
                         % Update the test image with stronger color correction.
                     elseif strcmp(keyPressed,'UpArrow')
@@ -251,15 +251,15 @@ try
                         % Set the index within the feasible range.
                         if idxColorCorrectImage < 1
                             idxColorCorrectImage = 1;
-                        elseif idxColorCorrectImage > nColorCorrectImages;
-                            idxColorCorrectImage = nColorCorrectImages;
+                        elseif idxColorCorrectImage > images.imageParams.nTestPoints;
+                            idxColorCorrectImage = images.imageParams.nTestPoints;
                         end
 
                         % Update the image here.
-                        testImage = images.testImage{idxTestImage,idxColorCorrectImage};
+                        testImage = images.testImage{idxImage,idxColorCorrectImage};
                         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectImages);
+                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
                     else
                         % Show a message to press a valid key press.
@@ -304,11 +304,14 @@ if (SAVETHERESULTS)
         fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
     end
 
-    % Set the file name and save. We will update the name of the folder
-    % later once we set on the experimental settings.
+    % Save out the image and experiment params in the structure.
+    data.imageParams = images.imageParams;
+    data.expParams = expParams;
+
+    % Set the file name and save.
     dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
     saveFilename = fullfile(saveFoldername,...
         sprintf('%s_%s_%s',subjectName,stripeColorToTest,dayTimestr));
-    save(saveFilename,'data','imageParams','expParams');
+    save(saveFilename,'data');
     disp('Data has been saved successfully!');
 end
