@@ -266,8 +266,12 @@ try
                         fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
                     end
                 end
-            end
 
+                % Make a tiny time delay here.
+                postColorCorrectDelaySec = 0.1;
+                pause(postColorCorrectDelaySec);
+            end
+            
             % Collect the key press data here.
             data.matchingIntensityColorCorrect(ii,rr) = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
 
