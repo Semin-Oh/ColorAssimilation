@@ -110,6 +110,7 @@ try
     expParams.nRepeat = 5;
     expParams.preIntervalDelaySec = 0.5;
     expParams.postIntervalDelaySec = 1;
+    expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
     % expParams.beepSound = true;
     % expParams.expKeyType = 'keyboard';
@@ -267,9 +268,11 @@ try
                     end
                 end
 
-                % Make a tiny time delay here.
-                postColorCorrectDelaySec = 0.1;
-                pause(postColorCorrectDelaySec);
+                % Make a tiny time delay here so that we make sure we color
+                % match in a unit step size. Without time delay, the color
+                % matching would be executed in more than one step size if
+                % we press the button too long.
+                pause(expParams.postColorCorrectDelaySec);
             end
             
             % Collect the key press data here.
