@@ -108,7 +108,6 @@ try
 
     % Experimental variables.
     expParams.nRepeat = 5;
-    expParams.preIntervalDelaySec = 0.5;
     expParams.postIntervalDelaySec = 1;
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
@@ -177,10 +176,8 @@ try
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
         'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
-    % Make an image texture of the initial image.
+    % Display an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
-
-    % Display the initial screen.
     FlipImageTexture(initialInstructionImageTexture, window, windowRect,'verbose',false);
 
     % Get any key press to proceed.
@@ -274,11 +271,14 @@ try
                 % we press the button too long.
                 pause(expParams.postColorCorrectDelaySec);
             end
-            
+
             % Collect the key press data here.
             data.matchingIntensityColorCorrect(ii,rr) = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
 
-            % Make a time delay before bringing the null stimulus back again.
+            % Display a null image again and pause for a second before
+            % displaying the next test image.
+            [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
+            FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
             pause(expParams.postIntervalDelaySec);
 
             % Show the progress.
