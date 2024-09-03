@@ -50,14 +50,14 @@ imageSize = size(image);
 imageCenterHorizontal = imageSize(2) * 0.5;
 imageCenterVertical = imageSize(1) * 0.5;
 
-fixHorizontalPosition = [imageCenterHorizontal-options.patternSize imageCenterHorizontal imageCenterHorizontal+options.patternSize imageCenterHorizontal];
-fixVerticalPosition = [imageCenterVertical imageCenterVertical-options.patternSize imageCenterVertical imageCenterVertical+options.patternSize];
+fixHorizontalPosition = [imageCenterHorizontal-options.patternSize imageCenterVertical imageCenterHorizontal+options.patternSize imageCenterVertical];
+fixVerticalPosition = [imageCenterHorizontal imageCenterVertical-options.patternSize imageCenterHorizontal imageCenterVertical+options.patternSize];
 
 switch (options.patternType)
     case 'line'
         patternPosition = [fixHorizontalPosition; fixVerticalPosition];
     case 'circle'
-        patternPosition = [imageCenter imageCenter options.patternSize];
+        patternPosition = [imageCenterHorizontal imageCenterVertical options.patternSize];
 end
 
 % Set fixation point on the image here.
