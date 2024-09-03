@@ -63,5 +63,4 @@ end
 % Set fixation point on the image here.
 imageEdit = insertShape(image, options.patternType, patternPosition, ...
     'Color', options.patternColor, 'LineWidth', options.patternWidth);
-
 end
