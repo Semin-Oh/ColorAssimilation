@@ -259,6 +259,12 @@ try
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
+                        % Close the PTB. This part is temporary and maybe
+                        % be removed later on.
+                    elseif strcmp(keyPressed,'q')
+                        CloseScreen;
+                        break;
+
                     else
                         % Show a message to press a valid key press.
                         fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
