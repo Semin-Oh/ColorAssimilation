@@ -173,9 +173,17 @@ try
     messageInitialImage_2ndLine = 'To start the experiment';
     ratioMessageInitialHorz = 0.4;
     ratioMessageInitialVert = 0.03;
+    
+    % Set the font.
+    switch sysInfo.userShortName
+        case 'gegenfurtner'
+            instructionImageFont = 'DejaVuSans-Bold';
+        otherwise
+            instructionImageFont = 'Arial';
+    end
     initialInstructionImage = insertText(images.nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',40,'Font','DejaVuSans-Bold','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
+        'fontsize',40,'Font',instructionImageFont,'BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
 
     % Display an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
