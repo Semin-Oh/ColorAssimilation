@@ -15,6 +15,7 @@
 %    08/30/24  smo    - First draft of doing color matching task with
 %                       multiple test images and repeatitions. Needs to be
 %                       tested.
+%    09/03/24  smo    - Made it work on the curved display.
 
 %% Initialize.
 close all; clear;
@@ -31,7 +32,7 @@ switch sysInfo.userShortName
         % SET THE NAME OF THE LINUX COMPUTER HERE.
     case 'gegenfurtner'
         % Lap Linux computer.
-        baseFiledir = '/home/gegenfurtner/Desktop/semin';
+        baseFiledir = '/home/gegenfurtner/Desktop/SEMIN';
     otherwise
         % This is for Semin's laptop.
         baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
@@ -174,7 +175,7 @@ try
     ratioMessageInitialVert = 0.03;
     initialInstructionImage = insertText(images.nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
+        'fontsize',40,'Font','DejaVuSans-Bold','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
 
     % Display an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
