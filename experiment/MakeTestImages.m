@@ -25,7 +25,10 @@ screenParams.screenGap_cm = 2.5;
 imageParams.displayType = 'curvedisplay';
 switch imageParams.displayType
     case 'curvedisplay'
-        imageParams.sizeCanvans = [5120 1440];
+        % For the curved display, we treat the three displays as one, so we
+        % set the resoultion as 15360 (5120*3) in horizontal and 1457 in
+        % vertical.
+        imageParams.sizeCanvans = [15360 1457];
     case 'laptop'
         imageParams.sizeCanvans = [1920 1080];
 end
