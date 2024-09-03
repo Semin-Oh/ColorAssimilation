@@ -72,6 +72,7 @@ if (~isempty(options.addFixationPointImage))
             fixPatternType = 'circle';
     end
     
+    % Set the fixation point color and size.
     fixPatternColor = [0 0 0];
     fixSizePixel = 12;
     fixPatternWidth = 5;
