@@ -33,11 +33,12 @@ function [imageEdit] = AddFixPointImage(image, options)
 
 % History:
 %   08/08/22 smo                - Wrote it.
+%   09/03/24 smo                - Modified to work for non-square images.
 
 %% Set parameters.
 arguments
     image
-    options.patternType = 'Line'
+    options.patternType = 'line'
     options.patternColor (1,3) = [0 0 0]
     options.patternSize (1,1) = 8
     options.patternWidth (1,1) = 5
@@ -46,10 +47,11 @@ end
 
 %% Set the position of the fixation point.
 imageSize = size(image);
-imageCenter = imageSize(1) * 0.5;
+imageCenterHorizontal = imageSize(2) * 0.5;
+imageCenterVertical = imageSize(1) * 0.5;
 
-fixHorizontalPosition = [imageCenter-options.patternSize imageCenter imageCenter+options.patternSize imageCenter];
-fixVerticalPosition = [imageCenter imageCenter-options.patternSize imageCenter imageCenter+options.patternSize];
+fixHorizontalPosition = [imageCenterHorizontal-options.patternSize imageCenterHorizontal imageCenterHorizontal+options.patternSize imageCenterHorizontal];
+fixVerticalPosition = [imageCenterVertical imageCenterVertical-options.patternSize imageCenterVertical imageCenterVertical+options.patternSize];
 
 switch (options.patternType)
     case 'line'
