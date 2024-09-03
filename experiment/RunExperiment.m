@@ -174,7 +174,7 @@ try
     ratioMessageInitialVert = 0.03;
     initialInstructionImage = insertText(images.nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
+        'fontsize',40,'Font','Arial','BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
 
     % Display an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
@@ -208,7 +208,7 @@ try
             testImage = images.testImage{idxImage,idxColorCorrectImage};
 
             % Display the test image.
-            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
             FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
@@ -238,7 +238,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
@@ -255,7 +255,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect, 'verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
@@ -283,7 +283,7 @@ try
 
             % Display a null image again and pause for a second before
             % displaying the next test image.
-            [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
+            [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
             FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
             pause(expParams.postIntervalDelaySec);
 
