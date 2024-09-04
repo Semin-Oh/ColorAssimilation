@@ -7,8 +7,9 @@
 
 % History:
 %    08/28/24  smo    - Started on it.
-%    09/03/24  smo    - When loading test images, it only reads out files
-%                       that are not hidden.
+%    09/03/24  smo    - When loading the raw test images, it only reads out
+%                       files that are not hidden. This prevents the break
+%                       when running on Linux.
 
 %% Initialize.
 close all; clear;
