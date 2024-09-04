@@ -154,11 +154,14 @@ for cc = 1:nColorStripeOptions
         % Set the directory to save the images.
         testImageFiledir = fullfile(testFiledir,'image','TestImages');
 
-        % Save the images here.
+        % Save the images here. The image file would be greater than 2GB,
+        % so make it sure it saves in the m-file in its version 7.3 or
+        % later. Here, we set it as version 7.3 and it should save it fine.
         dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
         saveFilename = fullfile(testImageFiledir,...
             sprintf('TestImages_%s_%s',imageParams.whichColorStripes,dayTimestr));
-        save(saveFilename,'nullImage','testImage','imageParams');
+        mFileVer = '-v7.3';
+        save(saveFilename,'nullImage','testImage','imageParams',mFileVer);
         fprintf('Test images have been saved successfully! - (%s) \n',imageParams.whichColorStripes);
     end
 end
