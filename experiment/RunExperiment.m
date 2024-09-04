@@ -116,8 +116,7 @@ try
     % expParams.expKeyType = 'keyboard';
 
     % etc.
-    SAVETHERESULTS = false;
-    verbose = false;
+    SAVETHERESULTS = true;
 
     %% Load test images.
     %
@@ -173,7 +172,7 @@ try
     messageInitialImage_2ndLine = 'To start the experiment';
     ratioMessageInitialHorz = 0.4;
     ratioMessageInitialVert = 0.03;
-    
+
     % Set the font.
     switch sysInfo.userShortName
         case 'gegenfurtner'
@@ -189,6 +188,10 @@ try
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
     FlipImageTexture(initialInstructionImageTexture, window, windowRect,'verbose',false);
 
+    % Get the PTB texture info in an array.
+    activeTextures = [];
+    activeTextures(end+1) = initialInstructionImageTexture;
+
     % Get any key press to proceed.
     while true
         [keyIsDown, ~, keyCode] = KbCheck;
@@ -202,7 +205,9 @@ try
 
     %% Color matching experiment happens here.
     %
-    % Display a null image.
+    % Display a null image. We will not include the null image texture in
+    % the 'activeTextures' as we will recall it every after test image
+    % display.
     [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
     FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
 
@@ -219,7 +224,11 @@ try
             % Display the test image.
             [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
             FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+            activeTextures(end+1) = testImageTexture;
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
+            
+            % Close the other textures.
+            Screen('Close',activeTextures(1:end-1));
 
             % This block completes a one evaluation. Get a key press.
             keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
@@ -249,7 +258,11 @@ try
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
                         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                        activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
+
+                        % Close the other textures.
+                        Screen('Close',activeTextures(1:end-1));
 
                         % Update the test image with stronger color correction.
                     elseif strcmp(keyPressed,'UpArrow')
@@ -266,11 +279,15 @@ try
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
                         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
+                        activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
+                        % Close the other textures.
+                        Screen('Close',activeTextures(1:end-1));
+
+                    elseif strcmp(keyPressed,'q')
                         % Close the PTB. This part is temporary and maybe
                         % be removed later on.
-                    elseif strcmp(keyPressed,'q')
                         CloseScreen;
                         break;
 
@@ -292,7 +309,6 @@ try
 
             % Display a null image again and pause for a second before
             % displaying the next test image.
-            [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
             FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
             pause(expParams.postIntervalDelaySec);
 
