@@ -42,11 +42,11 @@ imageParams.whichCenterImage = 'none';
 
 % Set the range of different intensity to correct the test image. Default
 % to ~0.33 when it's set to empty.
-imageParams.nTestPoints = 10;
+imageParams.nTestPoints = 20;
 imageParams.intensityColorCorrect = linspace(0,1,imageParams.nTestPoints);
 
 % etc.
-verbose = false;
+PLOTRAWIMAGES = false;
 SAVETHEIMAGES = true;
 
 %% Add the directory to the path.
@@ -94,12 +94,13 @@ for ii = 1:nTestImages
 end
 
 % Show the raw images if you want.
-if (verbose)
+if (PLOTRAWIMAGES)
     figure;
     sgtitle('Raw test images');
     for ii = 1:nTestImages
         subplot(2,ceil(nTestImages/2),ii);
         imshow(images{ii});
+        fprintf('Raw test images have been loaded - (n = %d) \n',nTestImages);
     end
 end
 
@@ -119,10 +120,12 @@ for cc = 1:nColorStripeOptions
     nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
         'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
         'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',false);
+    disp('Null image has been successfully generated!');
 
     % Make test stimulus.
     %
     % Loop for different images.
+    disp('Now we will start making test images...');
     for ii = 1:nTestImages
         imageTemp = images{ii};
 
@@ -132,10 +135,17 @@ for cc = 1:nColorStripeOptions
             testImage{ii,tt} = MakeImageCanvas(imageTemp,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
                 'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,'verbose',false);
+
+            % Show progress every 5 images.
+            if mod(tt,5) == 0
+                fprintf('Test image (%s) making progress - Test points (%d/%d) \n',...
+                    imageParams.whichColorStripes,tt,imageParams.nTestPoints);
+            end
         end
 
         % Show progress.
-        fprintf('Test image (%s) has been made - (%d/%d) \n',imageParams.whichColorStripes,ii,nTestImages);
+        fprintf('Test image (%s) making progress - Different test images (%d/%d) \n',...
+            imageParams.whichColorStripes,ii,nTestImages);
     end
 
     % Save the images.
