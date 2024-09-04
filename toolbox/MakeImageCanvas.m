@@ -26,7 +26,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 % Optional key/value pairs:
 %    testImageSize            - Decide the size of the test images. It
 %                               is decided by the ratio of the height of
-%                               the canvas. Default to 0.15.
+%                               the canvas. Default to 0.40.
 %    whichCenterImage         - Decide which image to place at the center
 %                               of the canvas. For the experiment, we will
 %                               put either the input image with stripes
@@ -128,9 +128,10 @@ if ~isempty(testImage)
     ratioWidthToHeight_original = originalImage_width/originalImage_height;
 
     % Define the size of the test image. For now, we keep the original
-    % height:width ratio.
-    testImage_height = canvas_height * options.testImageSize;
-    testImage_width = testImage_height * ratioWidthToHeight_original;
+    % height:width ratio. We will round up so that we make sure image size
+    % in integer number in pixel.
+    testImage_height = ceil(canvas_height * options.testImageSize);
+    testImage_width = ceil(testImage_height * ratioWidthToHeight_original);
 
     % Resize the test image to fit in the canvas.
     resized_testImage = imresize(testImage, [testImage_height, testImage_width]);
