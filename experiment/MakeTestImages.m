@@ -1,6 +1,10 @@
 % MakeTestImages.
 %
-% This routine makes test images prior to running the experiment.
+% This routine makes test images prior to running the experiment. The image
+% will be saved in the Dropbox, so it is recommended to use the computer
+% that has the access to the Dropbox. That means, for this project, use
+% either office laptop or personal laptop to run this code, not with the
+% Linux at the curved display room.
 %
 % See also:
 %    RunExperiment.
@@ -10,6 +14,7 @@
 %    09/03/24  smo    - When loading the raw test images, it only reads out
 %                       files that are not hidden. This prevents the break
 %                       when running on Linux.
+%    09/05/24  smo    - Now save the images on the Dropbox.
 
 %% Initialize.
 close all; clear;
@@ -57,26 +62,15 @@ sysInfo = GetComputerInfo();
 switch sysInfo.userShortName
     case 'semin'
         % Office computer.
-        baseFiledir = '~/Documents/MATLAB';
-    case 'gegenfurtner'
-        % Linux at the lab.
-        baseFiledir = '/home/gegenfurtner/Desktop/SEMIN';
+        baseFiledir = '~/Dropbox (Personal)/Giessen/projects';
     otherwise
         % This is for Semin's laptop.
-        baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
+        baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\Giessen\projects';
 end
 
 % Set repository name including the above path.
 projectName = 'ColorAssimilation';
 testFiledir = fullfile(baseFiledir,projectName);
-
-% Add repository to the path.
-if isfolder(testFiledir)
-    addpath(testFiledir);
-    fprintf('Following directory has been added to the path: %s \n',testFiledir);
-else
-    error('No such directory exist: %s \n',testFiledir);
-end
 
 %% Load raw test images.
 %
