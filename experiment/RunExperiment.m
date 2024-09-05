@@ -228,7 +228,7 @@ try
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
             
             % Close the other textures.
-            Screen('Close',activeTextures(1:end-1));
+            CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
             % This block completes a one evaluation. Get a key press.
             keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
@@ -262,7 +262,7 @@ try
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
                         % Close the other textures.
-                        Screen('Close',activeTextures(1:end-1));
+                        CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
                         % Update the test image with stronger color correction.
                     elseif strcmp(keyPressed,'UpArrow')
@@ -283,7 +283,7 @@ try
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
 
                         % Close the other textures.
-                        Screen('Close',activeTextures(1:end-1));
+                        CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
                     elseif strcmp(keyPressed,'q')
                         % Close the PTB. This part is temporary and maybe
