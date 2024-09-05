@@ -15,14 +15,19 @@ function [] = CloseScreen(options)
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
-%
+
 % History:
-%    10/28/21  smo                Started on it
+%    10/28/21  smo              - Started on it
+%    09/05/24  smo              - Now it closes all the active PTB textures
+%                                 as well.
 
 %% Set parameters.
 arguments
     options.verbose (1,1) = true
 end
+
+%% Close the PTB textures.
+Screen('CloseAll');
 
 %% Close PTB screen.
 sca;
