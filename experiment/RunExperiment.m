@@ -353,3 +353,5 @@ if (SAVETHERESULTS)
     save(saveFilename,'data');
     disp('Data has been saved successfully!');
 end
+
+% test
