@@ -165,3 +165,5 @@ for cc = 1:nColorStripeOptions
         fprintf('Test images have been saved successfully! - (%s) \n',imageParams.whichColorStripes);
     end
 end
+
+% test
