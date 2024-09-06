@@ -112,8 +112,8 @@ try
     expParams.postIntervalDelaySec = 1;
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
+    expParams.expKeyType = 'keyboard';
     % expParams.beepSound = true;
-    % expParams.expKeyType = 'keyboard';
 
     % etc.
     SAVETHERESULTS = true;
@@ -180,9 +180,10 @@ try
         otherwise
             instructionImageFont = 'Arial';
     end
-    initialInstructionImage = insertText(images.nullImage,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
+    initialImageBg = ones(size(images.nullImage))*0.5;
+    initialInstructionImage = insertText(initialImageBg,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
         {messageInitialImage_1stLine messageInitialImage_2ndLine},...
-        'fontsize',40,'Font',instructionImageFont,'BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','white','AnchorPoint','LeftCenter');
+        'fontsize',40,'Font',instructionImageFont,'BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
     % Display an image texture of the initial image.
     [initialInstructionImageTexture initialInstructionImageWindowRect rng] = MakeImageTexture(initialInstructionImage, window, windowRect,'verbose',false);
@@ -226,7 +227,7 @@ try
             FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
             activeTextures(end+1) = testImageTexture;
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
-            
+
             % Close the other textures.
             CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
