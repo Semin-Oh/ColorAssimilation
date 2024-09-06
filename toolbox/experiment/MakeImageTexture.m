@@ -75,7 +75,7 @@ if (~isempty(options.addFixationPointImage))
     % Set the fixation point color and size.
     fixPatternColor = [0 0 0];
     fixSizePixel = 12;
-    fixPatternWidth = 10;
+    fixPatternWidth = 5;
     
     % Add fixation point here.
     image = AddFixPointImage(image, 'patternType', fixPatternType, 'patternColor',fixPatternColor, ...
