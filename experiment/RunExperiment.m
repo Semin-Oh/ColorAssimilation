@@ -170,13 +170,13 @@ try
     imageSize = size(images.nullImage);
     messageInitialImage_1stLine = 'Press any button';
     messageInitialImage_2ndLine = 'To start the experiment';
-    ratioMessageInitialHorz = 0.4;
+    ratioMessageInitialHorz = 0.49;
     ratioMessageInitialVert = 0.03;
 
     % Set the font.
     switch sysInfo.userShortName
         case 'gegenfurtner'
-            instructionImageFont = 'DejaVuSans-Bold';
+            instructionImageFont = 'DejaVuSans';
         otherwise
             instructionImageFont = 'Arial';
     end
@@ -232,7 +232,7 @@ try
             CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
             % This block completes a one evaluation. Get a key press.
-            keyPressOptions = {'DownArrow','UpArrow','RightArrow'};
+            keyPressOptions = {'DownArrow','LeftArrow','RightArrow'};
             while true
                 [keyIsDown, ~, keyCode] = KbCheck;
                 if keyIsDown
@@ -240,12 +240,12 @@ try
 
                     % Break the loop if the key for decision ('RightArrow') was
                     % pressed.
-                    if strcmp(keyPressed,'RightArrow')
+                    if strcmp(keyPressed,'DownArrow')
                         fprintf('A key pressed = (%s) \n',keyPressed);
                         break;
 
                         % Update the test image with less color correction.
-                    elseif strcmp(keyPressed,'DownArrow')
+                    elseif strcmp(keyPressed,'LeftArrow')
                         idxColorCorrectImage = idxColorCorrectImage - 1;
 
                         % Set the index within the feasible range.
@@ -266,7 +266,7 @@ try
                         CloseImageTexture('whichTexture',activeTextures(1:end-1));
 
                         % Update the test image with stronger color correction.
-                    elseif strcmp(keyPressed,'UpArrow')
+                    elseif strcmp(keyPressed,'RightArrow')
                         idxColorCorrectImage = idxColorCorrectImage + 1;
 
                         % Set the index within the feasible range.
