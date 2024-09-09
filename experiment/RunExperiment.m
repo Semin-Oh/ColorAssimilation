@@ -346,6 +346,8 @@ if (SAVETHERESULTS)
 
     % Save out the image and experiment params in the structure.
     data.imageParams = images.imageParams;
+    [~, testImageFilename, ~] = fileparts(testImageFilename);
+    data.imageParams.testImageFilename = testImageFilename;
     data.expParams = expParams;
 
     % Set the file name and save.
