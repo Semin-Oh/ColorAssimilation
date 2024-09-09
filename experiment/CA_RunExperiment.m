@@ -1,4 +1,4 @@
-% RunExperiment.
+% CA_RunExperiment.
 %
 % This is an experiment running code for color assimilation project.
 %
@@ -16,7 +16,8 @@
 %                       multiple test images and repeatitions. Needs to be
 %                       tested.
 %    09/03/24  smo    - Made it work on the curved display.
-%    09/09/24  smo    - Fixation point has been updated to a circle.
+%    09/09/24  smo    - Fixation point has been updated to a circle. Also,
+%                       file name changed.
 
 %% Initialize.
 close all; clear;
