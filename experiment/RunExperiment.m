@@ -16,6 +16,7 @@
 %                       multiple test images and repeatitions. Needs to be
 %                       tested.
 %    09/03/24  smo    - Made it work on the curved display.
+%    09/09/24  smo    - Fixation point has been updated to a circle.
 
 %% Initialize.
 close all; clear;
@@ -223,7 +224,7 @@ try
             testImage = images.testImage{idxImage,idxColorCorrectImage};
 
             % Display the test image.
-            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
+            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
             FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
             activeTextures(end+1) = testImageTexture;
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
@@ -257,7 +258,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
@@ -278,7 +279,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);

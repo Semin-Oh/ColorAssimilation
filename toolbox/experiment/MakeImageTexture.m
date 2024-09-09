@@ -8,7 +8,7 @@ function [imageTexture, imageWindowRect, rngVal] = MakeImageTexture(image,window
 %    This is to make PTB texture of given image. As we want to display
 %    test stimuli exactly when we want, we separate the old function
 %    (SetScreenImage) into two, building PTB texture (this function) and
-%    flipping texture (FlipImageTexture). 
+%    flipping texture (FlipImageTexture).
 %
 % Inputs:
 %    image -                      Test images to display on the screen.
@@ -70,13 +70,15 @@ if (~isempty(options.addFixationPointImage))
             fixPatternType = 'line';
         case 'circle'
             fixPatternType = 'circle';
+        case 'filled-circle'
+            fixPatternType = 'filled-circle';
     end
-    
+
     % Set the fixation point color and size.
     fixPatternColor = [0 0 0];
     fixSizePixel = 12;
     fixPatternWidth = 5;
-    
+
     % Add fixation point here.
     image = AddFixPointImage(image, 'patternType', fixPatternType, 'patternColor',fixPatternColor, ...
         'patternSize', fixSizePixel, 'patternWidth', fixPatternWidth);
@@ -93,7 +95,7 @@ else
     error('Input image should be in the format either double or uint8');
 end
 
-%% Set the size of the PTB texture. 
+%% Set the size of the PTB texture.
 %
 % Make image texture.
 imageTexture = Screen('MakeTexture', window, image);

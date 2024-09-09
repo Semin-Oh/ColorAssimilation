@@ -34,6 +34,7 @@ function [imageEdit] = AddFixPointImage(image, options)
 % History:
 %   08/08/22 smo                - Wrote it.
 %   09/03/24 smo                - Modified to work for non-square images.
+%   09/09/24 smo                - Added an option of using filled-circle.
 
 %% Set parameters.
 arguments
@@ -58,9 +59,11 @@ switch (options.patternType)
         patternPosition = [fixHorizontalPosition; fixVerticalPosition];
     case 'circle'
         patternPosition = [imageCenterHorizontal imageCenterVertical options.patternSize];
+    case 'filled-circle'
+        patternPosition = [imageCenter imageCenter options.patternSize];
 end
 
 % Set fixation point on the image here.
 imageEdit = insertShape(image, options.patternType, patternPosition, ...
-    'Color', options.patternColor, 'LineWidth', options.patternWidth);
+    'Color', options.patternColor, 'LineWidth', options.patternWidth,'opacity',1);
 end
