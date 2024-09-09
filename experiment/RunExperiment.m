@@ -223,7 +223,7 @@ try
             testImage = images.testImage{idxImage,idxColorCorrectImage};
 
             % Display the test image.
-            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
+            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
             FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
             activeTextures(end+1) = testImageTexture;
             fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
@@ -257,7 +257,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
@@ -278,7 +278,7 @@ try
 
                         % Update the image here.
                         testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','crossbar','verbose', false);
+                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','circle','verbose', false);
                         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
                         activeTextures(end+1) = testImageTexture;
                         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
