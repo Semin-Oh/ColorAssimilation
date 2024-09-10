@@ -60,7 +60,7 @@ switch (options.patternType)
     case 'circle'
         patternPosition = [imageCenterHorizontal imageCenterVertical options.patternSize];
     case 'filled-circle'
-        patternPosition = [imageCenter imageCenter options.patternSize];
+        patternPosition = [imageCenterHorizontal imageCenterVertical options.patternSize];
 end
 
 % Set fixation point on the image here.
