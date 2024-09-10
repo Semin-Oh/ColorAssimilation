@@ -11,6 +11,8 @@
 %% Initialize.
 close all; clear;
 
+%% Choose how we analyze the data.
+
 %% Get subject names with the data.
 sysInfo = GetComputerInfo();
 
@@ -39,4 +41,19 @@ subjectNameList = {subjectNameContent.name};
 subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 
 %% Load the data to analyze.
+%
+% Define which subject data to analyze.
+idxSubject = 1;
+subjectName = subjectNames{idxSubject};
 
+% Set the directory.
+dataFiledir = fullfile(testFiledir,subjectName);
+
+% Read out all avaialble data over different primary color.
+dataFilename_red = GetMostRecentFileName(dataFiledir,sprintf('%s_red',subjectName));
+dataFilename_green = GetMostRecentFileName(dataFiledir,sprintf('%s_green',subjectName));
+dataFilename_blue = GetMostRecentFileName(dataFiledir,sprintf('%s_blue',subjectName));
+
+data_red = load(dataFilename_red);
+data_green = load(dataFilename_green);
+data_blue = load(dataFilename_blue);
