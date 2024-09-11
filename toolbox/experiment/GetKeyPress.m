@@ -1,4 +1,4 @@
-function [keyPress] = GetKeyPress(options)
+function [keyPressed] = GetKeyPress(options)
 % This gets a keyboard response.
 %
 % Syntax:
@@ -32,19 +32,18 @@ end
 %% Get a key press.
 while true
     % Get a key press.
+    pause;
     [keyIsDown, ~, keyCode] = KbCheck;
-    
+
     % Check which key was pressed.
     if keyIsDown
         keyPressed = KbName(keyCode);
-    end
-    
-    % If the key pressed is one of the preset options, break the loop.
-    if ismember(keyPressed,keyOptions)
+        break;
+
+        % If the key pressed is one of the preset options, break the loop.
         if (options.verbose)
             fprintf('A key pressed = (%s) \n',keyPressed);
         end
-        break;
     end
 end
 
