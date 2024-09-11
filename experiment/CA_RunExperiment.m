@@ -30,10 +30,8 @@ switch sysInfo.userShortName
     case 'semin'
         % Office computer.
         baseFiledir = '~/Documents/MATLAB';
-
-        % SET THE NAME OF THE LINUX COMPUTER HERE.
     case 'gegenfurtner'
-        % Lap Linux computer.
+        % Lab Linux computer.
         baseFiledir = '/home/gegenfurtner/Desktop/SEMIN';
     otherwise
         % This is for Semin's laptop.
@@ -104,9 +102,7 @@ try
     screenParams.screen_y_pixel = 1440;
     screenParams.screen_x_cm  = 119.2;
     screenParams.screen_y_cm  = 33.5;
-    % From the chinrest to the center screen.
     screenParams.screenDistance_cm = 100;
-    % Gap between the screens. It was measured manually.
     screenParams.screenGap_cm = 2.5;
 
     % Experimental variables.
@@ -114,8 +110,7 @@ try
     expParams.postIntervalDelaySec = 1;
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
-    expParams.expKeyType = 'keyboard';
-    % expParams.beepSound = true;
+    expParams.expKeyType = 'gamepad';
 
     % etc.
     SAVETHERESULTS = true;
@@ -293,7 +288,6 @@ try
                         % be removed later on.
                         CloseScreen;
                         break;
-
                     else
                         % Show a message to press a valid key press.
                         fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
@@ -336,25 +330,30 @@ CloseScreen;
 
 %% Save the data.
 if (SAVETHERESULTS)
-    saveFiledir = fullfile(testFiledir,'data');
+    % Save out the data only if we reached the desired number of trials.
+    nTargetTrials = expParams.nTestImages * expParams.nRepeat;
+    nTrialsDone = ii * rr;
+    if (nTrialsDone == nTargetTrials)
+        saveFiledir = fullfile(testFiledir,'data');
 
-    % Make folder with subject name if it does not exist.
-    saveFoldername = fullfile(saveFiledir,subjectName);
-    if ~exist(saveFoldername, 'dir')
-        mkdir(saveFoldername);
-        fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
+        % Make folder with subject name if it does not exist.
+        saveFoldername = fullfile(saveFiledir,subjectName);
+        if ~exist(saveFoldername, 'dir')
+            mkdir(saveFoldername);
+            fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
+        end
+
+        % Save out the image and experiment params in the structure.
+        data.imageParams = images.imageParams;
+        [~, testImageFilename, ~] = fileparts(testImageFilename);
+        data.imageParams.testImageFilename = testImageFilename;
+        data.expParams = expParams;
+
+        % Set the file name and save.
+        dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+        saveFilename = fullfile(saveFoldername,...
+            sprintf('%s_%s_%s',subjectName,stripeColorToTest,dayTimestr));
+        save(saveFilename,'data');
+        disp('Data has been saved successfully!');
     end
-
-    % Save out the image and experiment params in the structure.
-    data.imageParams = images.imageParams;
-    [~, testImageFilename, ~] = fileparts(testImageFilename);
-    data.imageParams.testImageFilename = testImageFilename;
-    data.expParams = expParams;
-
-    % Set the file name and save.
-    dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-    saveFilename = fullfile(saveFoldername,...
-        sprintf('%s_%s_%s',subjectName,stripeColorToTest,dayTimestr));
-    save(saveFilename,'data');
-    disp('Data has been saved successfully!');
 end
