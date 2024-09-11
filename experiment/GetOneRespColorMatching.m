@@ -1,4 +1,4 @@
-function [matchingIntensity] = GetOneRespColorMatching(images,idxImage,intensityColorCorrect,idxColorCorrectImage,nTestPoints, ...
+function [matchingIntensity] = GetOneRespColorMatching(testImage,idxImage,idxColorCorrectImage,intensityColorCorrect, ...
     window,windowRect,options)
 % This routine does one color matching trial.
 %
@@ -10,12 +10,20 @@ function [matchingIntensity] = GetOneRespColorMatching(images,idxImage,intensity
 %    dd
 %
 % Inputs:
-%    N/A
+%    testImage
+%    idxImage
+%    idxColorCorrectImage
+%    intensityColorCorrect
+%    window
+%    windowRect
 %
 % Outputs:
-%    keyPress                   - dd
+%    matchingIntensity          - dd
 %
 % Optional key/value pairs:
+%    imageFixationType
+%    expKeyType
+%    postColorCorrectDelaySec
 %    verbose                    - Boolean. Default true. Controls
 %                                 printout.
 %
@@ -27,7 +35,10 @@ function [matchingIntensity] = GetOneRespColorMatching(images,idxImage,intensity
 
 %% Set variables.
 arguments
-    images
+    testImage
+    idxImage (1,1)
+    idxColorCorrectImage (1,1)
+    intensityColorCorrect
     window (1,1)
     windowRect (1,4)
     options.imageFixationType = 'filled-circle';
@@ -35,11 +46,12 @@ arguments
     options.postColorCorrectDelaySec = 0.5;
     options.verbose = true;
 end
+nColorCorrectPoints = length(intensityColorCorrect);
 
 %% Color matching experiment happens here.
 %
 % Display the test image.
-testImage = images.testImage{idxImage,idxColorCorrectImage};
+testImage = testImage.testImage{idxImage,idxColorCorrectImage};
 [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,...
     'addFixationPointImage',options.imageFixationType,'verbose',false);
 FlipImageTexture(testImageTexture,window,windowRect,'verbose',false);
@@ -64,7 +76,7 @@ end
 
 %% This block completes a one evaluation. Get a key press.
 while true
-    % Get a key press here..
+    % Get a key press here.
     switch options.expKeyType
         case 'gamepad'
             keyPressed = GetJSResp;
@@ -72,7 +84,7 @@ while true
             keyPressed = GetKeyPress;
     end
 
-    % Quit.
+    % Finish the evalution.
     if strcmp(keyPressed,buttonDecide)
         fprintf('A key pressed = (%s) \n',keyPressed);
         break;
@@ -84,16 +96,16 @@ while true
         % Set the index within the feasible range.
         if idxColorCorrectImage < 1
             idxColorCorrectImage = 1;
-        elseif idxColorCorrectImage > nTestPoints
-            idxColorCorrectImage = nTestPoints;
+        elseif idxColorCorrectImage > nColorCorrectPoints
+            idxColorCorrectImage = nColorCorrectPoints;
         end
 
         % Update the image here.
-        testImage = images.testImage{idxImage,idxColorCorrectImage};
+        testImage = testImage.testImage{idxImage,idxColorCorrectImage};
         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,...
             'addFixationPointImage',options.imageFixationType,'verbose', false);
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nTestPoints);
+        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectPoints);
 
         % Close the other textures.
         CloseImageTexture;
@@ -105,15 +117,15 @@ while true
         % Set the index within the feasible range.
         if idxColorCorrectImage < 1
             idxColorCorrectImage = 1;
-        elseif idxColorCorrectImage > nTestPoints
-            idxColorCorrectImage = nTestPoints;
+        elseif idxColorCorrectImage > nColorCorrectPoints
+            idxColorCorrectImage = nColorCorrectPoints;
         end
 
         % Update the image here.
-        testImage = images.testImage{idxImage,idxColorCorrectImage};
+        testImage = testImage.testImage{idxImage,idxColorCorrectImage};
         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
+        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,testImage.imageParams.nTestPoints);
 
         % Close the other textures.
         CloseImageTexture;

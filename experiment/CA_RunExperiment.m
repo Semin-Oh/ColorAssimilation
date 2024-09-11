@@ -217,92 +217,12 @@ try
         for ii = 1:expParams.nTestImages
             idxImage = expParams.randOrder(ii,rr);
             idxColorCorrectImage = expParams.idxRandOrderInitial(ii,rr);
-            testImage = images.testImage{idxImage,idxColorCorrectImage};
 
-            % Display the test image.
-            [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
-            FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-            activeTextures(end+1) = testImageTexture;
-            fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
-
-            % Close the other textures.
-            CloseImageTexture('whichTexture',activeTextures(1:end-1));
-
-            % This block completes a one evaluation. Get a key press.
-            keyPressOptions = {'DownArrow','LeftArrow','RightArrow'};
-            while true
-                [keyIsDown, ~, keyCode] = KbCheck;
-                if keyIsDown
-                    keyPressed = KbName(keyCode);
-
-                    % Break the loop if the key for decision ('RightArrow') was
-                    % pressed.
-                    if strcmp(keyPressed,'DownArrow')
-                        fprintf('A key pressed = (%s) \n',keyPressed);
-                        break;
-
-                        % Update the test image with less color correction.
-                    elseif strcmp(keyPressed,'LeftArrow')
-                        idxColorCorrectImage = idxColorCorrectImage - 1;
-
-                        % Set the index within the feasible range.
-                        if idxColorCorrectImage < 1
-                            idxColorCorrectImage = 1;
-                        elseif idxColorCorrectImage > images.imageParams.nTestPoints;
-                            idxColorCorrectImage = images.imageParams.nTestPoints;
-                        end
-
-                        % Update the image here.
-                        testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
-                        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                        activeTextures(end+1) = testImageTexture;
-                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
-
-                        % Close the other textures.
-                        CloseImageTexture('whichTexture',activeTextures(1:end-1));
-
-                        % Update the test image with stronger color correction.
-                    elseif strcmp(keyPressed,'RightArrow')
-                        idxColorCorrectImage = idxColorCorrectImage + 1;
-
-                        % Set the index within the feasible range.
-                        if idxColorCorrectImage < 1
-                            idxColorCorrectImage = 1;
-                        elseif idxColorCorrectImage > images.imageParams.nTestPoints;
-                            idxColorCorrectImage = images.imageParams.nTestPoints;
-                        end
-
-                        % Update the image here.
-                        testImage = images.testImage{idxImage,idxColorCorrectImage};
-                        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
-                        FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-                        activeTextures(end+1) = testImageTexture;
-                        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,images.imageParams.nTestPoints);
-
-                        % Close the other textures.
-                        CloseImageTexture('whichTexture',activeTextures(1:end-1));
-
-                    elseif strcmp(keyPressed,'q')
-                        % Close the PTB. This part is temporary and maybe
-                        % be removed later on.
-                        CloseScreen;
-                        break;
-                    else
-                        % Show a message to press a valid key press.
-                        fprintf('Press a key either (%s) or (%s) or (%s) \n',keyPressOptions{1},keyPressOptions{2},keyPressOptions{3});
-                    end
-                end
-
-                % Make a tiny time delay here so that we make sure we color
-                % match in a unit step size. Without time delay, the color
-                % matching would be executed in more than one step size if
-                % we press the button too long.
-                pause(expParams.postColorCorrectDelaySec);
-            end
-
-            % Collect the key press data here.
-            data.matchingIntensityColorCorrect(ii,rr) = images.imageParams.intensityColorCorrect(idxColorCorrectImage);
+            % Color matching happens within this routine.
+            data.matchingIntensityColorCorrect(ii,rr) = GetOneRespColorMatching(images.testImage,idxImage,idxColorCorrectImage,...
+                images.imageParams.intensityColorCorrect,window,windowRect,...
+                'expKeyType',expParams.expKeyType,'postColorCorrectDelaySec',expParams.postColorCorrectDelaySec,...
+                'verbose',true);
 
             % Display a null image again and pause for a second before
             % displaying the next test image.
