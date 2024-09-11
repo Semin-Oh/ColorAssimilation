@@ -1,48 +1,105 @@
-% GetJSResp.
+function [buttonPress] = GetJSResp(options)
+% This gets a gamepad response. This is not using Psychtoolbox.
 %
-% Open the joystick device file (js0 is typically the first joystick)
-fid = fopen('/dev/input/js0', 'rb');
+% Syntax:
+%    [buttonPress] = GetJSResp(numGamepad)
+%
+% Description:
+%    This gets a single button press from the gamepad. This is based on the
+%    gamepad from Logitech F310. Before using this routine, the gamepad
+%    should be read out first using the routine 'OpenJS'. After the use of
+%    it, it can be closed out with the routine 'CloseJS'.
+%
+%    For this project, we will only use the colored four buttons on the
+%    right and one button on the side top left. Those are all mapped with
+%    the type 1. It could be updated as we wish later on.
+%
+% Inputs:
+%    N/A
+%
+% Outputs:
+%    buttonPress                - Shows which button was pressed on the
+%                                 gamepad.
+%
+% Optional key/value pairs:
+%    verbose                    - Boolean. Default true. Controls
+%                                 printout.
+%
+% See also:
+%    N/A
 
-if fid == -1
+% History:
+%   09/11/24 smo                - Wrote it.
+
+%% Set variables.
+arguments
+    options.typeButton (1,1) = 1;
+    options.valuePress (1,1) = 32767;
+    options.numButtonUp (1,1) = 3;
+    options.numButtonDown (1,1) = 0;
+    options.numButtonLeft (1,1) = 2;
+    options.numButtonRight (1,1) = 1;
+    options.numButtonSideLeft (1,1) = 4;
+    options.verbose = true;
+end
+
+%% Open the gamepad device file (js0 is typically the first joystick).
+gamepadDir = '/dev/input/js0';
+numGamepad = fopen(gamepadDir,'rb');
+
+% Check if there is availabe gamepad.
+if (numGamepad == -1)
     error('Unable to open joystick device.');
 end
 
-% Define constants for "down" button or axis event (depending on gamepad)
-% In this case, assume the D-pad "down" is axis 1, and negative value
-DOWN_AXIS = 1;  % Usually corresponds to the Y-axis (check with jstest-gtk)
-DOWN_THRESHOLD = -32767;  % Maximum negative value for the axis
-
-% Infinite loop to keep reading the joystick events
+%% Get a button press here.
+buttonPress = [];
 while true
-    % Read 8 bytes from the joystick input stream
-    data = fread(fid, 8);
+    % Read out 8 bytes from the joystick input stream.
+    numBytes = 8;
+    data = fread(numGamepad, numBytes);
+
+    % Check if we get the button press okay.
     if isempty(data)
-        break; % End of stream
+        break;
     end
 
-    % Parse joystick event data
-    time = typecast(uint8(data(1:4)), 'uint32');  % Event time
-    value = typecast(uint8(data(5:6)), 'int16');  % Value (axis/button)
-    type = data(7);                               % Event type (axis/button)
-    number = data(8);                             % Axis or button number
+    % Event time.
+    timeButtonPress = typecast(uint8(data(1:4)), 'uint32');
+    % Value (axis/button)
+    valueButton = typecast(uint8(data(5:6)), 'int16');
+    % Button type.
+    typeButton = data(7);
+    % Button number.
+    numButton = data(8);
 
-    % Display event details (for debugging purposes)
-    fprintf('Time: %u, Value: %d, Type: %d, Number: %d\n', time, value, type, number);
-
-    % Check if the event corresponds to an axis movement
-    if type == 2  % Type 2 indicates axis movement
-        % Check if it's the down axis (usually axis 1) and value is negative
-        if number == DOWN_AXIS && value == DOWN_THRESHOLD
-            disp('Down button pressed, ending routine.');
-            break;
+    % Check the button type.
+    if (typeButton == options.typeButton)
+        % Check the button value.
+        if valueButton == options.valuePress
+            % If we get any of our targeted button, close the loop.
+            if (numButton == options.numButtonUp)
+                buttonPress = 'up';
+            elseif (numButton == options.numButtonDown)
+                buttonPress = 'down';
+            elseif (numButton == options.numButtonLeft)
+                buttonPress = 'left';
+            elseif (numButton == options.numButtonRight)
+                buttonPress = 'right';
+            elseif (numButton == options.numButtonSideLeft)
+                buttonPress = 'sideleft';
+            end
         end
     end
 
-    % You can add other conditions for different buttons or axes here
-    if
+    % Close the loop if we got a button press.
+    if ~isempty(buttonPress)
         break;
     end
 end
 
-% Close the device file
-fclose(fid);
+% Display which button was pressed.
+if (options.verbose)
+    fprintf('Button pressed - (%s) \n', buttonPress);
+end
+end
