@@ -54,6 +54,8 @@ end
 
 %% Get a button press here.
 buttonPress = [];
+buttonPressOptions = {'up','down','right','sideleft'};
+
 while true
     % Read out 8 bytes from the joystick input stream.
     numBytes = 8;
@@ -77,7 +79,7 @@ while true
     if (typeButton == options.typeButton)
         % Check the button value.
         if valueButton == options.valuePress
-            % If we get any of our targeted button, close the loop.
+            % Get the string of which button was pressed.
             if (numButton == options.numButtonUp)
                 buttonPress = 'up';
             elseif (numButton == options.numButtonDown)
@@ -92,8 +94,8 @@ while true
         end
     end
 
-    % Close the loop if we got a button press.
-    if ~isempty(buttonPress)
+    % Close the loop if we got a valid button press.
+    if ismember(buttonPress,buttonPressOptions)
         break;
     end
 end

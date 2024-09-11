@@ -1,4 +1,28 @@
 function [keyPress] = GetKeyPress(options)
+% This gets a keyboard response.
+%
+% Syntax:
+%    [keyPress] = GetKeyPress()
+%
+% Description:
+%    This gets a single key press from the keyboard.
+%
+% Inputs:
+%    N/A
+%
+% Outputs:
+%    keyPress                   - String that shows which button was
+%                                 pressed on the keyboard.
+%
+% Optional key/value pairs:
+%    verbose                    - Boolean. Default true. Controls
+%                                 printout.
+%
+% See also:
+%    N/A
+
+% History:
+%   09/11/24 smo                - Wrote it.
 
 %% Set variables.
 arguments
@@ -6,9 +30,6 @@ arguments
 end
 
 %% Get a key press.
-%
-% We will get a key press until we get one within the preset key options.
-keyPressOptions = {'DownArrow','LeftArrow','RightArrow'};
 while true
     % Get a key press.
     [keyIsDown, ~, keyCode] = KbCheck;
