@@ -34,7 +34,6 @@ function [buttonPress] = GetJSResp(options)
 %% Set variables.
 arguments
     options.typeButton (1,1) = 1;
-    options.valuePress (1,1) = 32767;
     options.numButtonUp (1,1) = 3;
     options.numButtonDown (1,1) = 0;
     options.numButtonLeft (1,1) = 2;
@@ -77,26 +76,25 @@ while true
 
     % Check the button type.
     if (typeButton == options.typeButton)
-        % Check the button value.
-        if valueButton == options.valuePress
-            % Get the string of which button was pressed.
-            if (numButton == options.numButtonUp)
-                buttonPress = 'up';
-            elseif (numButton == options.numButtonDown)
-                buttonPress = 'down';
-            elseif (numButton == options.numButtonLeft)
-                buttonPress = 'left';
-            elseif (numButton == options.numButtonRight)
-                buttonPress = 'right';
-            elseif (numButton == options.numButtonSideLeft)
-                buttonPress = 'sideleft';
-            end
+        % Get the string of which button was pressed.
+        if (numButton == options.numButtonUp)
+            buttonPress = 'up';
+        elseif (numButton == options.numButtonDown)
+            buttonPress = 'down';
+        elseif (numButton == options.numButtonLeft)
+            buttonPress = 'left';
+        elseif (numButton == options.numButtonRight)
+            buttonPress = 'right';
+        elseif (numButton == options.numButtonSideLeft)
+            buttonPress = 'sideleft';
         end
     end
 
     % Close the loop if we got a valid button press.
-    if ismember(buttonPress,buttonPressOptions)
-        break;
+    if ~isempty(buttonPress)
+        if ismember(buttonPress,buttonPressOptions)
+            break;
+        end
     end
 end
 
