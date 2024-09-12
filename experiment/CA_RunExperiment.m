@@ -18,6 +18,7 @@
 %    09/03/24  smo    - Made it work on the curved display.
 %    09/09/24  smo    - Fixation point has been updated to a circle. Also,
 %                       file name changed.
+%    09/12/24  smo    - Routine is working with the gamepad.
 
 %% Initialize.
 close all; clear;
