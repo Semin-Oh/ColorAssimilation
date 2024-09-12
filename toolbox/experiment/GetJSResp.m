@@ -52,8 +52,12 @@ if (numGamepad == -1)
 end
 
 %% Get a button press here.
+%
+% Only the buttons within the array 'buttonPressOptions' would be
+% activated. For now, we only activate the four directional buttons on the
+% right side of the gamepad and the one on the side left.
 buttonPress = [];
-buttonPressOptions = {'up','down','right','sideleft'};
+buttonPressOptions = {'up','down','left','right','sideleft'};
 
 while true
     % Read out 8 bytes from the joystick input stream.

@@ -1,4 +1,4 @@
-function [matchingIntensity] = GetOneRespColorMatching(testImage,idxImage,idxColorCorrectImage,intensityColorCorrect, ...
+function [matchingIntensity] = GetOneRespColorMatching(testImages,idxImage,idxColorCorrectImage,intensityColorCorrect, ...
     window,windowRect,options)
 % This routine does one color matching trial.
 %
@@ -35,7 +35,7 @@ function [matchingIntensity] = GetOneRespColorMatching(testImage,idxImage,idxCol
 
 %% Set variables.
 arguments
-    testImage
+    testImages
     idxImage (1,1)
     idxColorCorrectImage (1,1)
     intensityColorCorrect
@@ -51,13 +51,19 @@ nColorCorrectPoints = length(intensityColorCorrect);
 %% Color matching experiment happens here.
 %
 % Display the test image.
-testImage = testImage.testImage{idxImage,idxColorCorrectImage};
+testImage = testImages{idxImage,idxColorCorrectImage};
 [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,...
     'addFixationPointImage',options.imageFixationType,'verbose',false);
 FlipImageTexture(testImageTexture,window,windowRect,'verbose',false);
 
-% Close the other textures.
-CloseImageTexture;
+% Close the other textures except the one currently on. For now, we
+% randonly create an array of the textures with the number from 1 to 100,
+% which should generally cover all the texture numbers. The PTB texture
+% number usually starts with 11,12,13,..., so theoritically it would close
+% all the active textures except the one displaying now.
+texturesToClose = linspace(1,100,100);
+texturesToClose = setdiff(texturesToClose,testImageTexture);
+CloseImageTexture('whichTexture',texturesToClose);
 
 %% Set the available key options here over different key type either
 % keyboard or gamepad.
@@ -101,14 +107,15 @@ while true
         end
 
         % Update the image here.
-        testImage = testImage.testImage{idxImage,idxColorCorrectImage};
+        testImage = testImages{idxImage,idxColorCorrectImage};
         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,...
             'addFixationPointImage',options.imageFixationType,'verbose', false);
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectPoints);
 
         % Close the other textures.
-        CloseImageTexture;
+        texturesToClose = setdiff(texturesToClose,testImageTexture);
+        CloseImageTexture('whichTexture',texturesToClose);
 
         % Update the test image with stronger color correction.
     elseif strcmp(keyPressed,buttonUp)
@@ -122,13 +129,14 @@ while true
         end
 
         % Update the image here.
-        testImage = testImage.testImage{idxImage,idxColorCorrectImage};
+        testImage = testImages{idxImage,idxColorCorrectImage};
         [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
-        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,testImage.imageParams.nTestPoints);
+        fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectPoints);
 
         % Close the other textures.
-        CloseImageTexture;
+        texturesToClose = setdiff(texturesToClose,testImageTexture);
+        CloseImageTexture('whichTexture',texturesToClose);
 
     elseif strcmp(keyPressed,buttonQuit)
         % Close the PTB. Force quit the experiment.
@@ -144,8 +152,8 @@ while true
     % matching would be executed in more than one step size if
     % we press the button too long.
     pause(options.postColorCorrectDelaySec);
-
-    % Collect the key press data here.
-    matchingIntensity = intensityColorCorrect(idxColorCorrectImage);
 end
+
+% Collect the key press data here.
+matchingIntensity = intensityColorCorrect(idxColorCorrectImage);
 end

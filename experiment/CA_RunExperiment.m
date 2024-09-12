@@ -191,13 +191,11 @@ try
     activeTextures(end+1) = initialInstructionImageTexture;
 
     % Get any key press to proceed.
-    while true
-        [keyIsDown, ~, keyCode] = KbCheck;
-        if keyIsDown
-            keyPressed = KbName(keyCode);
-            disp(['Key pressed: ' keyPressed]);
-            break;
-        end
+    switch (expParams.expKeyType)
+        case 'gamepad'
+            GetJSResp;
+        case 'keyboard'
+            GetKeyPress;
     end
     disp('Experiment is going to be started!');
 
@@ -226,6 +224,7 @@ try
 
             % Display a null image again and pause for a second before
             % displaying the next test image.
+            [nullImageTexture nullImageWindowRect rng] = MakeImageTexture(images.nullImage, window, windowRect, 'verbose', false);
             FlipImageTexture(nullImageTexture, window, windowRect,'verbose',false);
             pause(expParams.postIntervalDelaySec);
 
