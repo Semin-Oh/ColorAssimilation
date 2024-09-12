@@ -160,7 +160,12 @@ try
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
-
+    
+    %% Practice trials if you want.
+    if (PRACTICETRIALS)
+    
+    end
+    
     %% Display the initial screen on the null image.
     %
     % Set the initial screen with written instruction.
