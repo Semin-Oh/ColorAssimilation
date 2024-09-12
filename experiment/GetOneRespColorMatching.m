@@ -10,7 +10,7 @@ function [matchingIntensity] = GetOneRespColorMatching(testImages,idxImage,idxCo
 %    dd
 %
 % Inputs:
-%    testImage
+%    testImages                 -
 %    idxImage
 %    idxColorCorrectImage
 %    intensityColorCorrect

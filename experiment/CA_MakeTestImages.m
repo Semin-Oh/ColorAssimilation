@@ -1,4 +1,4 @@
-% MakeTestImages.
+% CA_MakeTestImages.
 %
 % This routine makes test images prior to running the experiment. The image
 % will be saved in the Dropbox, so it is recommended to use the computer
