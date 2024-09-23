@@ -348,6 +348,9 @@ if ~isempty(testImage)
             %
             % colorCorrectionPerPixelOneChannel = ratioColorCorrect .* resized_testImage(:,:,3);
             % colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3) - colorCorrectionPerPixelOneChannel;
+
+        case 'ciecam02'
+
     end
 
     % Remove the background of the color corrected image.
@@ -541,12 +544,18 @@ if ~isempty(testImage)
 
         % Matrix to convert from the linear RGB to XYZ.
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
-        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
+        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505]*100;
+        XYZ_white = sum(M_RGB2XYZ_sRGB,2);
 
         % Original test image.
         RGB_testImage = [red_testImage; green_testImage; blue_testImage];
         XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_testImage = XYZToxyY(XYZ_testImage);
+        
+        % Calculate the CIECAM02 stats.
+        LA = 20;
+        JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
+        XYZ_testImage_check = JCHToXYZ(JCH_testImage,XYZ_white,LA);
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
