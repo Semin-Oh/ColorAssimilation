@@ -27,54 +27,48 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    testImageSize            - Decide the size of the test images. It
 %                               is decided by the ratio of the height of
 %                               the canvas. Default to 0.40.
-%    whichCenterImage         - Decide which image to place at the center
-%                               of the canvas. For the experiment, we will
-%                               put either the input image with stripes
-%                               ('stripes') on or color corrected image
-%                               ('color'). Default to 'color'. If you don't
-%                               want to have the image at the center,
-%                               simply enter anything other than 'stripes'
-%                               and 'color'. For example, if you set it as
-%                               'none', there will be no centered image
-%                               appeared.
-%   stripeHeightPixel         - Define the height of each horizontal stripe
+%    addImageRight            - When it sets to true, add a mirrored image
+%                               on the right side of the canvas and place
+%                               the color corrected image on the center.
+%                               Default to false.
+%    stripeHeightPixel        - Define the height of each horizontal stripe
 %                               on the background of the cavas. It's in
 %                               pixel unit and default to 5.
-%   whichColorStripes         - Define the color of stripes to place on top
+%    whichColorStripes        - Define the color of stripes to place on top
 %                               of the image. This will make color
 %                               assimilation phenomena. Choose among 'red',
 %                               'green', 'blue'. Default to 'red'.
-%   intensityStripe           - Decide the intensity of the stripe in
+%    intensityStripe          - Decide the intensity of the stripe in
 %                               pixel. For now, it is decided on 8-bit
 %                               system, so it should be within the range of
 %                               0-255. Default to 255, the maximum.
-%   position_leftImage_x      - Define the position of the left sided image
+%    position_leftImage_x     - Define the position of the left sided image
 %                               on the canvas. This will decide the
 %                               positions of all three images on the
 %                               canvas. Choose between 0 to 1, where 0.5
 %                               means the center of the canvas, 0 is the
 %                               left end and 1 is the right end. Default to
 %                               0.1
-%   sizeCanvas                - Decide the size of the canvas to generate.
+%    sizeCanvas               - Decide the size of the canvas to generate.
 %                               It may be matched with the screen size that
 %                               you want to present the image. Default to
 %                               [1920 1080] as [width height] of the
 %                               screen in pixe.
-%   colorCorrectMethod        - Decide the color correcting method that
+%    colorCorrectMethod       - Decide the color correcting method that
 %                               corresponds to the test image with stripes
 %                               on. Default to 'mean'.
-%   nChannelsColorCorrect     - The number of channels to correct when
+%    nChannelsColorCorrect    - The number of channels to correct when
 %                               generating color corrected image. You can
 %                               set this value to 1 if you want to correct
 %                               only the targeting channel, otherwise it
 %                               will correct all three channels. Default to
 %                               1.
-%   intensityColorCorrect     - Decide the color correction power on
+%    intensityColorCorrect    - Decide the color correction power on
 %                               the test image. If it sets to empty, the
 %                               amount of color correction would be solely
 %                               decided by the ratio of the stripes on the
 %                               image with stripes. Default to empty.
-%   verbose                   - Control the plot and alarm messages.
+%    verbose                  - Control the plot and alarm messages.
 %                               Default to false.
 %
 % See also:
