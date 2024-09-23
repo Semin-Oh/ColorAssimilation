@@ -555,6 +555,9 @@ if ~isempty(testImage)
         % Calculate the CIECAM02 stats.
         LA = 20;
         JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
+        
+        JCH_testImage_corrected = JCH_testImage;
+        JCH_testImage_corrected(3,:) =
         XYZ_testImage_check = JCHToXYZ(JCH_testImage,XYZ_white,LA);
 
         % Test image with stripes.
