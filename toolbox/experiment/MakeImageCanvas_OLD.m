@@ -91,14 +91,12 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                         color correction after meeting with Karl.
 %    07/29/24    smo    - Substituting the part converting from the digital
 %                         RGB to the CIE XYZ values with the function.
-%    09/23/24    smo    - Now we can either put two or three images on the
-%                         canvas.
 
 %% Set variables.
 arguments
     testImage
     options.testImageSize = 0.40
-    options.addImageRight = false;
+    options.whichCenterImage = 'color'
     options.stripeHeightPixel (1,1) = 5
     options.whichColorStripes = 'red'
     options.intensityStripe (1,1) = 255
@@ -155,8 +153,6 @@ if ~isempty(testImage)
         end
     end
 
-    %% Image on the left.
-    %
     % Set the position to place the original image. The locations of the
     % following images will be automatically updated based on this. For now, we
     % always put all images at the center of the horizontal axis (set
@@ -190,14 +186,14 @@ if ~isempty(testImage)
     end
 end
 
-%% We will add the same image with stripes on the right if we want.
+%% We will add the same image with stripes at the center if we want.
 %
 % Put another image before the next section so that both images could place
 % before the lines.
 if ~isempty(testImage)
-    if (options.addImageRight)
+    if strcmp(options.whichCenterImage, 'stripes')
         % Set the image location.
-        position_centerImage_x = 1-position_testImage_x;
+        position_centerImage_x = 0.5;
         position_centerImage_y = 0.5;
         centerImage_x = floor((canvas_width - testImage_width) * position_centerImage_x) + 1;
         centerImage_y = floor((canvas_height - testImage_height) * position_centerImage_y) + 1;
@@ -393,28 +389,25 @@ if ~isempty(testImage)
 
     %% Now add the color corrected image to the canvas.
     %
-    % Set the position to place the corrected image. We can choose to place
-    % the color corrected image in the middle on the right side of the
-    % canvas.
-    if (~options.addImageRight)
-        position_correctedImage_x = 1-position_testImage_x;
-        position_correctedImage_y = 0.5;
-        correctedImage_x = floor((canvas_width - testImage_width) * position_correctedImage_x) + 1;
-        correctedImage_y = floor((canvas_height - testImage_height) * position_correctedImage_y) + 1;
+    % Set the position to place the corrected image.
+    position_correctedImage_x = 1-position_testImage_x;
+    position_correctedImage_y = 0.5;
+    correctedImage_x = floor((canvas_width - testImage_width) * position_correctedImage_x) + 1;
+    correctedImage_y = floor((canvas_height - testImage_height) * position_correctedImage_y) + 1;
 
-        % Place the image onto the canvas.
-        for ii = 1:length(idxImageHeight)
-            canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = ...
-                colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
-        end
+    % Place the image onto the canvas.
+    for ii = 1:length(idxImageHeight)
+        canvas(correctedImage_y+idxImageHeight(ii)-1, correctedImage_x+idxImageWidth(ii)-1, :) = ...
+            colorCorrected_testImage(idxImageHeight(ii),idxImageWidth(ii),:);
     end
 
-    %% Add a striped image on the center if you want.
+    %% Fianlly, add a test image at the center.
     %
     % We will place either an original image with stripes or color corrected
     % image at the center to evaluate. Here, we add color corrected image at
     % the center.
-    if (options.addImageRight)
+    if strcmp(options.whichCenterImage,'color')
+
         % Set the position to place the corrected image.
         position_centerImage_x = 0.5;
         position_centerImage_y = 0.5;
