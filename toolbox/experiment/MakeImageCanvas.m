@@ -569,6 +569,7 @@ if ~isempty(testImage)
         RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
         lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
         lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
         lab_testImage = lab_testImage';
         lab_testImage_corrected = lab_testImage;
         lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
