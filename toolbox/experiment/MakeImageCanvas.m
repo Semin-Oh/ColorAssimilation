@@ -552,13 +552,48 @@ if ~isempty(testImage)
         XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB);
         xyY_testImage = XYZToxyY(XYZ_testImage);
         
-        % Calculate the CIECAM02 stats.
+        % Calculate the CIECAM02 stats and modify it as you want.
         LA = 20;
         JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
-        
         JCH_testImage_corrected = JCH_testImage;
-        JCH_testImage_corrected(3,:) =
-        XYZ_testImage_check = JCHToXYZ(JCH_testImage,XYZ_white,LA);
+        JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
+        XYZ_testImage_check = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
+        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+        
+        % Calculate the CIELAB stats.
+        lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
+        dRGB_steps = [1:1:255];
+        dRGB_steps_zero = zeros(size(dRGB_steps));
+        RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
+        RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
+        RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
+        lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        lab_testImage = lab_testImage';
+        lab_testImage_corrected = lab_testImage;
+        lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
+        XYZ_testImage_check = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
+        XYZ_testImage_check = XYZ_testImage_check';
+        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+
+        % Now back to the image.
+        testImage_correct = resized_testImage;
+        for ii = 1:length(idxImageHeight)
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_check(1,ii);
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_check(2,ii);
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_check(3,ii);
+        end
+
+        figure;imshow(testImage_correct);
+
+        % Extract color information per each channel.
+        %
+        % Original image.
+        for ii = 1:length(idxImageHeight)
+            red_testImage(ii)   = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),1);
+            green_testImage(ii) = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),2);
+            blue_testImage(ii)  = resized_testImage(idxImageHeight(ii),idxImageWidth(ii),3);
+        end
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
