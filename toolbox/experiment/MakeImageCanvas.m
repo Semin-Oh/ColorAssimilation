@@ -544,7 +544,7 @@ if ~isempty(testImage)
 
         % Matrix to convert from the linear RGB to XYZ.
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
-        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505]*100;
+        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
         XYZ_white = sum(M_RGB2XYZ_sRGB,2);
 
         % Original test image.
@@ -577,6 +577,25 @@ if ~isempty(testImage)
         XYZ_testImage_check = XYZ_testImage_check';
         RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
 
+        % % Calculate the cone responses.
+        % M_XYZtoCones = [0.4002 0.7075 -0.0808; -0.2263 1.1653 0.0457; 0.0000 0.0000 0.9182];
+        % lms_testImage = M_XYZtoCones * XYZ_testImage;
+        
+        % Color correction on the u'v' coordinates.
+        uvY_testImage = XYZTouvY(XYZ_testImage);
+        uv_sRGB = xyTouv(xyY_sRGB(1:2,:));
+        uv_red = uv_sRGB(:,1);
+        uvY_ratio = 0.3;
+        uvY_testImage_check = uvY_testImage;
+        uvY_testImage_check(1:2,:) = uvY_testImage(1:2,:) + uvY_ratio * (uv_red - uvY_testImage(1:2,:));
+        
+        figure; hold on;
+        plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
+        plot(uvY_testImage_check(1,:),uvY_testImage(2,:),'r.');
+        
+        XYZ_testImage_check = uvYToXYZ(uvY_testImage_check);
+        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+        
         % Now back to the image.
         testImage_correct = resized_testImage;
         for ii = 1:length(idxImageHeight)
