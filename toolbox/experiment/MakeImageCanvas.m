@@ -553,55 +553,56 @@ if ~isempty(testImage)
         xyY_testImage = XYZToxyY(XYZ_testImage);
         
         % Calculate the CIECAM02 stats and modify it as you want.
-        LA = 20;
-        JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
-        JCH_testImage_corrected = JCH_testImage;
-        JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
-        XYZ_testImage_check = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
-        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+        % LA = 20;
+        % JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
+        % JCH_testImage_corrected = JCH_testImage;
+        % JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
+        % XYZ_testImage_correct = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
+        % RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
         
         % Calculate the CIELAB stats.
-        lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
-        dRGB_steps = [1:1:255];
-        dRGB_steps_zero = zeros(size(dRGB_steps));
-        RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
-        RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
-        RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
-        lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        lab_testImage = lab_testImage';
-        lab_testImage_corrected = lab_testImage;
-        lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
-        XYZ_testImage_check = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
-        XYZ_testImage_check = XYZ_testImage_check';
-        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+        % lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
+        % dRGB_steps = [1:1:255];
+        % dRGB_steps_zero = zeros(size(dRGB_steps));
+        % RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
+        % RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
+        % RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
+        % lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        % lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        % lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+        % lab_testImage = lab_testImage';
+        % lab_testImage_corrected = lab_testImage;
+        % lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
+        % XYZ_testImage_correct = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
+        % XYZ_testImage_correct = XYZ_testImage_correct';
+        % RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
 
-        % % Calculate the cone responses.
+        % Calculate the cone responses.
         % M_XYZtoCones = [0.4002 0.7075 -0.0808; -0.2263 1.1653 0.0457; 0.0000 0.0000 0.9182];
         % lms_testImage = M_XYZtoCones * XYZ_testImage;
         
         % Color correction on the u'v' coordinates.
         uvY_testImage = XYZTouvY(XYZ_testImage);
         uv_sRGB = xyTouv(xyY_sRGB(1:2,:));
-        uv_red = uv_sRGB(:,1);
-        uvY_ratio = 0.3;
-        uvY_testImage_check = uvY_testImage;
-        uvY_testImage_check(1:2,:) = uvY_testImage(1:2,:) + uvY_ratio * (uv_red - uvY_testImage(1:2,:));
+        uv_targetColorStripe = uv_sRGB(:,idxColorStripe);
+        colorCorrectionRatio_uv = 0.4;
+        uvY_testImage_correct = uvY_testImage;
+        uvY_testImage_correct(1:2,:) = uvY_testImage(1:2,:) + colorCorrectionRatio_uv * (uv_targetColorStripe - uvY_testImage(1:2,:));
         
+        % Plot the color profiles on the u'v' coordinates.
         figure; hold on;
         plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
-        plot(uvY_testImage_check(1,:),uvY_testImage(2,:),'r.');
+        plot(uvY_testImage_correct(1,:),uvY_testImage(2,:),'r.');
         
-        XYZ_testImage_check = uvYToXYZ(uvY_testImage_check);
-        RGB_testImage_check = XYZToRGB(XYZ_testImage_check,M_RGB2XYZ_sRGB,gamma_RGB);
+        XYZ_testImage_correct = uvYToXYZ(uvY_testImage_correct);
+        RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
         
         % Now back to the image.
         testImage_correct = resized_testImage;
         for ii = 1:length(idxImageHeight)
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_check(1,ii);
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_check(2,ii);
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_check(3,ii);
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_correct(1,ii);
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_correct(2,ii);
+            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_correct(3,ii);
         end
 
         figure;imshow(testImage_correct);
