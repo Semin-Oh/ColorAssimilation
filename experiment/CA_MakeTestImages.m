@@ -15,6 +15,8 @@
 %                       files that are not hidden. This prevents the break
 %                       when running on Linux.
 %    09/05/24  smo    - Now save the images on the Dropbox.
+%    10/01/24  smo    - Added an option to make test images having either
+%                       two or three images on the canvas.
 
 %% Initialize.
 close all; clear;
@@ -30,9 +32,9 @@ screenParams.screenDistance_cm = 100;
 screenParams.screenGap_cm = 2.5;
 
 % Image variables.
-imageParams.displayType = 'curvedisplay';
-switch imageParams.displayType
-    case 'curvedisplay'
+imageParams.whichDisplay = 'curvedDisplay';
+switch imageParams.whichDisplay
+    case 'curvedDisplay'
         % For the curved display, we treat the three displays as one, so we
         % set the resoultion as 15360 (5120*3) in horizontal and 1457 in
         % vertical.
@@ -43,13 +45,17 @@ end
 imageParams.testImageSize = 0.8;
 imageParams.position_leftImage_x = 0.36;
 imageParams.stripeHeightPixel = 5;
+imageParams.colorCorrectMethod = 'uv';
 imageParams.nChannelsColorCorrect = 1;
-imageParams.whichCenterImage = 'none';
+
+% Set this 'true' to put three images on the canvas.
+imageParams.addImageRight = false;
 
 % Set the range of different intensity to correct the test image. Default
 % to ~0.33 when it's set to empty.
+maxIntensityColorCorrect = 0.6;
 imageParams.nTestPoints = 20;
-imageParams.intensityColorCorrect = linspace(0,1,imageParams.nTestPoints);
+imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
 
 % etc.
 PLOTRAWIMAGES = false;
@@ -112,8 +118,8 @@ for cc = 1:nColorStripeOptions
 
     % Make a null stimulus. This is basically only background image without
     % test images on it.
-    nullImage = MakeImageCanvas([],'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
+    nullImage = MakeImageCanvas([],'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+        'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,....
         'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',false);
     disp('Null image has been successfully generated!');
 
@@ -127,8 +133,8 @@ for cc = 1:nColorStripeOptions
         % Loop for different level of color corrections.
         for tt = 1:imageParams.nTestPoints
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
-            testImage{ii,tt} = MakeImageCanvas(imageTemp,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
-                'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'whichCenterImage',imageParams.whichCenterImage,...
+            testImage{ii,tt} = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+                'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
                 'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,'verbose',false);
 
             % Show progress every 5 images.
