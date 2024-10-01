@@ -87,6 +87,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %                         RGB to the CIE XYZ values with the function.
 %    09/23/24    smo    - Now we can either put two or three images on the
 %                         canvas.
+%    10/01/24    smo    - Added a color correction on the u'v' coordinates.
 
 %% Set variables.
 arguments
@@ -375,7 +376,6 @@ if ~isempty(testImage)
             % Convert the original test image from dRGB to u'v'.
             RGB_testImage = [red_testImage; green_testImage; blue_testImage];
             XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ,gamma);
-            xyY_testImage = XYZToxyY(XYZ_testImage);
             uvY_testImage = XYZTouvY(XYZ_testImage);
 
             % Color correction happens here on the u'v' coordinates. We will
@@ -384,12 +384,12 @@ if ~isempty(testImage)
             %
             % Get the base array in u'v' of the original test image.
             uvY_colorCorrectedImage = uvY_testImage;
-            
+
             % Get u'v' coordinates of the target primary. We will correct
             % the color based on this anchor.
             uv_displayPrimary = xyTouv(xyY_displayPrimary(1:2,:));
             uv_targetColorStripe = uv_displayPrimary(:,idxColorStripe);
-            
+
             % Color correction happens here. We correct pixel by pixel
             % proportionally from one to the primary anchor by desired
             % ratio. The intensity of color correction could be customized
@@ -400,8 +400,8 @@ if ~isempty(testImage)
             % same as the primary anchor.
             uvY_colorCorrectedImage(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
 
-           % Calculate the digital RGB values from the u'v' coordinates to
-           % convert it to the color corrected image.
+            % Calculate the digital RGB values from the u'v' coordinates to
+            % convert it to the color corrected image.
             XYZ_testImage_correct = uvYToXYZ(uvY_colorCorrectedImage);
             RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ,gamma);
 
@@ -579,54 +579,50 @@ if ~isempty(testImage)
         grid on;
         title('2D (dR vs. dB)','fontsize',11);
 
-        % Extract color information per each channel.
+        % Calculate the CIE coordinates here.
         %
         % Original image.
-        for ii = 1:length(idxImageHeight)
-            red_testImage(ii)   = testImageRaw(idxImageHeight(ii),idxImageWidth(ii),1);
-            green_testImage(ii) = testImageRaw(idxImageHeight(ii),idxImageWidth(ii),2);
-            blue_testImage(ii)  = testImageRaw(idxImageHeight(ii),idxImageWidth(ii),3);
-        end
+        xyY_testImage = XYZToxyY(XYZ_testImage);
+        uvY_testImage = XYZTouvY(XYZ_testImage);
 
-        % Test image with stripes.
+        % Image with stripes.
         RGB_testImageStripe = [red_testImageStripe; green_testImageStripe; blue_testImageStripe];
         XYZ_testImageStripe = RGBToXYZ(RGB_testImageStripe,M_RGB2XYZ,gamma);
         xyY_testImageStripe = XYZToxyY(XYZ_testImageStripe);
+        uvY_testImageStripe = XYZTouvY(XYZ_testImageStripe);
 
         % Color corrected image.
         RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
         XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
         xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
+        uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
 
         % Plot the color profiles on the u'v' coordinates.
         figure; hold on;
-        plot(xyY_testImage(1,:),xyY_testImage(2,:),'k+');
-        plot(xyY_testImageStripe(1,:),xyY_testImageStripe(2,:),'k.');
-        plot(xyY_colorCorrectedImage(1,:),xyY_colorCorrectedImage(2,:),'r.');
-
-%         plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
-%         plot(uvY_colorCorrected_testImage(1,:),uvY_testImage(2,:),'r.');
+        plot(uvY_testImage(1,:),uvY_testImage(2,:),'k+');
+        plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.');
+        plot(uvY_colorCorrectedImage(1,:),uvY_colorCorrectedImage(2,:),'r.');
 
         % Display gamut.
-        plot([xyY_displayPrimary(1,:) xyY_displayPrimary(1,1)], [xyY_displayPrimary(2,:) xyY_displayPrimary(2,1)],'k-','LineWidth',1);
+        plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-','LineWidth',1);
 
         % Plackian locus.
         load T_xyzJuddVos
         T_XYZ = T_xyzJuddVos;
         T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
-        plot([T_xy(1,:) T_xy(1,1)], [T_xy(2,:) T_xy(2,1)], 'k-');
+        T_uv = xyTouv(T_xy);
+        plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
 
         % Figure stuffs.
-        xlim([0 1]);
-        ylim([0 1]);
-        xlabel('CIE x','fontsize',13);
-        ylabel('CIE y','fontsize',13);
+        xlim([0 0.7]);
+        ylim([0 0.7]);
+        xlabel('CIE u-prime','fontsize',13);
+        ylabel('CIE v-prime','fontsize',13);
         legend('Original','Stripes','Color-correct','Display gamut',...
             'Location','southeast','fontsize',11);
-        title('Image profile on CIE xy coordinates');
+        title('Image profile on CIE uv-prime coordinates');
     end
 end
-
 
 %% Parts calculating CIECAM and CIELAB stats. Keep here for now as we are not using right now.
 %
