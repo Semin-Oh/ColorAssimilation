@@ -91,6 +91,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %% Set variables.
 arguments
     testImage
+    options.whichDisplay = 'curvedDisplay'
     options.testImageSize = 0.40
     options.addImageRight = false;
     options.stripeHeightPixel (1,1) = 5
@@ -112,6 +113,27 @@ canvas_height = options.sizeCanvas(2);
 % generate a color corrected image.
 colorStripeOptions = {'red','green','blue'};
 idxColorStripe = find(strcmp(colorStripeOptions, options.whichColorStripes));
+
+%% Choose which diplay to use.
+switch options.whichDisplay
+    case 'sRGB'
+        % Matrix to convert from the linear RGB to XYZ.
+        xyY_displayPrimary = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
+        M_RGB2XYZ = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
+        gamma = 2.2;
+
+    case 'curvedDisplay'
+        % Gamma and the 3x3 matrix are set based on the RGB channel
+        % on the centered display. See detailed calibration results
+        % in the routine 'CalDisplay.m'. The values from the
+        % routine.
+        xyY_displayPrimary = [0.6781 0.2740 0.1574; 0.3084 0.6616 0.0648; 17.0886 61.3867 6.1283];
+        M_RGB2XYZ = xyYToXYZ(xyY_displayPrimary);
+        gamma = 2.2669;
+end
+
+% Get white point.
+XYZ_white = sum(M_RGB2XYZ,2);
 
 %% Create a canvas to place images on.
 %
@@ -268,7 +290,7 @@ if ~isempty(testImage)
     switch options.colorCorrectMethod
         % For this method, get the color correction coefficient per each channel.
         % Here, we simply match the mean R, G, B values independently.
-        case 'mean'
+        case 'meanRGB'
             coeffColorCorrect_red   = mean(red_testImageOneStripe)/mean(red_testImage);
             coeffColorCorrect_green = mean(green_testImageOneStripe)/mean(green_testImage);
             coeffColorCorrect_blue  = mean(blue_testImageOneStripe)/mean(blue_testImage);
@@ -295,7 +317,7 @@ if ~isempty(testImage)
                 colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3).*coeffColorCorrect_blue;
             end
 
-        case 'add'
+        case 'addRGB'
             % Calculate the proportion of the pixels that are stripes within
             % the image. This should be close to 1/3 (~33%) as we place three
             % different stripes - red, green, and blue - repeatedly.
@@ -349,7 +371,41 @@ if ~isempty(testImage)
             % colorCorrectionPerPixelOneChannel = ratioColorCorrect .* resized_testImage(:,:,3);
             % colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3) - colorCorrectionPerPixelOneChannel;
 
-        case 'ciecam02'
+        case 'uv'
+            % Convert the original test image from dRGB to u'v'.
+            RGB_testImage = [red_testImage; green_testImage; blue_testImage];
+            XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ,gamma);
+            xyY_testImage = XYZToxyY(XYZ_testImage);
+            uvY_testImage = XYZTouvY(XYZ_testImage);
+
+            % Color correction happens here on the u'v' coordinates. We will
+            % correct the color of each pixel in the image proportinally to the
+            % primary on the u'v' coordinates.
+            uv_displayPrimary = xyTouv(xyY_displayPrimary(1:2,:));
+            uv_targetColorStripe = uv_displayPrimary(:,idxColorStripe);
+            ratioColorCorrect_uv = 0.4;
+            uvY_testImage_correct = uvY_testImage;
+            uvY_testImage_correct(1:2,:) = uvY_testImage(1:2,:) + ratioColorCorrect_uv * (uv_targetColorStripe - uvY_testImage(1:2,:));
+
+            % Plot the color profiles on the u'v' coordinates.
+            figure; hold on;
+            plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
+            plot(uvY_testImage_correct(1,:),uvY_testImage(2,:),'r.');
+
+            XYZ_testImage_correct = uvYToXYZ(uvY_testImage_correct);
+            RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ,gamma);
+
+            % Now back to the image.
+            testImage_correct = resized_testImage;
+            for ii = 1:length(idxImageHeight)
+                testImage_correct(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_correct(1,ii);
+                testImage_correct(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_correct(2,ii);
+                testImage_correct(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_correct(3,ii);
+            end
+
+            figure; imshow(testImage_correct);
+
+
 
     end
 
@@ -516,97 +572,6 @@ if ~isempty(testImage)
         grid on;
         title('2D (dR vs. dB)','fontsize',11);
 
-        % Here we will compare the image profile on the CIE system.
-        %
-        % For now, we assume the display has the sRGB color gamut, which
-        % will be replaced by real measurement data.
-        %
-        % We will use the gamma and luminance values per each channel from
-        % the calibration data though.
-        %
-        % Calibration data. This is based on 10-bit and we will interpolate
-        % it to use for 8-bit display. This values are read from the file
-        % 'Calibration_Periphery_ExtendedWindow_CenterMonitor_1_20_23'.
-        inputRGB10bit = [2	4	8	16	32	64	128	197	266	335	404	473	507	508	509	510	511	512	513	514	515	516	517	542	610	679	748	817	886	955	1024];
-        inputRGB_norm = inputRGB10bit./inputRGB10bit(end);
-
-        output10bit_R = [0.188900000000000	0.189500000000000	0.194400000000000	0.201000000000000	0.223600000000000	0.313600000000000	0.668400000000000	1.35600000000000	2.44800000000000	4.04100000000000	6.08700000000000	8.52400000000000	9.86000000000000	9.88900000000000	9.92800000000000	9.97800000000000	10.0200000000000	10.0280000000000	10.0680000000000	10.0730000000000	10.1050000000000	10.1820000000000	10.2410000000000	11.3800000000000	14.8500000000000	19.0140000000000	23.6500000000000	28.8100000000000	34.3500000000000	40.6200000000000	47.4700000000000];
-        output10bit_G = [0.193300000000000	0.198500000000000	0.202400000000000	0.231800000000000	0.326400000000000	0.685300000000000	2.30300000000000	5.31800000000000	10.0600000000000	17.0900000000000	26.3000000000000	37.5300000000000	43.2300000000000	43.4400000000000	43.5600000000000	43.8600000000000	44.0200000000000	43.9500000000000	44	44.1800000000000	44.3600000000000	44.5500000000000	44.7600000000000	49.8900000000000	65.6400000000000	85.0700000000000	106.740000000000	130.320000000000	155.770000000000	183.270000000000	214.560000000000];
-        output10bit_B = [0.188500000000000	0.188700000000000	0.189100000000000	0.190400000000000	0.202500000000000	0.248500000000000	0.445400000000000	0.747700000000000	1.17800000000000	1.73500000000000	2.51100000000000	3.44000000000000	3.98600000000000	3.99900000000000	4.02200000000000	4.03100000000000	4.05300000000000	4.05500000000000	4.06700000000000	4.08500000000000	4.09800000000000	4.11600000000000	4.12800000000000	4.52400000000000	5.69000000000000	7.11600000000000	8.86900000000000	10.9150000000000	13.2500000000000	15.9010000000000	19.1100000000000];
-        output10bit_RGB = [0.196600000000000	0.201600000000000	0.213700000000000	0.245600000000000	0.373900000000000	0.925800000000000	3.19500000000000	7.74300000000000	15.1400000000000	26.1400000000000	40.0900000000000	57.6300000000000	67.9200000000000	68.0800000000000	68.3000000000000	68.7400000000000	69.0100000000000	69.0700000000000	69.1200000000000	69.4100000000000	69.6400000000000	70.0600000000000	70.2600000000000	78.2100000000000	103.190000000000	131.560000000000	164.060000000000	200.110000000000	240.040000000000	285.200000000000	332.900000000000];
-
-        % Calculate display gamma. All values should be close to 2.2 for
-        % the curved display.
-        gamma_R = CalculateGamma(inputRGB10bit,output10bit_R);
-        gamma_G = CalculateGamma(inputRGB10bit,output10bit_G);
-        gamma_B = CalculateGamma(inputRGB10bit,output10bit_B);
-        gamma_RGB = CalculateGamma(inputRGB10bit,output10bit_RGB);
-
-        % Matrix to convert from the linear RGB to XYZ.
-        xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
-        M_RGB2XYZ_sRGB = [0.4124 0.3576 0.1805; 0.2126 0.7152 0.0722; 0.0193 0.1192 0.9505];
-        XYZ_white = sum(M_RGB2XYZ_sRGB,2);
-
-        % Original test image.
-        RGB_testImage = [red_testImage; green_testImage; blue_testImage];
-        XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ_sRGB,gamma_RGB);
-        xyY_testImage = XYZToxyY(XYZ_testImage);
-        
-        % Calculate the CIECAM02 stats and modify it as you want.
-        % LA = 20;
-        % JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
-        % JCH_testImage_corrected = JCH_testImage;
-        % JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
-        % XYZ_testImage_correct = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
-        % RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
-        
-        % Calculate the CIELAB stats.
-        % lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
-        % dRGB_steps = [1:1:255];
-        % dRGB_steps_zero = zeros(size(dRGB_steps));
-        % RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
-        % RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
-        % RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
-        % lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        % lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        % lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-        % lab_testImage = lab_testImage';
-        % lab_testImage_corrected = lab_testImage;
-        % lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
-        % XYZ_testImage_correct = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
-        % XYZ_testImage_correct = XYZ_testImage_correct';
-        % RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
-
-        % Calculate the cone responses.
-        % M_XYZtoCones = [0.4002 0.7075 -0.0808; -0.2263 1.1653 0.0457; 0.0000 0.0000 0.9182];
-        % lms_testImage = M_XYZtoCones * XYZ_testImage;
-        
-        % Color correction on the u'v' coordinates.
-        uvY_testImage = XYZTouvY(XYZ_testImage);
-        uv_sRGB = xyTouv(xyY_sRGB(1:2,:));
-        uv_targetColorStripe = uv_sRGB(:,idxColorStripe);
-        colorCorrectionRatio_uv = 0.4;
-        uvY_testImage_correct = uvY_testImage;
-        uvY_testImage_correct(1:2,:) = uvY_testImage(1:2,:) + colorCorrectionRatio_uv * (uv_targetColorStripe - uvY_testImage(1:2,:));
-        
-        % Plot the color profiles on the u'v' coordinates.
-        figure; hold on;
-        plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
-        plot(uvY_testImage_correct(1,:),uvY_testImage(2,:),'r.');
-        
-        XYZ_testImage_correct = uvYToXYZ(uvY_testImage_correct);
-        RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
-        
-        % Now back to the image.
-        testImage_correct = resized_testImage;
-        for ii = 1:length(idxImageHeight)
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_correct(1,ii);
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_correct(2,ii);
-            testImage_correct(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_correct(3,ii);
-        end
-
-        figure;imshow(testImage_correct);
-
         % Extract color information per each channel.
         %
         % Original image.
@@ -618,12 +583,12 @@ if ~isempty(testImage)
 
         % Test image with stripes.
         RGB_testImageOneStripe = [red_testImageOneStripe; green_testImageOneStripe; blue_testImageOneStripe];
-        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripe,M_RGB2XYZ_sRGB,gamma_RGB);
+        XYZ_testImageOneStripe = RGBToXYZ(RGB_testImageOneStripe,M_RGB2XYZ,gamma);
         xyY_testImageOneStripe = XYZToxyY(XYZ_testImageOneStripe);
 
         % Color corrected image.
         RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
-        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ_sRGB,gamma_RGB);
+        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
         xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
 
         % Plot it.
@@ -632,8 +597,8 @@ if ~isempty(testImage)
         plot(xyY_testImageOneStripe(1,:),xyY_testImageOneStripe(2,:),'k.');
         plot(xyY_colorCorrectedImage(1,:),xyY_colorCorrectedImage(2,:),'r.');
 
-        % Display gamut. For now, it's set to sRGB for convenience.
-        plot([xyY_sRGB(1,:) xyY_sRGB(1,1)], [xyY_sRGB(2,:) xyY_sRGB(2,1)],'k-','LineWidth',1);
+        % Display gamut.
+        plot([xyY_displayPrimary(1,:) xyY_displayPrimary(1,1)], [xyY_displayPrimary(2,:) xyY_displayPrimary(2,1)],'k-','LineWidth',1);
 
         % Plackian locus.
         load T_xyzJuddVos
@@ -651,3 +616,35 @@ if ~isempty(testImage)
         title('Image profile on CIE xy coordinates');
     end
 end
+
+
+%% Parts calculating CIECAM and CIELAB stats. Keep here for now as we are not using right now.
+%
+% Calculate the CIECAM02 stats and modify it as you want.
+% LA = 20;
+% JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
+% JCH_testImage_corrected = JCH_testImage;
+% JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
+% XYZ_testImage_correct = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
+% RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
+
+% Calculate the CIELAB stats.
+% lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
+% dRGB_steps = [1:1:255];
+% dRGB_steps_zero = zeros(size(dRGB_steps));
+% RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
+% RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
+% RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
+% lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+% lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+% lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
+% lab_testImage = lab_testImage';
+% lab_testImage_corrected = lab_testImage;
+% lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
+% XYZ_testImage_correct = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
+% XYZ_testImage_correct = XYZ_testImage_correct';
+% RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
+
+% Calculate the cone responses.
+% M_XYZtoCones = [0.4002 0.7075 -0.0808; -0.2263 1.1653 0.0457; 0.0000 0.0000 0.9182];
+% lms_testImage = M_XYZtoCones * XYZ_testImage;
