@@ -49,7 +49,13 @@ imageParams.colorCorrectMethod = 'uv';
 imageParams.nChannelsColorCorrect = 1;
 
 % Set this 'true' to put three images on the canvas.
-imageParams.addImageRight = false;
+imageParams.testImageType = 'periphery';
+switch imageParams.testImageType
+    case 'periphery'
+        imageParams.addImageRight = false;
+    case 'fovea'
+        imageParams.addImageRight = true;
+end
 
 % Set the range of different intensity to correct the test image. Default
 % to ~0.33 when it's set to empty.
@@ -159,7 +165,7 @@ for cc = 1:nColorStripeOptions
         % later. Here, we set it as version 7.3 and it should save it fine.
         dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
         saveFilename = fullfile(testImageFiledir,...
-            sprintf('TestImages_%s_%s',imageParams.whichColorStripes,dayTimestr));
+            sprintf('TestImages_%s_%s_%s',imageParams.testImageType,imageParams.whichColorStripes,dayTimestr));
         mFileVer = '-v7.3';
         save(saveFilename,'nullImage','testImage','imageParams',mFileVer);
         fprintf('Test images have been saved successfully! - (%s) \n',imageParams.whichColorStripes);

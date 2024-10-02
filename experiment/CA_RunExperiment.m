@@ -59,6 +59,21 @@ end
 inputMessageName = 'Enter subject name: ';
 subjectName = input(inputMessageName, 's');
 
+% Which mode to run either periphery or fovea.
+while 1
+    inputMessageExpMode = 'Which mode to run? [1:periphery, 2:fovea]: ';
+    ansExpMode = input(inputMessageExpMode);
+    ansOptions = [1 2];
+
+    if ismember(ansExpMode, ansOptions)
+        break
+    end
+
+    disp('Type either 1 or 2!');
+end
+expModeOptions = {'periphery','fovea'};
+expMode = expModeOptions{ansExpMode};
+
 % Decide which stripe color to test.
 while 1
     inputMessageIdxStripeColor = 'Which color of stripes to test [1:red,2:green,3:blue]: ';
@@ -123,7 +138,7 @@ try
 
     % Load the images here. We will load the corresponding test images
     % according to stripe color input received at the beginning.
-    testImageFilename = GetMostRecentFileName(testImageFiledir,append('TestImages_',stripeColorToTest));
+    testImageFilename = GetMostRecentFileName(testImageFiledir,sprintf('TestImages_%s_%s',expMode,stripeColorToTest));
     images = load(testImageFilename);
 
     %% Set the randomization order of displaying the test images.
@@ -161,12 +176,12 @@ try
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
-    
+
     %% Practice trials if you want.
     if (PRACTICETRIALS)
-    
+
     end
-    
+
     %% Display the initial screen on the null image.
     %
     % Set the initial screen with written instruction.
