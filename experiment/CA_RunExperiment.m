@@ -292,7 +292,7 @@ if (SAVETHERESULTS)
         % Set the file name and save.
         dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
         saveFilename = fullfile(saveFoldername,...
-            sprintf('%s_%s_%s',subjectName,stripeColorToTest,dayTimestr));
+            sprintf('%s_%s_%s_%s',subjectName,expMode,stripeColorToTest,dayTimestr));
         save(saveFilename,'data');
         disp('Data has been saved successfully!');
     end
