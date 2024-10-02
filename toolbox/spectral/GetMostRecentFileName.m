@@ -27,7 +27,9 @@ function [fileName] = GetMostRecentFileName(testFileDir,testFileName,options)
 %                                 to 2 finds third to the most recent date.
 
 % History:
-%    11/10/21  smo                Started on it
+%    11/10/21  smo               - Started on it
+%    10/02/24  smo               - A little update on searching the latest
+%                                  file.
 
 %% Set parameters.
 arguments
@@ -46,8 +48,11 @@ listOfFiles = dir(append(fullfile(testFileDir,testFileName),'*'));
 % 'listOfFiles' will be the struct variable with the size of nx1 (n =
 % number of files)
 for ii = 1:size(listOfFiles,1)
-    fileDateTemp = listOfFiles(ii).date;
-    listOfDatenums(ii) = datenum(fileDateTemp);
+    listOfDatenums(ii) = listOfFiles(ii).datenum;
+
+    % Old way to find the date nums.
+    % fileDateTemp = listOfFiles(ii).date;
+    % listOfDatenums(ii) = datenum(fileDateTemp);
 end
 [maxDateNum maxDateOrder] = max(listOfDatenums);
 
