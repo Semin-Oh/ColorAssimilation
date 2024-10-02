@@ -141,7 +141,8 @@ for cc = 1:nColorStripeOptions
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
             testImage{ii,tt} = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
-                'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,'verbose',false);
+                'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,...
+                'addImageRight',imageParams.addImageRight,'verbose',false);
 
             % Show progress every 5 images.
             if mod(tt,5) == 0
