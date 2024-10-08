@@ -57,3 +57,29 @@ dataFilename_blue = GetMostRecentFileName(dataFiledir,sprintf('%s_blue',subjectN
 data_red = load(dataFilename_red);
 data_green = load(dataFilename_green);
 data_blue = load(dataFilename_blue);
+
+%% Read out some variables.
+nRepeat = data_red.data.expParams.nRepeat;
+nTestImages = data_red.data.expParams.nTestImages;
+
+%% Rearrange the experiment results.
+%
+% Test images were displayed in a random order, so the raw data is
+% sorted in the same random order. Here, we sort out the results.
+
+% Get the index to sort out the results. 
+for rr = 1:nRepeat
+    for ii = 1:nTestImages
+        idxOrder(ii,rr) = find(data_red.data.expParams.randOrder(:,rr) == ii);
+    end
+end
+
+% Sort out the results.
+matchingIntensityColorCorrect_sorted = data_red.data.matchingIntensityColorCorrect(idxOrder);
+
+% Mean results.
+mean_red = mean(matchingIntensityColorCorrect_sorted,2);
+
+%% Plot the results.
+
+%% Save out something if you want.
