@@ -103,5 +103,6 @@ ylabel('Matching intensity');
 xlim([1 nTestImages]);
 xticks(xaxisTestImages);
 ylim([0 0.5]);
+title(sprintf('Primary = (%s) / Experiment mode = (%s) / Subject = (%s)',whichPrimary,expMode,subjectName));
 
 %% Save out something if you want.
