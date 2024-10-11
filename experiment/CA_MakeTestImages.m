@@ -59,7 +59,7 @@ end
 
 % Set the range of different intensity to correct the test image. Default
 % to ~0.33 when it's set to empty.
-maxIntensityColorCorrect = 0.6;
+maxIntensityColorCorrect = 0.5;
 imageParams.nTestPoints = 20;
 imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
 

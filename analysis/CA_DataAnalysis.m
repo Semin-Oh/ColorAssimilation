@@ -95,6 +95,9 @@ switch whichPrimary
 end
 
 % Plot happens here.
+%
+% Comparison of the mean chosen color correction over different test
+% images.
 figure; hold on;
 plot(xaxisTestImages,matchingIntensityColorCorrect_sorted,'k.');
 plot(xaxisTestImages,meanMatchingIntensityColorCorrect,'o','MarkerFaceColor',markerFaceColor,'MarkerEdgeColor','k');
@@ -104,5 +107,26 @@ xlim([1 nTestImages]);
 xticks(xaxisTestImages);
 ylim([0 0.5]);
 title(sprintf('Primary = (%s) / Experiment mode = (%s) / Subject = (%s)',whichPrimary,expMode,subjectName));
+
+% The mean results on the u'v' coordinates.
+figure; hold on;
+
+% Plackian locus.
+load T_xyzJuddVos
+T_XYZ = T_xyzJuddVos;
+T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+T_uv = xyTouv(T_xy);
+plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+
+% Figure stuff.
+xlim([0 0.7]);
+ylim([0 0.7]);
+xlabel('CIE u-prime','fontsize',13);
+ylabel('CIE v-prime','fontsize',13);
+legend('Original','Stripes','Color-correct','Display gamut',...
+    'Location','southeast','fontsize',11);
+title('Mean results on the CIE uv-prime');
+
+
 
 %% Save out something if you want.
