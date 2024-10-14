@@ -1,4 +1,4 @@
-function [canvas] = MakeImageCanvas(testImage,options)
+function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 % Make an image canvas with given input image.
 %
 % Syntax:
@@ -22,6 +22,7 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    canvas                   - Output image with three corrected images.
 %                               This image should be ready to present using
 %                               psychtoolbox for the project.
+%    imageProfile
 %
 % Optional key/value pairs:
 %    testImageSize            - Decide the size of the test images. It
@@ -88,6 +89,10 @@ function [canvas] = MakeImageCanvas(testImage,options)
 %    09/23/24    smo    - Now we can either put two or three images on the
 %                         canvas.
 %    10/01/24    smo    - Added a color correction on the u'v' coordinates.
+%    10/14/24    smo    - Added the image profile as a function output. It
+%                         contains the color coordinates of the test
+%                         images. Also, deleted the old method to color
+%                         correct the test images, so-called 'addRGB'.
 
 %% Set variables.
 arguments
@@ -103,7 +108,7 @@ arguments
     options.sizeCanvas (1,2) = [1920 1080]
     options.colorCorrectMethod = 'uv'
     options.nChannelsColorCorrect (1,1) = 1
-    options.intensityColorCorrect = []
+    options.intensityColorCorrect = 0.33
 end
 
 % Define the size of the canvas.
@@ -275,6 +280,7 @@ if ~isempty(testImage)
         green_testImage(ii) = testImageRaw(idxImageHeight(ii),idxImageWidth(ii),2);
         blue_testImage(ii)  = testImageRaw(idxImageHeight(ii),idxImageWidth(ii),3);
     end
+    RGB_testImage = [red_testImage; green_testImage; blue_testImage];
 
     % Image with stripes.
     for ii = 1:length(idxImageHeight)
@@ -282,6 +288,20 @@ if ~isempty(testImage)
         green_testImageStripe(ii) = testImageStripe(idxImageHeight(ii),idxImageWidth(ii),2);
         blue_testImageStripe(ii)  = testImageStripe(idxImageHeight(ii),idxImageWidth(ii),3);
     end
+    RGB_testImageStripe = [red_testImageStripe; green_testImageStripe; blue_testImageStripe];
+
+    % Calculate the proportion of the pixels that are stripes within
+    % the image. This should be close to 1/3 (~33%) as we place three
+    % different stripes - red, green, and blue - repeatedly.
+    switch options.whichColorStripes
+        case 'red'
+            targetCh_testImageStripe = red_testImageStripe;
+        case 'green'
+            targetCh_testImageStripe = green_testImageStripe;
+        case 'blue'
+            targetCh_testImageStripe = blue_testImageStripe;
+    end
+    ratioStripes = length(find(targetCh_testImageStripe == options.intensityStripe))./length(targetCh_testImageStripe);
 
     % We color correct the original image. We get the resized original
     % image and correct color in the next step to this image.
@@ -289,75 +309,27 @@ if ~isempty(testImage)
 
     % Here we choose which method to color correct the image.
     switch options.colorCorrectMethod
-        % For this method, get the color correction coefficient per each channel.
-        % Here, we simply match the mean R, G, B values independently.
-        case 'meanRGB'
-            coeffColorCorrect_red   = mean(red_testImageStripe)/mean(red_testImage);
-            coeffColorCorrect_green = mean(green_testImageStripe)/mean(green_testImage);
-            coeffColorCorrect_blue  = mean(blue_testImageStripe)/mean(blue_testImage);
-
-            % Here, we can either correct one target channel or all channels.
-            %
-            % For example, when we generate red corrected image, we can either only
-            % correct the red channel or all three channels. Still thinking about
-            % what's more logical way to do.
-            if options.nChannelsColorCorrect == 1
-                % Correct only the targeting channel, while the others remain the same.
-                switch options.whichColorStripes
-                    case 'red'
-                        testImageColorCorrect(:,:,1) = testImageColorCorrect(:,:,1).*coeffColorCorrect_red;
-                    case 'green'
-                        testImageColorCorrect(:,:,2) = testImageColorCorrect(:,:,2).*coeffColorCorrect_green;
-                    case 'blue'
-                        testImageColorCorrect(:,:,3) = testImageColorCorrect(:,:,3).*coeffColorCorrect_blue;
-                end
-            else
-                % Correct all three channels.
-                testImageColorCorrect(:,:,1) = testImageColorCorrect(:,:,1).*coeffColorCorrect_red;
-                testImageColorCorrect(:,:,2) = testImageColorCorrect(:,:,2).*coeffColorCorrect_green;
-                testImageColorCorrect(:,:,3) = testImageColorCorrect(:,:,3).*coeffColorCorrect_blue;
-            end
-
-        case 'addRGB'
-            % Calculate the proportion of the pixels that are stripes within
-            % the image. This should be close to 1/3 (~33%) as we place three
-            % different stripes - red, green, and blue - repeatedly.
-            switch options.whichColorStripes
-                case 'red'
-                    targetCh_testImageStripe = red_testImageStripe;
-                case 'green'
-                    targetCh_testImageStripe = green_testImageStripe;
-                case 'blue'
-                    targetCh_testImageStripe = blue_testImageStripe;
-            end
-
-            % Find the number of the intensity of the stripes within the image.
-            % 'ratioStripes' should be close to 1/3 (~33%).
-            ratioStripes = length(find(targetCh_testImageStripe == options.intensityStripe))./length(targetCh_testImageStripe);
-
-            % Color correction happens here. Here we only correct one
-            % targeting channel. The final scale ('ratioColorCorrect')
-            % should be within the range 0-1.
-            if ~isempty(options.intensityColorCorrect)
-                ratioColorCorrect = options.intensityColorCorrect;
-            else
-                ratioColorCorrect = ratioStripes;
-            end
-
-            % Check if the scaling factor is within the range 0-1.
-            maxRatioColorCorrect = 1;
-            minRatioColorCorrect = 0;
-            if ratioColorCorrect > maxRatioColorCorrect
-                ratioColorCorrect = maxRatioColorCorrect;
-            elseif ratioColorCorrect < minRatioColorCorrect
-                ratioColorCorrect = minRatioColorCorrect;
-            end
-
-            % Color correction happens here.
-            %
-            % Target channel.
-            colorCorrectionPerPixelOneChannel = ratioColorCorrect .* (options.intensityStripe - testImageRaw(:,:,idxColorStripe));
+        case 'RGB'
+            % Color correction happens here. The results of this have the
+            % colored background.
+            colorCorrectionPerPixelOneChannel = options.intensityColorCorrect .* (options.intensityStripe - testImageRaw(:,:,idxColorStripe));
             testImageColorCorrect(:,:,idxColorStripe) = testImageColorCorrect(:,:,idxColorStripe) + colorCorrectionPerPixelOneChannel;
+
+            % Extract the pixels where the image is. The results of this
+            % would have the black background.
+            testImageColorCorrect_extract = zeros(size(testImageColorCorrect));
+            for ii = 1:length(idxImageHeight)
+                testImageColorCorrect_extract(idxImageHeight(ii),idxImageWidth(ii),:) = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),:);
+            end
+            testImageColorCorrect = testImageColorCorrect_extract;
+
+            % Get color information of the color corrected image for comparison.
+            for ii = 1:length(idxImageHeight)
+                red_colorCorrectedImage(ii)   = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),1);
+                green_colorCorrectedImage(ii) = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),2);
+                blue_colorCorrectedImage(ii)  = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3);
+            end
+            RGB_colorCorrectedImage = [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
 
             % The other channels. Commented out for now, we can think about
             % correcting the other channels as well. When we also correct
@@ -373,8 +345,9 @@ if ~isempty(testImage)
             % colorCorrected_testImage(:,:,3) = colorCorrected_testImage(:,:,3) - colorCorrectionPerPixelOneChannel;
 
         case 'uv'
-            % Convert the original test image from dRGB to u'v'.
-            RGB_testImage = [red_testImage; green_testImage; blue_testImage];
+            % Convert the original test image from dRGB to u'v'. We will
+            % use only the part where actual images are. Backgrounds are
+            % not included.
             XYZ_testImage = RGBToXYZ(RGB_testImage,M_RGB2XYZ,gamma);
             uvY_testImage = XYZTouvY(XYZ_testImage);
 
@@ -402,32 +375,18 @@ if ~isempty(testImage)
 
             % Calculate the digital RGB values from the u'v' coordinates to
             % convert it to the color corrected image.
-            XYZ_testImage_correct = uvYToXYZ(uvY_colorCorrectedImage);
-            RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ,gamma);
+            XYZ_colorCorrectedImage = uvYToXYZ(uvY_colorCorrectedImage);
+            RGB_colorCorrectedImage = XYZToRGB(XYZ_colorCorrectedImage,M_RGB2XYZ,gamma);
 
             % Back to the image. Idea here is getting the original test
             % image as a base array and update the pixels where actual
             % images are.
             testImageColorCorrect = testImageRaw;
             for ii = 1:length(idxImageHeight)
-                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_testImage_correct(1,ii);
-                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_testImage_correct(2,ii);
-                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_testImage_correct(3,ii);
+                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),1) = RGB_colorCorrectedImage(1,ii);
+                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),2) = RGB_colorCorrectedImage(2,ii);
+                testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_colorCorrectedImage(3,ii);
             end
-    end
-
-    % Remove the background of the color corrected image.
-    testImageColorCorrect_temp = zeros(size(testImageColorCorrect));
-    for ii = 1:length(idxImageHeight)
-        testImageColorCorrect_temp(idxImageHeight(ii),idxImageWidth(ii),:) = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),:);
-    end
-    testImageColorCorrect = testImageColorCorrect_temp;
-
-    % Get color information of the color corrected image for comparison.
-    for ii = 1:length(idxImageHeight)
-        red_colorCorrectedImage(ii)   = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),1);
-        green_colorCorrectedImage(ii) = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),2);
-        blue_colorCorrectedImage(ii)  = testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3);
     end
 
     % Display the images if you want.
@@ -499,129 +458,114 @@ if (options.verbose)
     title('Simulated screen image')
 end
 
-%% Check how color information is changed.
-%
+%% Calculate the image profiles on the chromaticitiy coordinates.
 if ~isempty(testImage)
-    % Get the mean RGB values of the original image.
-    meanRed_testImage = mean(red_testImage);
-    meanGreen_testImage = mean(green_testImage);
-    meanBlue_testImage = mean(blue_testImage);
-    meanRGB_testImage = [meanRed_testImage; meanGreen_testImage; meanBlue_testImage];
+    % Calculate the CIE coordinates of the original image.
+    xyY_testImage = XYZToxyY(XYZ_testImage);
+    uvY_testImage = XYZTouvY(XYZ_testImage);
 
     % Image with stripes.
-    meanRed_testImageStripe = mean(red_testImageStripe);
-    meanGreen_testImageStripe = mean(green_testImageStripe);
-    meanBlue_testImageStripe = mean(blue_testImageStripe);
-    meanRGB_testImageStripe = [meanRed_testImageStripe; meanGreen_testImageStripe; meanBlue_testImageStripe];
+    XYZ_testImageStripe = RGBToXYZ(RGB_testImageStripe,M_RGB2XYZ,gamma);
+    xyY_testImageStripe = XYZToxyY(XYZ_testImageStripe);
+    uvY_testImageStripe = XYZTouvY(XYZ_testImageStripe);
 
     % Color corrected image.
-    meanRed_colorCorrectedImage = mean(red_colorCorrectedImage);
-    meanGreen_colorCorrectedImage = mean(green_colorCorrectedImage);
-    meanBlue_colorCorrectedImage = mean(blue_colorCorrectedImage);
-    meanRGB_colorCorrectedImage = [meanRed_colorCorrectedImage; meanGreen_colorCorrectedImage; meanBlue_colorCorrectedImage];
+    XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
+    xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
+    uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
+end
 
-    % Plot the comparison results across images.
-    if (options.verbose)
-        % Compare the digital RGB values across the images in 3-D.
-        figure;
-        markerColorOptions = {'r','g','b'};
-        sgtitle('Image profile comparison');
-        subplot(1,4,1);
-        scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
-        scatter3(red_testImageStripe,green_testImageStripe,blue_testImageStripe,'k.');
-        scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
-        xlabel('dR','fontsize',13);
-        ylabel('dG','fontsize',13);
-        zlabel('dB','fontsize',13);
-        legend('Original','Stripes','Color-correct','Location','northeast','fontsize',11);
-        xlim([0 255]);
-        ylim([0 255]);
-        zlim([0 255]);
-        grid on;
-        title('3D (dRGB)','fontsize',11);
+%% Plot the comparison results across images.
+if (options.verbose)
+    % Compare the digital RGB values across the images in 3-D.
+    figure;
+    markerColorOptions = {'r','g','b'};
+    sgtitle('Image profile comparison');
+    subplot(1,4,1);
+    scatter3(red_testImage,green_testImage,blue_testImage,'k+'); hold on;
+    scatter3(red_testImageStripe,green_testImageStripe,blue_testImageStripe,'k.');
+    scatter3(red_colorCorrectedImage,green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
+    xlabel('dR','fontsize',13);
+    ylabel('dG','fontsize',13);
+    zlabel('dB','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','northeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    zlim([0 255]);
+    grid on;
+    title('3D (dRGB)','fontsize',11);
 
-        % Comparison in 2-D: dG vs. dR.
-        subplot(1,4,2); hold on;
-        plot(green_testImage,red_testImage,'k+');
-        plot(green_testImageStripe,red_testImageStripe,'k.');
-        plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
-        xlabel('dG','fontsize',13);
-        ylabel('dR','fontsize',13);
-        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-        xlim([0 255]);
-        ylim([0 255]);
-        grid on;
-        title('2D (dG vs. dR)','fontsize',11);
+    % Comparison in 2-D: dG vs. dR.
+    subplot(1,4,2); hold on;
+    plot(green_testImage,red_testImage,'k+');
+    plot(green_testImageStripe,red_testImageStripe,'k.');
+    plot(green_colorCorrectedImage,red_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
+    xlabel('dG','fontsize',13);
+    ylabel('dR','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    grid on;
+    title('2D (dG vs. dR)','fontsize',11);
 
-        % Comparison in 2-D: dG vs. dB.
-        subplot(1,4,3); hold on;
-        plot(green_testImage,blue_testImage,'k+');
-        plot(green_testImageStripe,blue_testImageStripe,'k.');
-        plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
-        xlabel('dG','fontsize',13);
-        ylabel('dB','fontsize',13);
-        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-        xlim([0 255]);
-        ylim([0 255]);
-        grid on;
-        title('2D (dG vs. dB)','fontsize',11);
+    % Comparison in 2-D: dG vs. dB.
+    subplot(1,4,3); hold on;
+    plot(green_testImage,blue_testImage,'k+');
+    plot(green_testImageStripe,blue_testImageStripe,'k.');
+    plot(green_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
+    xlabel('dG','fontsize',13);
+    ylabel('dB','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    grid on;
+    title('2D (dG vs. dB)','fontsize',11);
 
-        % Comparison in 2-D: dR vs. dB.
-        subplot(1,4,4); hold on;
-        plot(red_testImage,blue_testImage,'k+');
-        plot(red_testImageStripe,blue_testImageStripe,'k.');
-        plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
-        xlabel('dR','fontsize',13);
-        ylabel('dB','fontsize',13);
-        legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
-        xlim([0 255]);
-        ylim([0 255]);
-        grid on;
-        title('2D (dR vs. dB)','fontsize',11);
+    % Comparison in 2-D: dR vs. dB.
+    subplot(1,4,4); hold on;
+    plot(red_testImage,blue_testImage,'k+');
+    plot(red_testImageStripe,blue_testImageStripe,'k.');
+    plot(red_colorCorrectedImage,blue_colorCorrectedImage,append(markerColorOptions{idxColorStripe},'.'));
+    xlabel('dR','fontsize',13);
+    ylabel('dB','fontsize',13);
+    legend('Original','Stripes','Color-correct','Location','southeast','fontsize',11);
+    xlim([0 255]);
+    ylim([0 255]);
+    grid on;
+    title('2D (dR vs. dB)','fontsize',11);
 
-        % Calculate the CIE coordinates here.
-        %
-        % Original image.
-        xyY_testImage = XYZToxyY(XYZ_testImage);
-        uvY_testImage = XYZTouvY(XYZ_testImage);
+    % Plot the color profiles on the u'v' coordinates.
+    figure; hold on;
+    plot(uvY_testImage(1,:),uvY_testImage(2,:),'k+');
+    plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.');
+    plot(uvY_colorCorrectedImage(1,:),uvY_colorCorrectedImage(2,:),'r.');
 
-        % Image with stripes.
-        RGB_testImageStripe = [red_testImageStripe; green_testImageStripe; blue_testImageStripe];
-        XYZ_testImageStripe = RGBToXYZ(RGB_testImageStripe,M_RGB2XYZ,gamma);
-        xyY_testImageStripe = XYZToxyY(XYZ_testImageStripe);
-        uvY_testImageStripe = XYZTouvY(XYZ_testImageStripe);
+    % Display gamut.
+    plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-','LineWidth',1);
 
-        % Color corrected image.
-        RGB_colorCorrectedImage =  [red_colorCorrectedImage; green_colorCorrectedImage; blue_colorCorrectedImage];
-        XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
-        xyY_colorCorrectedImage = XYZToxyY(XYZ_colorCorrectedImage);
-        uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
+    % Plackian locus.
+    load T_xyzJuddVos
+    T_XYZ = T_xyzJuddVos;
+    T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+    T_uv = xyTouv(T_xy);
+    plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
 
-        % Plot the color profiles on the u'v' coordinates.
-        figure; hold on;
-        plot(uvY_testImage(1,:),uvY_testImage(2,:),'k+');
-        plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.');
-        plot(uvY_colorCorrectedImage(1,:),uvY_colorCorrectedImage(2,:),'r.');
+    % Figure stuffs.
+    xlim([0 0.7]);
+    ylim([0 0.7]);
+    xlabel('CIE u-prime','fontsize',13);
+    ylabel('CIE v-prime','fontsize',13);
+    legend('Original','Stripes','Color-correct','Display gamut',...
+        'Location','southeast','fontsize',11);
+    title('Image profile on CIE uv-prime coordinates');
+end
 
-        % Display gamut.
-        plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-','LineWidth',1);
-
-        % Plackian locus.
-        load T_xyzJuddVos
-        T_XYZ = T_xyzJuddVos;
-        T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
-        T_uv = xyTouv(T_xy);
-        plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
-
-        % Figure stuffs.
-        xlim([0 0.7]);
-        ylim([0 0.7]);
-        xlabel('CIE u-prime','fontsize',13);
-        ylabel('CIE v-prime','fontsize',13);
-        legend('Original','Stripes','Color-correct','Display gamut',...
-            'Location','southeast','fontsize',11);
-        title('Image profile on CIE uv-prime coordinates');
-    end
+%% Save out image stats. We may want to use this info for data analysis.
+%
+% Color distributions of the test images on CIE u'v' coordinates.
+imageProfile.uvY_testImage = uvY_testImage;
+imageProfile.uvY_testImageStripe = uvY_testImageStripe;
+imageProfile.uvY_colorCorrectedImage = uvY_colorCorrectedImage;
 end
 
 %% Parts calculating CIECAM and CIELAB stats. Keep here for now as we are not using right now.
