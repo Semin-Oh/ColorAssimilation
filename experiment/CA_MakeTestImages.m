@@ -16,7 +16,7 @@
 %                       when running on Linux.
 %    09/05/24  smo    - Now save the images on the Dropbox.
 %    10/01/24  smo    - Added an option to make test images having either
-%                       two or three images on the canvas. 
+%                       two or three images on the canvas.
 %    10/15/24  smo    - Save out the color profile of the test images.
 %                       Also, saving out the name of the original test
 %                       images so that we know which images were used.
@@ -155,7 +155,7 @@ for cc = 1:nColorStripeOptions
         % Loop for different level of color corrections.
         for tt = 1:imageParams.nTestPoints
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
-            [testImage{ii,tt} imageParams.testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+            [testImage{ii,tt} testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
                 'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,...
                 'addImageRight',imageParams.addImageRight,'verbose',false);
@@ -172,8 +172,8 @@ for cc = 1:nColorStripeOptions
             imageParams.whichColorStripes,ii,nTestImages);
     end
 
-    % Save the images.
     if (SAVETHEIMAGES)
+        % Save the test images.
         % Set the directory to save the images.
         testImageFiledir = fullfile(testFiledir,'image','TestImages');
 
@@ -186,5 +186,14 @@ for cc = 1:nColorStripeOptions
         mFileVer = '-v7.3';
         save(saveFilename,'nullImage','testImage','imageParams',mFileVer);
         fprintf('Test images have been saved successfully! - (%s) \n',imageParams.whichColorStripes);
+
+        % Save the test image profiles separately. This is larger file than
+        % the test images, so we save it as a separate file. We only need
+        % this when we analyze the data.
+        testImageProfiledir = fullfile(testFiledir,'image','TestImageProfiles');
+        saveFilename = fullfile(testImageProfiledir,...
+            sprintf('TestImageProfiles_%s_%s_%s',imageParams.testImageType,imageParams.whichColorStripes,dayTimestr));
+        save(saveFilename,'testImageProfile',mFileVer);
+        fprintf('Test image profiles have been saved successfully! - (%s) \n',imageParams.whichColorStripes);
     end
 end
