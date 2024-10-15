@@ -16,7 +16,10 @@
 %                       when running on Linux.
 %    09/05/24  smo    - Now save the images on the Dropbox.
 %    10/01/24  smo    - Added an option to make test images having either
-%                       two or three images on the canvas.
+%                       two or three images on the canvas. 
+%    10/15/24  smo    - Save out the color profile of the test images.
+%                       Also, saving out the name of the original test
+%                       images so that we know which images were used.
 
 %% Initialize.
 close all; clear;
@@ -57,12 +60,6 @@ switch imageParams.testImageType
         imageParams.addImageRight = true;
 end
 
-% Set the range of different intensity to correct the test image. Default
-% to ~0.33 when it's set to empty.
-maxIntensityColorCorrect = 0.5;
-imageParams.nTestPoints = 20;
-imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
-
 % etc.
 PLOTRAWIMAGES = false;
 SAVETHEIMAGES = true;
@@ -94,6 +91,9 @@ imageFiledir = fullfile(testFiledir,'image','RawImages');
 testImageFileList = dir(fullfile(imageFiledir,append('*',imageFormat)));
 testImageFilenames = {testImageFileList(~startsWith({testImageFileList.name},'.')).name};
 
+% Save out the names of the test images.
+imageParams.testImageFilenames = testImageFilenames;
+
 % Load images here.
 nTestImages = length(testImageFilenames);
 for ii = 1:nTestImages
@@ -122,6 +122,21 @@ for cc = 1:nColorStripeOptions
     % Set the stripe color here.
     imageParams.whichColorStripes = colorStripeOptions{cc};
 
+    % Set the range of different intensity to correct the test image. We se
+    % the max correction level differently for the green primary as it
+    % seems we need further correction to match the color. We can updated
+    % it later on based on the pilot test.
+    switch imageParams.whichColorStripes
+        case 'red'
+            maxIntensityColorCorrect = 0.5;
+        case 'green'
+            maxIntensityColorCorrect = 0.6;
+        case 'blue'
+            maxIntensityColorCorrect = 0.5;
+    end
+    imageParams.nTestPoints = 20;
+    imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
+
     % Make a null stimulus. This is basically only background image without
     % test images on it.
     nullImage = MakeImageCanvas([],'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
@@ -131,7 +146,7 @@ for cc = 1:nColorStripeOptions
 
     % Make test stimulus.
     %
-    % Loop for different images.
+    % Make a loop for different test images.
     disp('Now we will start making test images...');
     for ii = 1:nTestImages
         imageTemp = images{ii};
@@ -139,7 +154,7 @@ for cc = 1:nColorStripeOptions
         % Loop for different level of color corrections.
         for tt = 1:imageParams.nTestPoints
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
-            testImage{ii,tt} = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+            [testImage{ii,tt} testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
                 'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,...
                 'addImageRight',imageParams.addImageRight,'verbose',false);

@@ -93,13 +93,18 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 %                         contains the color coordinates of the test
 %                         images. Also, deleted the old method to color
 %                         correct the test images, so-called 'addRGB'.
+%    10/15/24    smo    - Added a feature to correct the overall brightness
+%                         of an original test image so that we can maintain
+%                         the mean luminance as close as possible across
+%                         the different levels of the color corrections.
 
 %% Set variables.
 arguments
     testImage
     options.whichDisplay = 'curvedDisplay'
+    options.ratio_RGB_control_originalImage = 0.85
     options.testImageSize = 0.40
-    options.addImageRight = false;
+    options.addImageRight = false
     options.stripeHeightPixel (1,1) = 5
     options.whichColorStripes = 'red'
     options.intensityStripe (1,1) = 255
@@ -176,6 +181,13 @@ if ~isempty(testImage)
             end
         end
     end
+
+    % Control the brightness of the original image here. If we lower the
+    % brightness of the image for a bit, the performance of the color
+    % correction increases as we minimizes the number of the pixels
+    % distributing outside the display gamut. The ratio_RGB_control should
+    % be within 0 and 1.
+    testImageRaw = testImageRaw .* options.ratio_RGB_control_originalImage;
 
     %% Image on the left.
     %
@@ -356,7 +368,7 @@ if ~isempty(testImage)
             % primary on the u'v' coordinates.
             %
             % Get the base array in u'v' of the original test image.
-            uvY_colorCorrectedImage = uvY_testImage;
+            uvY_colorCorrectedImage_target = uvY_testImage;
 
             % Get u'v' coordinates of the target primary. We will correct
             % the color based on this anchor.
@@ -371,12 +383,33 @@ if ~isempty(testImage)
             % modulated. The variable 'options.intensityColorCorrect'
             % should be within 0-1 and 1 means all chromaticity becomes the
             % same as the primary anchor.
-            uvY_colorCorrectedImage(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
+            uvY_colorCorrectedImage_target(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
 
             % Calculate the digital RGB values from the u'v' coordinates to
             % convert it to the color corrected image.
-            XYZ_colorCorrectedImage = uvYToXYZ(uvY_colorCorrectedImage);
-            RGB_colorCorrectedImage = XYZToRGB(XYZ_colorCorrectedImage,M_RGB2XYZ,gamma);
+            XYZ_colorCorrectedImage_target = uvYToXYZ(uvY_colorCorrectedImage_target);
+            RGB_colorCorrectedImage = XYZToRGB(XYZ_colorCorrectedImage_target,M_RGB2XYZ,gamma);
+
+            % TEMP - Now Calculate it back to the u'v'. This process is
+            % quantizing so that we know how actual image would distribute
+            % on the chromaticity coordinates.
+            %
+            % XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
+            % uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
+
+            % TEMP - MEAN LUMINANCE. THIS IS FOR CHECKING HOW MUCH THE MEAN
+            % LUMINANCE CHANGES OVER THE DIFFERENT LEVEL OF COLOR
+            % CORRECTIONS.
+            %
+            % mean_uvY_target = mean(uvY_colorCorrectedImage_target,2);
+            % mean_uvY = mean(uvY_colorCorrectedImage,2);
+            % ratio_Y = mean_uvY_target(3)/mean_uvY(3);
+
+            % Get digital RGB values per each channel. We will use it to
+            % plot the image profile in the end.
+            red_colorCorrectedImage = RGB_colorCorrectedImage(1,:);
+            green_colorCorrectedImage = RGB_colorCorrectedImage(2,:);
+            blue_colorCorrectedImage = RGB_colorCorrectedImage(3,:);
 
             % Back to the image. Idea here is getting the original test
             % image as a base array and update the pixels where actual
@@ -563,9 +596,10 @@ end
 %% Save out image stats. We may want to use this info for data analysis.
 %
 % Color distributions of the test images on CIE u'v' coordinates.
-imageProfile.uvY_testImage = uvY_testImage;
-imageProfile.uvY_testImageStripe = uvY_testImageStripe;
-imageProfile.uvY_colorCorrectedImage = uvY_colorCorrectedImage;
+if ~isempty(testImage)
+    imageProfile.uvY_testImageStripe = uvY_testImageStripe;
+    imageProfile.uvY_colorCorrectedImage = uvY_colorCorrectedImage;
+end
 end
 
 %% Parts calculating CIECAM and CIELAB stats. Keep here for now as we are not using right now.
