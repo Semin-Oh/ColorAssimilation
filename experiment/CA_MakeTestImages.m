@@ -59,6 +59,7 @@ switch imageParams.testImageType
     case 'fovea'
         imageParams.addImageRight = true;
 end
+fprintf('Following set of test images will be generated - (%s) \n',imageParams.testImageType);
 
 % etc.
 PLOTRAWIMAGES = false;
@@ -154,7 +155,7 @@ for cc = 1:nColorStripeOptions
         % Loop for different level of color corrections.
         for tt = 1:imageParams.nTestPoints
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
-            [testImage{ii,tt} testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
+            [testImage{ii,tt} imageParams.testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
                 'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,...
                 'addImageRight',imageParams.addImageRight,'verbose',false);
