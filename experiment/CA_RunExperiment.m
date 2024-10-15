@@ -122,8 +122,8 @@ try
     screenParams.screenGap_cm = 2.5;
 
     % Experimental variables.
-    expParams.nRepeat = 5;
-    expParams.postIntervalDelaySec = 1;
+    expParams.nRepeat = 10;
+    expParams.postIntervalDelaySec = 2;
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
     expParams.expKeyType = 'gamepad';
