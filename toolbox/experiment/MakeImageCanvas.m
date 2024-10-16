@@ -171,13 +171,13 @@ if ~isempty(testImage)
     % when preparing the raw test images, it is advised to set the
     % background color distinctive from the face and hair colors. Orange
     % color as a background (dRGB = 255, 87, 34) would work pretty well.
-    % 
+    %
     % Therefore, the number of pixels of the image content is the same as
     % the length of either 'idxImageHeight' or 'idxImageWidth'.
     idxImageHeight = [];
     idxImageWidth = [];
     bgSetting = squeeze(testImage(1,1,:));
-    
+
     % Here, we will extract the pixels that does not match with the color
     % of the background, which is the actual image.
     for hh = 1:testImage_height
