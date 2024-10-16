@@ -67,14 +67,10 @@ nTestImages = rawData.data.expParams.nTestImages;
 % sorted in the same random order. Here, we sort out the results.
 
 % Get the index to sort out the results.
-for rr = 1:nRepeat
-    for ii = 1:nTestImages
-        idxOrder(ii,rr) = find(rawData.data.expParams.randOrder(:,rr) == ii);
-    end
-end
+[randOrderSorted idxOrder_sorted] = sort(rawData.data.expParams.randOrder);
 
 % Sort out the results.
-matchingIntensityColorCorrect_sorted = rawData.data.matchingIntensityColorCorrect(idxOrder);
+matchingIntensityColorCorrect_sorted = rawData.data.matchingIntensityColorCorrect(idxOrder_sorted);
 
 % Mean results.
 meanMatchingIntensityColorCorrect = mean(matchingIntensityColorCorrect_sorted,2);
@@ -99,34 +95,34 @@ end
 % Comparison of the mean chosen color correction over different test
 % images.
 figure; hold on;
-plot(xaxisTestImages,matchingIntensityColorCorrect_sorted,'k.');
 plot(xaxisTestImages,meanMatchingIntensityColorCorrect,'o','MarkerFaceColor',markerFaceColor,'MarkerEdgeColor','k');
+plot(xaxisTestImages,matchingIntensityColorCorrect_sorted,'k.');
 xlabel('Test Image');
 ylabel('Matching intensity');
 xlim([1 nTestImages]);
 xticks(xaxisTestImages);
-ylim([0 0.5]);
+xticklabels(rawData.data.imageParams.testImageFilenames);
+ylim([0 0.6]);
+legend(sprintf('Mean (N=%d)',nRepeat),'Raw Data');
 title(sprintf('Primary = (%s) / Experiment mode = (%s) / Subject = (%s)',whichPrimary,expMode,subjectName));
 
-% The mean results on the u'v' coordinates.
-figure; hold on;
-
-% Plackian locus.
-load T_xyzJuddVos
-T_XYZ = T_xyzJuddVos;
-T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
-T_uv = xyTouv(T_xy);
-plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
-
-% Figure stuff.
-xlim([0 0.7]);
-ylim([0 0.7]);
-xlabel('CIE u-prime','fontsize',13);
-ylabel('CIE v-prime','fontsize',13);
-legend('Original','Stripes','Color-correct','Display gamut',...
-    'Location','southeast','fontsize',11);
-title('Mean results on the CIE uv-prime');
-
-
+% % The mean results on the u'v' coordinates.
+% figure; hold on;
+% 
+% % Plackian locus.
+% load T_xyzJuddVos
+% T_XYZ = T_xyzJuddVos;
+% T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+% T_uv = xyTouv(T_xy);
+% plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+% 
+% % Figure stuff.
+% xlim([0 0.7]);
+% ylim([0 0.7]);
+% xlabel('CIE u-prime','fontsize',13);
+% ylabel('CIE v-prime','fontsize',13);
+% legend('Original','Stripes','Color-correct','Display gamut',...
+%     'Location','southeast','fontsize',11);
+% title('Mean results on the CIE uv-prime');
 
 %% Save out something if you want.
