@@ -166,16 +166,24 @@ if ~isempty(testImage)
     testImageRaw = imresize(testImage, [testImage_height, testImage_width]);
 
     % Find the location where the image content exist. The idea here is to
-    % treat the black (0, 0, 0) part as a background and it will be excluded in
-    % this index. Therefore, the number of pixels of the image content is the
-    % same as the length of either 'idxImageHeight' or 'idxImageWidth'.
+    % find the background color in the very first pixel of the image
+    % (1,1,:) and the pixels with this color be excluded in this index. So,
+    % when preparing the raw test images, it is advised to set the
+    % background color distinctive from the face and hair colors. Orange
+    % color as a background (dRGB = 255, 87, 34) would work pretty well.
+    % 
+    % Therefore, the number of pixels of the image content is the same as
+    % the length of either 'idxImageHeight' or 'idxImageWidth'.
     idxImageHeight = [];
     idxImageWidth = [];
-    bgSetting = 0;
+    bgSetting = squeeze(testImage(1,1,:));
+    
+    % Here, we will extract the pixels that does not match with the color
+    % of the background, which is the actual image.
     for hh = 1:testImage_height
         for ww = 1:testImage_width
-            summation = testImageRaw(hh,ww,1)+testImageRaw(hh,ww,2)+testImageRaw(hh,ww,3);
-            if ~(summation == bgSetting)
+            areAllEqual = (testImageRaw(hh,ww,1)==bgSetting(1)) & (testImageRaw(hh,ww,2)==bgSetting(2)) & (testImageRaw(hh,ww,3)==bgSetting(3));
+            if ~(areAllEqual)
                 idxImageHeight(end+1) = hh;
                 idxImageWidth(end+1) = ww;
             end
