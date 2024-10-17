@@ -149,6 +149,14 @@ for cc = 1:nColorStripeOptions
     %
     % Make a loop for different test images.
     disp('Now we will start making test images...');
+
+    % Show the estimated time.
+    secPerImage = 2.2520;
+    estTimeSec = secPerImage * nTestImages * imageParams.nTestPoints * nColorStripeOptions;
+    estTimeMin = estTimeSec/60;
+    fprintf('Estimated time = (%.f) minutes \n',estTimeMin);
+
+    % Make image from here.
     for ii = 1:nTestImages
         imageTemp = images{ii};
 
