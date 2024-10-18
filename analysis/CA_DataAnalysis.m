@@ -36,7 +36,7 @@ subjectNameContent = dir(testFiledir);
 subjectNameList = {subjectNameContent.name};
 subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 
-%% Load the data to analyze.
+%% Load the exp data to analyze.
 %
 % Define which subject data to analyze.
 idxSubject = 1;
@@ -57,14 +57,14 @@ whichPrimary = whichPrimaryOptions{3};
 dataFilename = GetMostRecentFileName(dataFiledir,sprintf('%s_%s_%s',subjectName,expMode,whichPrimary));
 rawData = load(dataFilename);
 
-%% Read out some variables.
-nRepeat = rawData.data.expParams.nRepeat;
-nTestImages = rawData.data.expParams.nTestImages;
-
 %% Rearrange the experiment results.
 %
 % Test images were displayed in a random order, so the raw data is
 % sorted in the same random order. Here, we sort out the results.
+
+% Read out some variables.
+nRepeat = rawData.data.expParams.nRepeat;
+nTestImages = rawData.data.expParams.nTestImages;
 
 % Get the index to sort out the results.
 [randOrderSorted idxOrder_sorted] = sort(rawData.data.expParams.randOrder);
@@ -74,6 +74,31 @@ matchingIntensityColorCorrect_sorted = rawData.data.matchingIntensityColorCorrec
 
 % Mean results.
 meanMatchingIntensityColorCorrect = mean(matchingIntensityColorCorrect_sorted,2);
+
+%% Load the corresponding image profile.
+%
+% We will analyze the date based on the color profile on the u'v'
+% coordinates. Corresponding image profile should have the same date on its
+% file name.
+imgProfileDir = fullfile(baseFiledir,projectName,'image','TestImageProfiles');
+filename = rawData.data.imageParams.testImageFilename;
+
+% Extract date of the experiment.
+date_pattern = '\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}';
+date = regexp(filename, date_pattern, 'match');
+
+% Load the image profile here. The array should be the number of test
+% images x the number of test points (color correction). For example, if we
+% used 5 test images and 20 color correction points per image, the cell
+% array shold look like 5x20. In each cell array, there are two image
+% profiles, one being the test image with stripes and the other being the
+% color corrected image.
+imgProfilename = fullfile(imgProfileDir,sprintf('TestImageProfiles_%s_%s_%s',...
+    rawData.data.imageParams.testImageType, rawData.data.imageParams.whichColorStripes, date{:}));
+imgProfile = load(imgProfilename);
+imgProfile = imgProfile.testImageProfile;
+
+
 
 %% Plot the results.
 %
