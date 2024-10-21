@@ -401,18 +401,16 @@ if ~isempty(testImage)
             % TEMP - Now Calculate it back to the u'v'. This process is
             % quantizing so that we know how actual image would distribute
             % on the chromaticity coordinates.
-            %
-            % XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
-            % uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
+            XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
+            uvY_colorCorrectedImage = XYZTouvY(XYZ_colorCorrectedImage);
 
             % TEMP - MEAN LUMINANCE. THIS IS FOR CHECKING HOW MUCH THE MEAN
             % LUMINANCE CHANGES OVER THE DIFFERENT LEVEL OF COLOR
             % CORRECTIONS.
-            %
-            % mean_uvY_target = mean(uvY_colorCorrectedImage_target,2);
-            % mean_uvY = mean(uvY_colorCorrectedImage,2);
-            % ratio_Y = mean_uvY_target(3)/mean_uvY(3);
-
+            mean_uvY_target = mean(uvY_colorCorrectedImage_target,2);
+            mean_uvY = mean(uvY_colorCorrectedImage,2);
+            ratio_Y = mean_uvY_target(3)/mean_uvY(3);
+            
             % Get digital RGB values per each channel. We will use it to
             % plot the image profile in the end.
             red_colorCorrectedImage = RGB_colorCorrectedImage(1,:);
