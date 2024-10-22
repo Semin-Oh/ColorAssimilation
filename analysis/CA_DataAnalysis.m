@@ -12,9 +12,9 @@
 %% Initialize.
 close all; clear;
 
-%% Choose how we analyze the data.
-
-%% Get subject names with the data.
+%% Set variables to analyze the data.
+%
+% Get computer info.
 sysInfo = GetComputerInfo();
 
 % Set the file dir differently depending on the computer.
@@ -36,25 +36,31 @@ subjectNameContent = dir(testFiledir);
 subjectNameList = {subjectNameContent.name};
 subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 
-%% Load the exp data to analyze.
-%
-% Define which subject data to analyze.
+% Set variables from here. We may make a loop to do everything at once.
+% Decide which subject.
 idxSubject = 1;
 subjectName = subjectNames{idxSubject};
 
-% Set the directory.
-dataFiledir = fullfile(testFiledir,subjectName);
-
 % Set experimental mode either 'periphery' or 'fovea'.
 expModeOptions = {'periphery','fovea'};
-expMode = expModeOptions{1};
+idxExpMode = 1;
+expMode = expModeOptions{idxExpMode};
 
-% Choose which primary session.
+% Choose which primary.
 whichPrimaryOptions = {'red','green','blue'};
-whichPrimary = whichPrimaryOptions{1};
+idxWhichPrimary = 1;
+whichPrimary = whichPrimaryOptions{idxWhichPrimary};
+
+% Choose how recent data to load. Set this 0 to load the most recent data
+% from the subject.
+olderDate = 1;
+
+%% Load the exp data to analyze.
+%
+% Set the directory name per subject.
+dataFiledir = fullfile(testFiledir,subjectName);
 
 % Read out all avaialble data over different primary color.
-olderDate = 0;
 dataFilename = GetMostRecentFileName(dataFiledir,sprintf('%s_%s_%s',subjectName,expMode,whichPrimary),'olderDate',olderDate);
 rawData = load(dataFilename);
 
@@ -99,6 +105,91 @@ imageProfilename = fullfile(imageProfileDir,sprintf('TestImageProfiles_%s_%s_%s'
 imageProfile = load(imageProfilename);
 imageProfile = imageProfile.testImageProfile;
 
+%% Decide the test image and get matching color correct intensity for analysis.
+idxTestImage = 1;
+idxColorCorrect = 15;
+
+%% Load out chromaticity coordinates.
+%
+% Read out the first column of the image profile array which is the zero
+% color corrected image, which means the chromaticity coordinates of the
+% color corrected image is actually the same as the raw image.
+idxColorCorrectRaw = 1;
+imageProfile_raw = imageProfile{idxTestImage,idxColorCorrectRaw};
+
+% Raw test image on the u'v' coordinates.
+uvY_testImageRaw = imageProfile_raw.uvY_colorCorrectedImage;
+
+% Test image with stripes on the u'v' coordinates.
+uvY_testImageStripe = imageProfile_raw.uvY_testImageStripe;
+
+% Color corrected test image on the u'v' coordinates. This is decided based
+% on the experiment results. We will calculate it based on the mean results
+% of the matching intensity of color correction.
+meanMatchingIntensityColorCorrect_target = meanMatchingIntensityColorCorrect(idxTestImage);
+
+
+oneImageProfile = imageProfile{idxTestImage,idxColorCorrect};
+uvY_colorCorrectImage = oneImageProfile.uvY_colorCorrectedImage;
+
+%% Calculate the Color Assimiliation index (AI).
+%
+% Reference: Shinoda, H., & Ikeda, M. (2004). Color assimilation on grating
+% affected by its apparent stripe width. Color Research & Application,
+% 29(3), 187-195.
+%
+% IMPORTANT: We collected 'matchingIntensityColorCorrect' as a raw data.
+% Itself does not represent how much color assmiliation happened per each
+% test image. The results should be compared in AI index, which is relative
+% mean chromaticity shift, which reflects the color assmiliation.
+%
+% Mean color coordinates.
+mean_uvY_testImageRaw = mean(uvY_testImageRaw,2);
+mean_uvY_testImageStripe = mean(uvY_testImageStripe,2);
+mean_uvY_colorCorrectImage = mean(uvY_colorCorrectImage,2);
+
+% 'a' is the distance from the original to the image with the stripes and
+% 'm' is the distance from the original to the matched color.
+m = norm(mean_uvY_colorCorrectImage(1:2)-mean_uvY_testImageRaw(1:2));
+a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
+
+% The 'AI' value should be zero if there is no color assimiliation effect.
+AI = m/a;
+
+%% Plot the results.
+figure; hold on;
+
+% Plot the image profiles.
+plot(uvY_testImageRaw(1,:),uvY_testImageRaw(2,:),'k.');
+plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.','MarkerEdgeColor',[1 1 0]);
+plot(uvY_colorCorrectImage(1,:),uvY_colorCorrectImage(2,:),'r.');
+
+% Plot the mean chromaticity.
+plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor','k','markeredgecolor','k');
+plot(mean_uvY_testImageStripe(1),mean_uvY_testImageStripe(2),'o','MarkerFaceColor',[1 1 0],'markeredgecolor','k');
+plot(mean_uvY_colorCorrectImage(1),mean_uvY_colorCorrectImage(2),'o','MarkerFaceColor','r','markeredgecolor','k');
+
+% Plot the Plackian locus.
+load T_xyzJuddVos
+T_XYZ = T_xyzJuddVos;
+T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+T_uv = xyTouv(T_xy);
+plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+
+% Display gamut.
+
+
+% Figure stuff.
+xlim([0 0.7]);
+ylim([0 0.7]);
+xlabel('CIE u-prime','fontsize',13);
+ylabel('CIE v-prime','fontsize',13);
+legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
+    'Location','southeast','fontsize',11);
+title(sprintf('Mean image profile on the CIE uv-prime (AI = %.2f)',AI));
+
+
+
 %% Plot the results.
 %
 % X-axis as test images.
@@ -128,69 +219,8 @@ ylim([0 0.6]);
 legend(sprintf('Mean (N=%d)',nRepeat),'Raw Data');
 title(sprintf('Primary = (%s) / Experiment mode = (%s) / Subject = (%s)',whichPrimary,expMode,subjectName));
 
-%% The mean results on the u'v' coordinates.
-figure; hold on;
-
-% Get image profiles of the stripes and color corrected on the u'v'
-% coordinates. This is fixed, not changing within the same test image.
-whichTestImage = 2;
-whichColorCorrect = 15;
-oneImageProfile = imageProfile{whichTestImage,whichColorCorrect};
-uvY_colorCorrectImage = oneImageProfile.uvY_colorCorrectedImage;
-
-oneImageProfile_raw = imageProfile{whichTestImage,1};
-uvY_testImageRaw = oneImageProfile_raw.uvY_colorCorrectedImage;
-uvY_testImageStripe = oneImageProfile_raw.uvY_testImageStripe;
-
-% Mean color coordinates.
-mean_uvY_testImageRaw = mean(uvY_testImageRaw,2);
-mean_uvY_testImageStripe = mean(uvY_testImageStripe,2);
-mean_uvY_colorCorrectImage = mean(uvY_colorCorrectImage,2);
-
-% Calculate the Color Assimiliation index (AI). Reference: Shinoda, H., &
-% Ikeda, M. (2004). Color assimilation on grating affected by its apparent
-% stripe width. Color Research & Application, 29(3), 187-195.
-%
-% 'a' is the distance from the original to the image with the stripes and
-% 'm' is the distance from the original to the matched color.
-%
-% The 'AI' value should be zero if there is no color assimiliation effect.
-%
-% IMPORTANT: We collected 'matchingIntensityColorCorrect' as a raw data.
-% Itself does not represent how much color assmiliation happened per each
-% test image. The results should be compared in AI index, which is relative
-% mean chromaticity shift, which reflects the situation better.
-m = norm(mean_uvY_colorCorrectImage(1:2)-mean_uvY_testImageRaw(1:2));
-a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
-AI = m/a;
-
-% Plot the image profiles.
-plot(uvY_testImageRaw(1,:),uvY_testImageRaw(2,:),'k.');
-plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.','MarkerEdgeColor',[1 1 0]);
-plot(uvY_colorCorrectImage(1,:),uvY_colorCorrectImage(2,:),'ro');
-
-% Plot the mean chromaticity.
-plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor','k','markeredgecolor','k');
-plot(mean_uvY_testImageStripe(1),mean_uvY_testImageStripe(2),'o','MarkerFaceColor',[1 1 0],'markeredgecolor','k');
-plot(mean_uvY_colorCorrectImage(1),mean_uvY_colorCorrectImage(2),'o','MarkerFaceColor','r','markeredgecolor','k');
-
-% Plot the Plackian locus.
-load T_xyzJuddVos
-T_XYZ = T_xyzJuddVos;
-T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
-T_uv = xyTouv(T_xy);
-plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
-
-% Display gamut.
-
-
-% Figure stuff.
-xlim([0 0.7]);
-ylim([0 0.7]);
-xlabel('CIE u-prime','fontsize',13);
-ylabel('CIE v-prime','fontsize',13);
-legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-    'Location','southeast','fontsize',11);
-title(sprintf('Mean image profile on the CIE uv-prime (AI = %.2f)',AI));
-
 %% Save out something if you want.
+SAVETHERESULTS = false;
+
+if (SAVETHERESULTS)
+end
