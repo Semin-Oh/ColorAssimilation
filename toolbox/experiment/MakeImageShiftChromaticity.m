@@ -10,7 +10,7 @@ function [chromaticity_shiftedImage] = MakeImageShiftChromaticity(chromaticity_i
 %    the color shifted images. Especially, when we generate an image
 %    profile based on the experiment. We will use this routine for both
 %    making test images and also analyzing the data.
-%    
+%
 % Inputs:
 %    chromaticity_image       - Image profile on chromaticity coordinates.
 %                               It should work for any color space (CIE xy,
@@ -48,4 +48,5 @@ end
 
 %% Image shift happens here.
 chromaticity_shiftedImage(1:2,:) = chromaticity_image(1:2,:) + intensityColorCorrect * (chromaticity_target - chromaticity_image(1:2,:));
+
 end
