@@ -97,6 +97,8 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 %                         of an original test image so that we can maintain
 %                         the mean luminance as close as possible across
 %                         the different levels of the color corrections.
+%    10/29/24    smo    - Color correction part has been substituted with
+%                         a function.
 
 %% Set variables.
 arguments
@@ -391,8 +393,9 @@ if ~isempty(testImage)
             % modulated. The variable 'options.intensityColorCorrect'
             % should be within 0-1 and 1 means all chromaticity becomes the
             % same as the primary anchor.
-            uvY_colorCorrectedImage_target(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
-
+            uvY_colorCorrectedImage_target(1:2,:) = MakeImageShiftChromaticity(uvY_testImage(1:2,:),uv_targetColorStripe,options.intensityColorCorrect);
+            % uvY_colorCorrectedImage_target(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
+            
             % Calculate the digital RGB values from the u'v' coordinates to
             % convert it to the color corrected image.
             XYZ_colorCorrectedImage_target = uvYToXYZ(uvY_colorCorrectedImage_target);
