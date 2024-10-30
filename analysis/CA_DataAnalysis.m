@@ -45,7 +45,7 @@ subjectName = subjectNames{idxSubject};
 
 % Choose how recent data to load. Set this 0 to load the most recent data
 % from the subject.
-olderDate = 1;
+olderDate = 0;
 
 % Set experimental mode either 'periphery' or 'fovea'.
 expModeOptions = {'periphery','fovea'};
@@ -147,8 +147,7 @@ for pp = 1:nPrimaries
     % Make a loop for the test images.
     for tt = 1:nTestImages
         idxTestImage = tt;
-
-        % Load out chromaticity coordinates.
+        % Load out chromaticity coordinates of the test images.
         %
         % Read out the first column of the image profile array which is the zero
         % color corrected image, which means the chromaticity coordinates of the
@@ -156,30 +155,32 @@ for pp = 1:nPrimaries
         idxColorCorrectRaw = 1;
         imageProfile_raw = imageProfile{idxTestImage,idxColorCorrectRaw};
 
-        % Raw test image on the u'v' coordinates.
+        % Get the raw and striped test image on the u'v' coordinates.
         uvY_testImageRaw = imageProfile_raw.uvY_colorCorrectedImage;
-
-        % We will process the image with NaN components excluded.
-        idxValidPixels = ~any(isnan(uvY_testImageRaw));
-        uvY_testImageRaw = uvY_testImageRaw(:,idxValidPixels,1);
-
-        % Test image with stripes on the u'v' coordinates.
         uvY_testImageStripe = imageProfile_raw.uvY_testImageStripe;
-        uvY_testImageStripe = uvY_testImageStripe(:,~any(isnan(uvY_testImageStripe),1));
 
         % Color corrected test image on the u'v' coordinates. This is decided based
         % on the experiment results. We will calculate it based on the mean results
         % of the matching intensity of color correction.
         meanMatchingIntensityColorCorrect_target = meanMatchingIntensityColorCorrect(idxTestImage);
         uv_colorCorrectImage = MakeImageShiftChromaticity(uvY_testImageRaw(1:2,:),uv_displayTargetPrimary,meanMatchingIntensityColorCorrect_target);
-        
-        % THIS PART NEEDS TO BE FIGURED OUT.
-        %
+
         % Set the luminace of the color corrected image the same as the
         % striped image.
         uvY_colorCorrectImage = zeros(size(uvY_testImageStripe));
+        uvY_colorCorrectImage(1:2,:) = uv_colorCorrectImage;
         uvY_colorCorrectImage(3,:) = uvY_testImageStripe(3,:);
-        uvY_colorCorrectImage(1:2,idxValidPixels) = uv_colorCorrectImage(:,idxValidPixels);
+
+        % Find out valid components that are not 'NaN'.
+        %
+        % We will process the image with NaN components excluded. Some
+        % images contain NaN components for some reason, but not so much.
+        idxValidPixels = ~any(isnan(uvY_testImageRaw));
+
+        % Set each each with only vaild pixels without NaN components.
+        uvY_testImageRaw = uvY_testImageRaw(:,idxValidPixels);
+        uvY_testImageStripe = uvY_testImageStripe(:,idxValidPixels);
+        uvY_colorCorrectImage = uvY_colorCorrectImage(:,idxValidPixels);
 
         % Quantize the color corrected image.
         XYZ_colorCorrectImage = uvYToXYZ(uvY_colorCorrectImage);
@@ -193,15 +194,15 @@ for pp = 1:nPrimaries
         % % test image to the most saturated color corrected image.
         % for ii = 1:nColorPoints
         %     uvY_colorCorrectedImage_oneImage_temp = imageProfile{idxTestImage,ii}.uvY_colorCorrectedImage;
-        % 
+        %
         %     % Make sure every number is finite.
         %     columns_NaN = any(isnan(uvY_colorCorrectedImage_oneImage_temp),1);
         %     uvY_colorCorrectedImage_oneImage_temp = uvY_colorCorrectedImage_oneImage_temp(:,~columns_NaN);
-        % 
+        %
         %     % Calculate mean coordinates.
         %     mean_uvY_colorCorrectedImage(:,ii) = mean(uvY_colorCorrectedImage_oneImage_temp,2);
         % end
-        % 
+        %
         % % Find the mean chromaticity coordinates that corresponds the mean matching
         % % color correct values from the experiment. This is one way to do it, maybe
         % % we can directly calculates this from the image profile later on, but for
@@ -211,22 +212,22 @@ for pp = 1:nPrimaries
         % x = mean_uvY_colorCorrectedImage(1,:);
         % y = mean_uvY_colorCorrectedImage(2,:);
         % z = rawData.data.imageParams.intensityColorCorrect;
-        % 
+        %
         % % Create the interpolant.
         % F = scatteredInterpolant(x', y', z', 'natural');
-        % 
+        %
         % % Define the z value you're searching for
         % z_target = meanMatchingIntensityColorCorrect_target;
-        % 
+        %
         % % Define an objective function to minimize the absolute difference.
         % obj = @(p) abs(F(p(1), p(2)) - z_target);
-        % 
+        %
         % % Initial guess for [xi, yi].
         % z0 = [mean(x), mean(y)];
-        % 
+        %
         % % Use fminsearch to find the xi, yi that gives zi_target
         % z_found = fminsearch(obj, z0);
-        % 
+        %
         % % Extract the results
         % x_found = z_found(1);
         % y_found = z_found(2);
@@ -262,14 +263,18 @@ for pp = 1:nPrimaries
         subplot(nPrimaries,nTestImages,tt + nTestImages*(pp-1)); hold on;
 
         % Plot the image profiles.
-        plot(uvY_testImageRaw(1,:),uvY_testImageRaw(2,:),'k.');
-        plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.','MarkerEdgeColor',[1 1 0]);
-        % plot(uvY_colorCorrectImage(1,:),uvY_colorCorrectImage(2,:),'r.');
+        plot(uvY_testImageRaw(1,:),uvY_testImageRaw(2,:),'.','MarkerEdgeColor',[0.5 0.5 0.5]);
+        % plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.','MarkerEdgeColor',[1 1 0]);
+        plot(uvY_colorCorrectImage(1,:),uvY_colorCorrectImage(2,:),'.','MarkerEdgeColor',markerFaceColor);
 
         % Plot the mean chromaticity.
-        plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor','k','markeredgecolor','k');
+        plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor',[0.2 0.2 0.2],'markeredgecolor','k');
         plot(mean_uvY_testImageStripe(1),mean_uvY_testImageStripe(2),'o','MarkerFaceColor',[1 1 0],'markeredgecolor','k');
         plot(mean_uvY_colorCorrectImage(1),mean_uvY_colorCorrectImage(2),'o','MarkerFaceColor',markerFaceColor,'markeredgecolor','k');
+
+        % Plot the display gamut with the target primary highlighted.
+        plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-');
+        plot(uv_displayTargetPrimary(1),uv_displayTargetPrimary(2),'^','markerfacecolor',markerFaceColor,'markeredgecolor','k','MarkerSize',8);
 
         % Plot the Plackian locus.
         load T_xyzJuddVos
@@ -277,11 +282,7 @@ for pp = 1:nPrimaries
         T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
         T_uv = xyTouv(T_xy);
         plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
-        
-        % Plot the display gamut with the target primary highlighted.
-        plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-');
-        plot(uv_displayTargetPrimary(1),uv_displayTargetPrimary(2),'^','markerfacecolor',markerFaceColor,'markeredgecolor','k','MarkerSize',8);
-        
+
         % TEMP - Trajectory when we fit to find the mean chromaticity of
         % the color corrected image.
         % plot(x,y,'-','LineWidth',2,'Color',markerFaceColor);
@@ -291,10 +292,10 @@ for pp = 1:nPrimaries
         ylim([0 0.7]);
         xlabel('CIE u-prime','fontsize',13);
         ylabel('CIE v-prime','fontsize',13);
-        % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-        %     'Location','southeast','fontsize',11);
-        legend('raw','stripes','Mean(raw)','Mean(stripes)','Mean(matched)',...
+        legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
             'Display','Target Primary','Location','southeast','fontsize',11);
+        % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
+        %     'Display','Target Primary','Location','southeast','fontsize',11);
         title(sprintf('Test Image %d (AI = %.2f) \n Image = (%s)',tt,AI(tt),testImageNames{tt}));
 
         % Show the progress
