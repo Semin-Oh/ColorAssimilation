@@ -140,6 +140,10 @@ try
     %
     % Get the directory where the test images are saved.
     testImageFiledir = fullfile(testFiledir,'image','TestImages');
+    
+    % Open the PTB screen.
+    initialScreenSetting = [0.5 0.5 0.5]';
+    [window windowRect] = OpenPlainScreen(initialScreenSetting);
 
     % We make a loop to test all stripe colors at once. The order of
     % showing will be randomized and will save the order in expParams.
@@ -186,23 +190,16 @@ try
         expParams.idxRandOrderInitial = randi([initialImageMin initialImageMax], size(expParams.randOrder));
         expParams.idxRandOrderInitial(expParams.idxRandOrderInitial == initialImageMax) = images.imageParams.nTestPoints;
 
-        %% Open the PTB screen.
-        initialScreenSetting = [0.5 0.5 0.5]';
-        [window windowRect] = OpenPlainScreen(initialScreenSetting);
-
         %% Practice trials if you want.
-        if (PRACTICETRIALS)
-
-        end
+        % if (PRACTICETRIALS)
+        % end
 
         %% Display the initial screen on the null image.
         %
         % Set the initial screen with written instruction.
         imageSize = size(images.nullImage);
         messageInitialImage_1stLine = 'Press any button';
-        messageInitialImage_2ndLine = 'To start the experiment';
-        messageInitialImage_3rdLine = sprintf('Type (%s)',expMode);
-        messageInitialImage_4thLine = sprintf('Session (%d/%d)',ss,nStripeColors);
+        messageInitialImage_2ndLine = sprintf('To start the experiment (%d/%d)',ss,nStripeColors);
         ratioMessageInitialHorz = 0.49;
         ratioMessageInitialVert = 0.03;
 
@@ -215,7 +212,7 @@ try
         end
         initialImageBg = ones(size(images.nullImage))*0.5;
         initialInstructionImage = insertText(initialImageBg,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
-            {messageInitialImage_1stLine messageInitialImage_2ndLine messageInitialImage_3rdLine messageInitialImage_4thLine},...
+            {messageInitialImage_1stLine messageInitialImage_2ndLine},...
             'fontsize',40,'Font',instructionImageFont,'BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
 
         % Display an image texture of the initial image.
@@ -272,47 +269,47 @@ try
             end
         end
 
-    catch
-        % If error occurs, close the screen.
-        CloseScreen;
-        tmpE = lasterror;
+        %% Save the data. We will save the results separately per each primary.
+        if (SAVETHERESULTS)
+            % Save out the data only if we reached the desired number of trials.
+            nTargetTrials = expParams.nTestImages * expParams.nRepeat;
+            nTrialsDone = ii * rr;
+            if (nTrialsDone == nTargetTrials)
+                saveFiledir = fullfile(testFiledir,'data');
 
-        % Display the error message.
-        tmpE.message
-        tmpE.stack.name
-        tmpE.stack.line
+                % Make folder with subject name if it does not exist.
+                saveFoldername = fullfile(saveFiledir,subjectName);
+                if ~exist(saveFoldername, 'dir')
+                    mkdir(saveFoldername);
+                    fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
+                end
+
+                % Save out the image and experiment params in the structure.
+                data.imageParams = images.imageParams;
+                [~, testImageFilename, ~] = fileparts(testImageFilename);
+                data.imageParams.testImageFilename = testImageFilename;
+                data.expParams = expParams;
+
+                % Set the file name and save.
+                dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+                saveFilename = fullfile(saveFoldername,...
+                    sprintf('%s_%s_%s_%s',subjectName,expMode,stripeColorToTest,dayTimestr));
+                save(saveFilename,'data');
+                disp('Data has been saved successfully!');
+            end
+        end
     end
-
+    
     %% Close the PTB screen once the experiment is done.
     CloseScreen;
 
-    %% Save the data.
-    if (SAVETHERESULTS)
-        % Save out the data only if we reached the desired number of trials.
-        nTargetTrials = expParams.nTestImages * expParams.nRepeat;
-        nTrialsDone = ii * rr;
-        if (nTrialsDone == nTargetTrials)
-            saveFiledir = fullfile(testFiledir,'data');
+catch
+    % If error occurs, close the screen.
+    CloseScreen;
+    tmpE = lasterror;
 
-            % Make folder with subject name if it does not exist.
-            saveFoldername = fullfile(saveFiledir,subjectName);
-            if ~exist(saveFoldername, 'dir')
-                mkdir(saveFoldername);
-                fprintf('Folder has been successfully created: (%s)\n',saveFoldername);
-            end
-
-            % Save out the image and experiment params in the structure.
-            data.imageParams = images.imageParams;
-            [~, testImageFilename, ~] = fileparts(testImageFilename);
-            data.imageParams.testImageFilename = testImageFilename;
-            data.expParams = expParams;
-
-            % Set the file name and save.
-            dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-            saveFilename = fullfile(saveFoldername,...
-                sprintf('%s_%s_%s_%s',subjectName,expMode,stripeColorToTest,dayTimestr));
-            save(saveFilename,'data');
-            disp('Data has been saved successfully!');
-        end
-    end
+    % Display the error message.
+    tmpE.message
+    tmpE.stack.name
+    tmpE.stack.line
 end
