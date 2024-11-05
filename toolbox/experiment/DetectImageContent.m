@@ -5,7 +5,8 @@ function [image_detected] = DetectImageContent(image,options)
 %    [canvas] = MakeImageCanvas(image)
 %
 % Description:
-%    dd
+%    It detects the actual image content and resize it. The result image
+%    would be the same size as the input image in pixel. Also, 
 %
 % Inputs:
 %    image                    - An input image to detect its contents.
@@ -26,12 +27,12 @@ function [image_detected] = DetectImageContent(image,options)
 %% Set variables.
 arguments
     image
-    options.verbose (1,1) = true
+    options.verbose (1,1) = false
 end
 
 %% Get the original image size.
 [originalHeight originalWidth nChannels] = size(image);
-desiredHeightPixel = originalHeight*0.7;
+desiredHeightPixel = originalHeight;
 
 %% Detect the actual contents of the image.
 %

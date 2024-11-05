@@ -45,7 +45,7 @@ switch imageParams.whichDisplay
     case 'laptop'
         imageParams.sizeCanvans = [1920 1080];
 end
-imageParams.testImageSize = 0.8;
+imageParams.testImageSize = 0.65;
 imageParams.position_leftImage_x = 0.36;
 imageParams.stripeHeightPixel = 5;
 imageParams.colorCorrectMethod = 'uv';

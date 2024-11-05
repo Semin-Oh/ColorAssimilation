@@ -153,8 +153,13 @@ XYZ_white = sum(M_RGB2XYZ,2);
 % Create a blank canvas.
 canvas = zeros(canvas_height, canvas_width, 3);
 
-% Get the size of original input image.
+% Process this part only when we have the test image as input.
 if ~isempty(testImage)
+    % Find the actual image content. This will help to keep the image size
+    % similar across different test images.
+    testImage = DetectImageContent(testImage);
+
+    % Get the size of original input image.
     [originalImage_height originalImage_width ~] = size(testImage);
     ratioWidthToHeight_original = originalImage_width/originalImage_height;
 
