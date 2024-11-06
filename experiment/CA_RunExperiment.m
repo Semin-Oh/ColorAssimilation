@@ -224,9 +224,6 @@ try
             case 'keyboard'
                 GetKeyPress;
         end
-        % Make a small delay here in case the button is accidently pressed
-        % again which will affect the next trial.
-        pause(1);
         disp('Experiment is going to be started!');
 
         %% Color matching experiment happens here.
