@@ -34,8 +34,8 @@ switch sysInfo.userShortName
         % Office computer.
         baseFiledir = '~/Documents/MATLAB';
     case 'gegenfurtner'
-        % Lab Linux computer.
-        baseFiledir = '/home/gegenfurtner/Documents/MATLAB';
+        % Lab Linux computer Dropbox directory.
+        baseFiledir = '/home/gegenfurtner/Dropbox/Giessen/projects';
     otherwise
         % This is for Semin's laptop.
         baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
@@ -122,7 +122,7 @@ try
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
     expParams.expKeyType = 'gamepad';
-    
+
     expParams.stripeColorOptions = {'red','green','blue'};
     nStripeColors = length(expParams.stripeColorOptions);
     expParams.stripeColorRandOrder = randperm(nStripeColors);
@@ -133,7 +133,7 @@ try
     %% Experiment starts from here.
     %
     % Get the directory where the test images are saved.
-    testImageFiledir = fullfile(testFiledir,'image','TestImages');
+    testImageFiledir = fullfile(testFiledir,'image','TestImagesEXP');
 
     % Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
