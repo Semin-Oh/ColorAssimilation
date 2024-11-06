@@ -99,6 +99,8 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 %                         the different levels of the color corrections.
 %    10/29/24    smo    - Color correction part has been substituted with
 %                         a function.
+%    11/05/24    smo    - Now the image is set to the same size before
+%                         placing it on the canvas.
 
 %% Set variables.
 arguments
