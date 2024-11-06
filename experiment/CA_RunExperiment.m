@@ -20,6 +20,7 @@
 %                       file name changed.
 %    09/12/24  smo    - Routine is working with the gamepad.
 %    11/05/24  smo    - Now running three primaries as one session.
+%    11/06/24  smo    - Lab Linux computer using GitKraken from this day.
 
 %% Initialize.
 close all; clear;
@@ -34,7 +35,7 @@ switch sysInfo.userShortName
         baseFiledir = '~/Documents/MATLAB';
     case 'gegenfurtner'
         % Lab Linux computer.
-        baseFiledir = '/home/gegenfurtner/Desktop/SEMIN';
+        baseFiledir = '/home/gegenfurtner/Documents/MATLAB';
     otherwise
         % This is for Semin's laptop.
         baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
@@ -43,14 +44,6 @@ end
 % Set repository name.
 projectName = 'ColorAssimilation';
 testFiledir = fullfile(baseFiledir,projectName);
-
-% Add to the path here.
-if isfolder(testFiledir)
-    addpath(testFiledir);
-    fprintf('Directory has been added to the path!: %s \n',testFiledir);
-else
-    fprintf('No such directory exist: %s \n',testFiledir);
-end
 
 %% Get some input to initiate.
 %
@@ -129,6 +122,7 @@ try
     expParams.postColorCorrectDelaySec = 0.1;
     expParams.subjectName = subjectName;
     expParams.expKeyType = 'gamepad';
+    
     expParams.stripeColorOptions = {'red','green','blue'};
     nStripeColors = length(expParams.stripeColorOptions);
     expParams.stripeColorRandOrder = randperm(nStripeColors);
