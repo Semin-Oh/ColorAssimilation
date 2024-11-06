@@ -140,7 +140,7 @@ try
     %
     % Get the directory where the test images are saved.
     testImageFiledir = fullfile(testFiledir,'image','TestImages');
-    
+
     % Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
@@ -269,6 +269,21 @@ try
             end
         end
 
+        %% Show the screen every after finishing one primary session.
+        %
+        % It takes a while saving the results and moving on to the next primary
+        % session, so here we show some screen to say it will take a while.
+        messageAfterSessionImage_1stLine = 'Session completed';
+        messageAfterSessionImage_2ndLine = 'Wait for the next session started';
+
+        afterSessionInstructionImage = insertText(initialImageBg,[imageSize(2)*ratioMessageInitialHorz imageSize(1)/2-imageSize(1)*ratioMessageInitialVert; imageSize(2)*ratioMessageInitialHorz imageSize(1)/2+imageSize(1)*ratioMessageInitialVert],...
+            {messageAfterSessionImage_1stLine messageAfterSessionImage_2ndLine},...
+            'fontsize',40,'Font',instructionImageFont,'BoxColor',[1 1 1],'BoxOpacity',0,'TextColor','black','AnchorPoint','LeftCenter');
+
+        % Display an image texture of the initial image.
+        [afterSessionImageTexture afterSessionImageWindowRect rng] = MakeImageTexture(afterSessionInstructionImage, window, windowRect,'verbose',false);
+        FlipImageTexture(afterSessionImageTexture, window, windowRect,'verbose',false);
+
         %% Save the data. We will save the results separately per each primary.
         if (SAVETHERESULTS)
             % Save out the data only if we reached the desired number of trials.
@@ -299,7 +314,7 @@ try
             end
         end
     end
-    
+
     %% Close the PTB screen once the experiment is done.
     CloseScreen;
 
