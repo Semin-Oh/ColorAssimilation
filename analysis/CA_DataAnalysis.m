@@ -10,6 +10,7 @@
 %    10/09/24    smo    - Now load the experiment data from the Dropbox.
 %    10/23/24    smo    - Now we can get a result of all test images and
 %                         all primaries at once.
+%    11/06/24    smo    - Now it works on Lab Linux computer.
 
 %% Initialize.
 close all; clear;
@@ -21,9 +22,12 @@ sysInfo = GetComputerInfo();
 
 % Set the file dir differently depending on the computer.
 switch sysInfo.userShortName
+    % Semin office computer.
     case 'semin'
-        % Semin office computer.
         baseFiledir = '/Users/semin/Dropbox (Personal)/Giessen/projects';
+        % Lab Linux computer.
+    case 'gegenfurtner'
+        baseFiledir = '/home/gegenfurtner/Dropbox/Giessen/projects';
     otherwise
         % Semin's laptop.
         baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\Giessen\projects';
