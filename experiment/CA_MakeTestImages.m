@@ -133,7 +133,7 @@ for cc = 1:nColorStripeOptions
         case 'green'
             maxIntensityColorCorrect = 0.6;
         case 'blue'
-            maxIntensityColorCorrect = 0.5;
+            maxIntensityColorCorrect = 0.6;
     end
     imageParams.nTestPoints = 20;
     imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
