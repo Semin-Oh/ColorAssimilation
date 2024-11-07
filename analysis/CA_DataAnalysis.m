@@ -284,10 +284,10 @@ for ss = 1:nSubjects
                     % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
                     %     'Display','Target Primary','Location','southeast','fontsize',11);
                 end
-
-                % Show the progress.
-                fprintf('Progress - Primary (%d/%d) / Test image (%d/%d) \n',pp,nPrimaries,tt,nTestImages);
             end
+
+            % Display the progress.
+            fprintf('Progress - Primary (%d/%d) \n',pp,nPrimaries);
 
             % Save out the assmiliation index (AI) results.
             switch pp
