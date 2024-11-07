@@ -130,7 +130,7 @@ while true
 
         % Update the image here.
         testImage = testImages{idxImage,idxColorCorrectImage};
-        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage','filled-circle','verbose', false);
+        [testImageTexture testImageWindowRect rng] = MakeImageTexture(testImage, window, windowRect,'addFixationPointImage',options.imageFixationType,'verbose', false);
         FlipImageTexture(testImageTexture, window, windowRect,'verbose',false);
         fprintf('Test image is now displaying: Color correct level (%d/%d) \n',idxColorCorrectImage,nColorCorrectPoints);
 
