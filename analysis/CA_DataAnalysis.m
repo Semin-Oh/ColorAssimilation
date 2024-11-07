@@ -280,7 +280,7 @@ for ss = 1:nSubjects
                 % Adding legend once per each primary.
                 if tt == nTestImages
                     legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-                        'Display','Target Primary','Location','outsidesoutheast','fontsize',11);
+                        'Display','Target Primary','Location','southeastoutside','fontsize',11);
                     % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
                     %     'Display','Target Primary','Location','southeast','fontsize',11);
                 end
