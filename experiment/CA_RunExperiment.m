@@ -127,6 +127,15 @@ try
     nStripeColors = length(expParams.stripeColorOptions);
     expParams.stripeColorRandOrder = randperm(nStripeColors);
 
+    % Fixation point over different experiment mode. We will not add
+    % fixation point for the foveal session.
+    switch expMode
+        case 'periphery'
+            expParams.imageFixationType = 'filled-circle';
+        case 'fovea'
+            expParams.imageFixationType = [];
+    end
+
     % etc.
     SAVETHERESULTS = true;
 
@@ -247,7 +256,7 @@ try
                 data.matchingIntensityColorCorrect(ii,rr) = GetOneRespColorMatching(images.testImage,idxImage,idxColorCorrectImage,...
                     images.imageParams.intensityColorCorrect,window,windowRect,...
                     'expKeyType',expParams.expKeyType,'postColorCorrectDelaySec',expParams.postColorCorrectDelaySec,...
-                    'verbose',true);
+                    'imageFixationType',expParams.imageFixationType,'verbose',true);
 
                 % Display a null image again and pause for a second before
                 % displaying the next test image.
