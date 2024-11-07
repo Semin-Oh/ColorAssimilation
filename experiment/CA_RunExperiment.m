@@ -21,6 +21,8 @@
 %    09/12/24  smo    - Routine is working with the gamepad.
 %    11/05/24  smo    - Now running three primaries as one session.
 %    11/06/24  smo    - Lab Linux computer using GitKraken from this day.
+%    11/07/24  smo    - Now fixation point not showing for the foveal
+%                       session.
 
 %% Initialize.
 close all; clear;
