@@ -270,22 +270,22 @@ for ss = 1:nSubjects
                 T_uv = xyTouv(T_xy);
                 plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
 
-                % TEMP - Trajectory when we fit to find the mean chromaticity of
-                % the color corrected image.
-                % plot(x,y,'-','LineWidth',2,'Color',markerFaceColor);
-
                 % Figure stuff.
                 xlim([0 0.7]);
                 ylim([0 0.7]);
                 xlabel('CIE u-prime','fontsize',13);
                 ylabel('CIE v-prime','fontsize',13);
-                legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-                    'Display','Target Primary','Location','southeast','fontsize',11);
-                % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-                %     'Display','Target Primary','Location','southeast','fontsize',11);
                 title(sprintf('Test Image %d (AI = %.2f) \n Image = (%s)',tt,AI(tt),testImageNames{tt}));
 
-                % Show the progress
+                % Adding legend once per each primary.
+                if tt == nTestImages
+                    legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
+                        'Display','Target Primary','Location','outsidesoutheast','fontsize',11);
+                    % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
+                    %     'Display','Target Primary','Location','southeast','fontsize',11);
+                end
+
+                % Show the progress.
                 fprintf('Progress - Primary (%d/%d) / Test image (%d/%d) \n',pp,nPrimaries,tt,nTestImages);
             end
 
