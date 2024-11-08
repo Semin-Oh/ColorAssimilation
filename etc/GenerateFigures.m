@@ -10,13 +10,14 @@
 clear all; close all;
 
 %% Load images.
+image = imread("rudolf.png");
 
 %% Make image canvas.
 %
 % Generate the test images with different levels of color corrections to
 % see how the color coordinates change over the power of color correction.
 %
-% MakeImageCanvs
+canvas = MakeImageCanvas(image,'verbose',true);
 
 %% Plot it.
 
