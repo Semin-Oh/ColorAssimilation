@@ -4,7 +4,7 @@
 %
 % See also:
 %    CA_RunExperiment.
-
+ 
 % History:
 %    09/09/24    smo    - Started on it.
 %    10/09/24    smo    - Now load the experiment data from the Dropbox.
@@ -83,7 +83,7 @@ for ss = 1:nSubjects
         figure; hold on;
         figurePosition = [0 0 1200 500];
         set(gcf,'Position',figurePosition);
-        sgtitle(sprintf('Experiment mode = (%s)',expMode));
+        sgtitle(sprintf('Subject = (%s) / Experiment mode = (%s)',subjectName,expMode));
         fprintf('Now starting to analyze the data - (%s) \n',expMode);
 
         % Make a loop for analyzing for all primaries.
@@ -255,13 +255,13 @@ for ss = 1:nSubjects
                 plot(uvY_colorCorrectImage(1,:),uvY_colorCorrectImage(2,:),'.','MarkerEdgeColor',markerFaceColor);
 
                 % Plot the mean chromaticity.
-                plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor',[0.2 0.2 0.2],'markeredgecolor','k');
-                plot(mean_uvY_testImageStripe(1),mean_uvY_testImageStripe(2),'o','MarkerFaceColor',[1 1 0],'markeredgecolor','k');
-                plot(mean_uvY_colorCorrectImage(1),mean_uvY_colorCorrectImage(2),'o','MarkerFaceColor',markerFaceColor,'markeredgecolor','k');
+                f_meanRaw = plot(mean_uvY_testImageRaw(1),mean_uvY_testImageRaw(2),'o','MarkerFaceColor',[0.2 0.2 0.2],'markeredgecolor','k');
+                f_meanStripes = plot(mean_uvY_testImageStripe(1),mean_uvY_testImageStripe(2),'o','MarkerFaceColor',[1 1 0],'markeredgecolor','k');
+                f_meanColorCorrect = plot(mean_uvY_colorCorrectImage(1),mean_uvY_colorCorrectImage(2),'o','MarkerFaceColor',markerFaceColor,'markeredgecolor','k');
 
                 % Plot the display gamut with the target primary highlighted.
                 plot([uv_displayPrimary(1,:) uv_displayPrimary(1,1)], [uv_displayPrimary(2,:) uv_displayPrimary(2,1)],'k-');
-                plot(uv_displayTargetPrimary(1),uv_displayTargetPrimary(2),'^','markerfacecolor',markerFaceColor,'markeredgecolor','k','MarkerSize',8);
+                f_targetPrimary = plot(uv_displayTargetPrimary(1),uv_displayTargetPrimary(2),'^','markerfacecolor',markerFaceColor,'markeredgecolor','k','MarkerSize',8);
 
                 % Plot the Plackian locus.
                 load T_xyzJuddVos
@@ -279,8 +279,11 @@ for ss = 1:nSubjects
 
                 % Adding legend once per each primary.
                 if tt == nTestImages
-                    legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
-                        'Display','Target Primary','Location','southeastoutside','fontsize',11);
+                    legend([f_meanRaw f_meanStripes f_meanColorCorrect f_targetPrimary],...
+                        'Mean(raw)','Mean(stripes)','Mean(matched)','Stripe',...
+                        'Location','southeast','fontsize',11);
+                    % legend('raw','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
+                    %     'Display','Target Primary','Location','southeast','fontsize',11);
                     % legend('raw','stripes','matched','Mean(raw)','Mean(stripes)','Mean(matched)',...
                     %     'Display','Target Primary','Location','southeast','fontsize',11);
                 end
