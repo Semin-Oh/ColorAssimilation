@@ -46,8 +46,9 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 %
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
-targetSubjects = subjectNames;
-nSubjects = length(targetSubjects);
+targetSubjectsNames = subjectNames;
+targetSubjectsNames = {'Semin'};
+nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
 % from each subject.
@@ -71,7 +72,7 @@ AI_fovea = [];
 for ss = 1:nSubjects
     % Get the subject name to load the raw data. For now, the raw data is
     % saved in the folder with subject's name. We will update it later on.
-    subjectName = subjectNames{ss};
+    subjectName = targetSubjectsNames{ss};
     fprintf('Data loading - Subject = (%s) / Number of subjects (%d/%d) \n',subjectName,ss,nSubjects);
 
     % Loop for both experimental mode periphery and foveal.
@@ -268,7 +269,7 @@ for ss = 1:nSubjects
                 T_XYZ = T_xyzJuddVos;
                 T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
                 T_uv = xyTouv(T_xy);
-                plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+                plot([T_uv(1,1:65) T_uv(1,1)], [T_uv(2,1:65) T_uv(2,1)], 'k-');
 
                 % Figure stuff.
                 xlim([0 0.7]);
