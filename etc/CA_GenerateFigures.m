@@ -11,6 +11,8 @@ clear all; close all;
 
 %% Set variables.
 verbose = true;
+addImageRight = false;
+saveImages = true;
 
 %% Load images.
 testFiledir = '/Users/semin/Dropbox (Personal)/Giessen/projects/ColorAssimilation/image/RawImages';
@@ -21,14 +23,18 @@ image = imread(fullfile(testFiledir,testImagename));
 %
 % Generate the test images with different levels of color corrections to
 % see how the color coordinates change over the power of color correction.
-targetIntensityColorCorrect = [0:0.1:1];
+targetIntensityColorCorrect = [0:0.1:0.7];
 nTargets = length(targetIntensityColorCorrect);
 
 for ii = 1:nTargets
-    canvas = MakeImageCanvas(image,'verbose',verbose,'intensityColorCorrect',targetIntensityColorCorrect(ii));
+    close all;
+    canvas = MakeImageCanvas(image,'verbose',verbose,'intensityColorCorrect',targetIntensityColorCorrect(ii),...
+        'addImageRight',addImageRight);
 
-    % Save it.
-    saveFiledir = '~/Desktop/';
-    saveFilename = sprintf('temp_%d.png',ii);
-    saveas(gcf,fullfile(saveFiledir,saveFilename));
+    % Save it if you want.
+    if (saveImages)
+        saveFiledir = '~/Desktop/';
+        saveFilename = sprintf('foveal_%d.png',ii);
+        saveas(figure(1),fullfile(saveFiledir,saveFilename));
+    end
 end
