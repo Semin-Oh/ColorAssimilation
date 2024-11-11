@@ -585,8 +585,8 @@ if (options.verbose)
 
     % Plot the color profiles on the u'v' coordinates.
     figure; hold on;
-    plot(uvY_testImage(1,:),uvY_testImage(2,:),'k+');
-    plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k.');
+    plot(uvY_testImage(1,:),uvY_testImage(2,:),'k.');
+    % plot(uvY_testImageStripe(1,:),uvY_testImageStripe(2,:),'k+');
     plot(uvY_colorCorrectedImage(1,:),uvY_colorCorrectedImage(2,:),'r.');
 
     % Display gamut.
@@ -606,8 +606,10 @@ if (options.verbose)
     ylim([0 0.7]);
     xlabel('CIE u-prime','fontsize',13);
     ylabel('CIE v-prime','fontsize',13);
-    legend('Original','Stripes','Color-correct','Display gamut',...
-        'Location','southeast','fontsize',11);
+    legend('Original','Color-correct','Display gamut',...
+        'Location','southeast','fontsize',11);    
+    % legend('Original','Stripes','Color-correct','Display gamut',...
+    %     'Location','southeast','fontsize',11);
     title('Image profile on CIE uv-prime coordinates');
 end
 
