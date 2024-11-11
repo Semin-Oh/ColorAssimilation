@@ -597,7 +597,9 @@ if (options.verbose)
     T_XYZ = T_xyzJuddVos;
     T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
     T_uv = xyTouv(T_xy);
-    plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+    idxFarRightPointuv = 65;
+    idxFarBelowPointuv = 3;
+    plot([T_uv(1,1:idxFarRightPointuv) T_uv(1,idxFarBelowPointuv)], [T_uv(2,1:idxFarRightPointuv) T_uv(2,idxFarBelowPointuv)], 'k-');
 
     % Figure stuffs.
     xlim([0 0.7]);
