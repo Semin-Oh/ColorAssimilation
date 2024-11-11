@@ -107,7 +107,7 @@ if (PLOTRAWIMAGES)
     sgtitle('Raw test images');
     for ii = 1:nTestImages
         subplot(2,ceil(nTestImages/2),ii);
-        imshow(images{ii});
+        imshow(DetectImageContent(images{ii}));
         fprintf('Raw test images have been loaded - (n = %d) \n',nTestImages);
     end
 end
