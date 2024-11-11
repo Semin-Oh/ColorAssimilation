@@ -37,4 +37,7 @@ hAngle = relativeX * hAnglePerPixel; % This assumes a linear spread on a cylindr
 % Calculate the vertical angle (using flat-plane approximation)
 relativeY = yPixel - (totalHeightPixels / 2);
 vAngle = relativeY * vAnglePerPixel;
+
+% Display the results.
+fprintf('Image center FOV (Horizontal, Vertical): (%.2f, %.2f) degrees\n', hAngle, vAngle);
 end
