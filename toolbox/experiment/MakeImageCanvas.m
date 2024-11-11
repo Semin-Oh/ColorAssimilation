@@ -437,6 +437,12 @@ if ~isempty(testImage)
                 testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_colorCorrectedImage(3,ii);
             end
     end
+    
+    % Make image with no background for plot.
+    for ii = 1:length(idxImageHeight)
+        testImageRaw_noBG(idxImageHeight(ii),idxImageWidth(ii),:) = testImageRaw(idxImageHeight(ii), idxImageWidth(ii), :);
+        testImageColorCorrect_noBG(idxImageHeight(ii),idxImageWidth(ii),:) = testImageColorCorrect(idxImageHeight(ii), idxImageWidth(ii), :);
+    end
 
     % Display the images if you want.
     if (options.verbose)
@@ -445,18 +451,18 @@ if ~isempty(testImage)
 
         % Original image.
         subplot(1,3,1);
-        imshow(uint8(testImageRaw));
+        imshow(uint8(testImageRaw_noBG));
         title('Original');
 
         % Image with stripes.
         subplot(1,3,2);
         imshow(uint8(testImageStripe));
-        title('From the canvas');
+        title('Stripes-on');
 
         % Color corrected image.
         subplot(1,3,3);
-        imshow(uint8(testImageColorCorrect));
-        title('Color correction');
+        imshow(uint8(testImageColorCorrect_noBG));
+        title('Color-corrected');
     end
 
     %% Now add the color corrected image to the canvas.
