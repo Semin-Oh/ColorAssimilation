@@ -47,7 +47,7 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
 targetSubjectsNames = subjectNames;
-% targetSubjectsNames = {'Semin'};
+targetSubjectsNames = {'Semin'};
 nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
@@ -396,7 +396,7 @@ mean_AI_fovea_blue = mean(AI_fovea_all_blue,1);
 % Plot here.
 figure; hold on;
 sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
-numYaxisLimits = [0.3 1.5];
+numYaxisLimits = [0.3 1.4];
 
 % Red.
 subplot(nPrimaries,1,1); hold on;
@@ -455,7 +455,6 @@ idxFaceImages = ~(or(strcmp(testImageNames,'brownegg'),strcmp(testImageNames,'wh
 % Plot happens here.
 figure; hold on;
 title(sprintf('AI: Peripheral vs. Foveal (N=%d)',nSubjects));
-subtitle(sprintf('Face images are marked with bigger marker (nFaces = %d)',sum(idxFaceImages)));
 numAxisLimits = [0 2];
 
 % Mean AI results (ALL).
@@ -475,8 +474,7 @@ xlabel('AI (Peripheral)','fontsize',13);
 ylabel('AI (Foveal)','fontsize',13);
 xlim(numAxisLimits);
 ylim(numAxisLimits);
-legend([f_1 f_2 f_3],sprintf('Mean AI (red), N=%d',nSubjects),sprintf('Mean AI (green), N=%d',nSubjects),...
-    sprintf('Mean AI (blue), N=%d',nSubjects),'location','southeast');
+legend([f_1 f_2 f_3],'Mean A')
 
 %% Plot faces vs. non-faces.
 
