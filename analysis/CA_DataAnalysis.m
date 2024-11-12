@@ -297,22 +297,189 @@ for ss = 1:nSubjects
             switch pp
                 case 1
                     AI_all.red = AI;
+                    c_all.red = matchingIntensityColorCorrect_sorted;
                 case 2
                     AI_all.green = AI;
+                    c_all.green = matchingIntensityColorCorrect_sorted;
                 case 3
                     AI_all.blue = AI;
+                    c_all.blue = matchingIntensityColorCorrect_sorted;
             end
+
+            % Save out the raw exp data.
         end
 
         % Save out the AI results over different experimental mode.
         switch expMode
             case 'periphery'
                 AI_periphery{ss} = AI_all;
+                c_periphery{ss} = c_all;
             case 'fovea'
                 AI_fovea{ss} = AI_all;
+                c_fovea{ss} = c_all;
         end
     end
 end
+
+%% Plot some more results here.
+%
+% Color correction coefficient (c). This is the raw data from the
+% experiment.
+figure; hold on;
+xAxisImages = linspace(1,nTestImages,nTestImages);
+sgtitle(sprintf('Subject = (%s)',subjectName));
+
+% Red.
+subplot(nPrimaries,1,1); hold on;
+f_1 = plot(xAxisImages,c_periphery{1}.red','k.');
+f_2 = plot(xAxisImages,c_fovea{1}.red','k*');
+f_3 = plot(xAxisImages,mean(c_periphery{1}.red,2)','o','markerfacecolor','r','markeredgecolor','k');
+f_4 = plot(xAxisImages,mean(c_fovea{1}.red,2)','^','markerfacecolor','r','markeredgecolor','k');
+ylim([0 0.6]);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('Coefficient c','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'Raw (peripheral)','Raw (foveal)','Mean (peripheral)','Mean (foveal)','Location','southeastoutside');
+title('Primary = (Red)');
+
+% Green.
+subplot(nPrimaries,1,2); hold on;
+f_1 = plot(xAxisImages,c_periphery{1}.green','k.');
+f_2 = plot(xAxisImages,c_fovea{1}.green','k*');
+f_3 = plot(xAxisImages,mean(c_periphery{1}.green,2)','o','markerfacecolor','g','markeredgecolor','k');
+f_4 = plot(xAxisImages,mean(c_fovea{1}.green,2)','^','markerfacecolor','g','markeredgecolor','k');
+ylim([0 0.6]);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('Coefficient c','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'Raw (peripheral)','Raw (foveal)','Mean (peripheral)','Mean (foveal)','Location','southeastoutside');
+title('Primary = (Green)');
+
+% Blue.
+subplot(nPrimaries,1,3); hold on;
+f_1 = plot(xAxisImages,c_periphery{1}.blue','k.');
+f_2 = plot(xAxisImages,c_fovea{1}.blue','k*');
+f_3 = plot(xAxisImages,mean(c_periphery{1}.blue,2)','o','markerfacecolor','b','markeredgecolor','k');
+f_4 = plot(xAxisImages,mean(c_fovea{1}.blue,2)','^','markerfacecolor','b','markeredgecolor','k');
+ylim([0 0.6]);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('Coefficient c','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'Raw (peripheral)','Raw (foveal)','Mean (peripheral)','Mean (foveal)','Location','southeastoutside');
+title('Primary = (Blue)');
+
+%% Plot the AI results.
+%
+% Rearrange the data array.
+for ss = 1:nSubjects
+    AI_periphery_all_red(ss,:) = AI_periphery{ss}.red;
+    AI_periphery_all_green(ss,:) = AI_periphery{ss}.green;
+    AI_periphery_all_blue(ss,:) = AI_periphery{ss}.blue;
+
+    AI_fovea_all_red(ss,:) = AI_fovea{ss}.red;
+    AI_fovea_all_green(ss,:) = AI_fovea{ss}.green;
+    AI_fovea_all_blue(ss,:) = AI_fovea{ss}.blue;
+end
+
+% Calculate the mean AI.
+mean_AI_periphery_red = mean(AI_periphery_all_red,1);
+mean_AI_periphery_green = mean(AI_periphery_all_green,1);
+mean_AI_periphery_blue = mean(AI_periphery_all_blue,1);
+
+mean_AI_fovea_red = mean(AI_fovea_all_red,1);
+mean_AI_fovea_green = mean(AI_fovea_all_green,1);
+mean_AI_fovea_blue = mean(AI_fovea_all_blue,1);
+
+% Plot here.
+figure; hold on;
+sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
+numYaxisLimits = [0.3 1.4];
+
+% Red.
+subplot(nPrimaries,1,1); hold on;
+f_1=plot(xAxisImages,AI_periphery_all_red,'k.');
+f_2=plot(xAxisImages,AI_fovea_all_red,'k*');
+f_3=plot(xAxisImages,mean_AI_periphery_red,'o','markerfacecolor','r','markeredgecolor','k');
+f_4=plot(xAxisImages,mean_AI_fovea_red,'^','markerfacecolor','r','markeredgecolor','k');
+ylim(numYaxisLimits);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('AI','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'AI (peripheral)','AI (foveal)',...
+    sprintf('Mean (peripheral), N=%d',nSubjects),sprintf('Mean (foveal), N=%d',nSubjects),...
+    'Location','southeastoutside');
+title('Primary = (Red)');
+
+% Green.
+subplot(nPrimaries,1,2); hold on;
+f_1=plot(xAxisImages,AI_periphery_all_green,'k.');
+f_2=plot(xAxisImages,AI_fovea_all_green,'k*');
+f_3=plot(xAxisImages,mean_AI_periphery_green,'o','markerfacecolor','g','markeredgecolor','k');
+f_4=plot(xAxisImages,mean_AI_fovea_green,'^','markerfacecolor','g','markeredgecolor','k');
+ylim(numYaxisLimits);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('AI','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'AI (peripheral)','AI (foveal)',...
+    sprintf('Mean (peripheral), N=%d',nSubjects),sprintf('Mean (foveal), N=%d',nSubjects),...
+    'Location','southeastoutside');
+title('Primary = (Green)');
+
+% Blue.
+subplot(nPrimaries,1,3); hold on;
+f_1=plot(xAxisImages,AI_periphery_all_blue,'k.');
+f_2=plot(xAxisImages,AI_fovea_all_blue,'k*');
+f_3=plot(xAxisImages,mean_AI_periphery_blue,'o','markerfacecolor','b','markeredgecolor','k');
+f_4=plot(xAxisImages,mean_AI_fovea_blue,'^','markerfacecolor','b','markeredgecolor','k');
+ylim(numYaxisLimits);
+xlabel('Test Images','FontSize',13);
+xticks(xAxisImages);
+xticklabels(testImageNames);
+ylabel('AI','FontSize',13);
+legend([f_1(1) f_2(1) f_3 f_4], 'AI (peripheral)','AI (foveal)',...
+    sprintf('Mean (peripheral), N=%d',nSubjects),sprintf('Mean (foveal), N=%d',nSubjects),...
+    'Location','southeastoutside');
+title('Primary = (Blue)');
+
+%% Plot Pripheral vs. Foveal.
+%
+% Extract the mean AI results for the faces. We will highlight them in the
+% figure.
+idxFaceImages = ~(or(strcmp(testImageNames,'brownegg'),strcmp(testImageNames,'whiteegg')));
+
+% Plot happens here.
+figure; hold on;
+title(sprintf('AI: Peripheral vs. Foveal (N=%d)',nSubjects));
+subtitle(sprintf('Face images are marked with bigger marker (nFaces = %d)',sum(idxFaceImages)));
+numAxisLimits = [0 2];
+
+% Mean AI results (ALL).
+f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
+f_2=plot(mean_AI_periphery_green,mean_AI_fovea_green,'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',4);
+f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',4);
+
+% Mean AI results (FACES).
+f_4=plot(mean_AI_periphery_red(idxFaceImages),mean_AI_fovea_red(idxFaceImages),'ro','MarkerSize',8);
+f_5=plot(mean_AI_periphery_green(idxFaceImages),mean_AI_fovea_green(idxFaceImages),'go','MarkerSize',8);
+f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
+
+% 45-deg line.
+f_4=plot([0 10],[0 10],'k-');
+
+xlabel('AI (Peripheral)','fontsize',13);
+ylabel('AI (Foveal)','fontsize',13);
+xlim(numAxisLimits);
+ylim(numAxisLimits);
+legend([f_1 f_2 f_3],sprintf('Mean AI (red), N=%d',nSubjects),sprintf('Mean AI (green), N=%d',nSubjects),...
+    sprintf('Mean AI (blue), N=%d',nSubjects),'location','southeast');
+
+%% Plot faces vs. non-faces.
+
 
 %% Save out something if you want.
 SAVETHERESULTS = false;
