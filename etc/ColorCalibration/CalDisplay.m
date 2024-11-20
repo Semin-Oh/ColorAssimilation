@@ -19,7 +19,7 @@ verbose = true;
 % but the spectra was measured in 8-bit system.
 %
 % Load the spectrum data.
-testFiledir = '/Users/semin/Documents/MATLAB/ColorAssimilation/ColorCalibration/rawdata';
+testFiledir = '/Users/semin/Documents/MATLAB/ColorAssimilation/etc/ColorCalibration/rawdata';
 testFilenameSpd = fullfile(testFiledir,'spectra.mat');
 spdData = load(testFilenameSpd);
 
