@@ -31,27 +31,28 @@ try
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
-
+q
     %% Make image canvas to present.
     %
     % Set variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
     whichDisplay = 'curvedDisplay';
     testImageSize = 0.65;
-    position_leftImage_x = 0.36;
+    position_leftImage_x = 0.44;
     colorStripesOptions = {'red','green','blue'};
     idxColorStripes = 1;
     stripe_height_pixel = 5;
     numColorCorrectChannelOptions = [1 3];
     numColorCorrectChannel = 1;
-    intensityColorCorrect = 0.1;
+    intensityColorCorrect = 0.2;
+    instensityStripe = 255*0.85;
     addFixationPointImage = 'filled-circle';
     verbose = false;
 
     % More variables to control the image canvas in real time.
-    stepsize_imagePosition = 0.02;
+    stepsize_imagePosition = 0.015;
     stepsize_testImage_size = 0.1;
-    stepsize_height_pixel = 5;
+    stepsize_height_pixel = 3;
     stepsize_intensityColorCorrect = 0.1;
 
     % Make a loop here to update the canvas in real time.
@@ -62,7 +63,7 @@ try
         % Here we generate an image canvas so that we can present thos whole
         % image as a stimulus.
         imageCanvas = MakeImageCanvas(testImage,'whichDisplay',whichDisplay,'sizeCanvas',sizeCanvas,'testImageSize',testImageSize,...
-            'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,...
+            'position_leftImage_x',position_leftImage_x,'whichColorStripes',whichColorStripes,'intensityStripe',instensityStripe,...
             'stripeHeightPixel',stripe_height_pixel,'nChannelsColorCorrect',numColorCorrectChannel,'intensityColorCorrect',intensityColorCorrect,...
             'verbose',verbose);
 
