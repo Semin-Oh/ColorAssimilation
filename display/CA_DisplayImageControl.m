@@ -31,7 +31,7 @@ try
     %% Open the PTB screen.
     initialScreenSetting = [0.5 0.5 0.5]';
     [window windowRect] = OpenPlainScreen(initialScreenSetting);
-q
+
     %% Make image canvas to present.
     %
     % Set variables.
