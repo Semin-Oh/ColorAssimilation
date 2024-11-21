@@ -14,7 +14,7 @@
 %    04/10/24  smo    - Made it to be able to control image elements in
 %                       real time.
 %    06/19/24  smo    - Added one more variable to control: Level of color
-%                       correction.
+%                       correction.q
 %    06/20/24  smo    - Corrected directory and variable names.
 %    11/21/24  smo    - Changed the script name.
 
@@ -37,18 +37,19 @@ try
     % Set variables.
     sizeCanvas = [windowRect(3) windowRect(4)];
     whichDisplay = 'curvedDisplay';
-    testImageSize = 0.5;
-    position_leftImage_x = 0.35;
+    testImageSize = 0.65;
+    position_leftImage_x = 0.36;
     colorStripesOptions = {'red','green','blue'};
     idxColorStripes = 1;
     stripe_height_pixel = 5;
     numColorCorrectChannelOptions = [1 3];
     numColorCorrectChannel = 1;
     intensityColorCorrect = 0.1;
+    addFixationPointImage = 'filled-circle';
     verbose = false;
 
     % More variables to control the image canvas in real time.
-    stepsize_imagePosition = 0.05;
+    stepsize_imagePosition = 0.02;
     stepsize_testImage_size = 0.1;
     stepsize_height_pixel = 5;
     stepsize_intensityColorCorrect = 0.1;
@@ -75,7 +76,7 @@ try
         % Also, we will choose which location on the screen to present the image.
         ratioHorintalScreen = 0.5;
         ratioVerticalScreen = 0.5;
-        [imageTexture imageWindowRect rng] = MakeImageTexture(imageCanvas, window, windowRect, ...
+        [imageTexture imageWindowRect rng] = MakeImageTexture(imageCanvas, window, windowRect,'addFixationPointImage',addFixationPointImage, ...
             'ratioHorintalScreen',ratioHorintalScreen,'ratioVerticalScreen',ratioVerticalScreen,'verbose', false);
 
         %% Flip the PTB texture to display the image on the projector.
@@ -112,12 +113,6 @@ try
             if idxColorStripes > length(colorStripesOptions)
                 idxColorStripes = 1;
             end
-            % Switch the centered image either the stripes or color corrected.
-        elseif strcmp(keyPressed,'v')
-            idxCenterImage = idxCenterImage+1;
-            if idxCenterImage > length(centerImageOptions)
-                idxCenterImage = 1;
-            end
             % Switch the number of the channels to be corrected.
         elseif strcmp(keyPressed,'n')
             numColorCorrectChannel = setdiff(numColorCorrectChannelOptions,numColorCorrectChannel);
@@ -150,7 +145,7 @@ catch
 
     % Display the error message.
     tmpE.message
-    
+
     % Display the error code.
     for ee = 1:length(tmpE.stack)
         fprintf('Error code = (%s), line = (%d) \n',tmpE.stack(ee).name,tmpE.stack(ee).line);
