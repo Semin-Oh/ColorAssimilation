@@ -20,6 +20,8 @@
 %    10/15/24  smo    - Save out the color profile of the test images.
 %                       Also, saving out the name of the original test
 %                       images so that we know which images were used.
+%    11/21/24  smo    - Now set the same maximum ratio for color correction
+%                       for all three primaries.
 
 %% Initialize.
 close all; clear;
@@ -123,18 +125,9 @@ for cc = 1:nColorStripeOptions
     % Set the stripe color here.
     imageParams.whichColorStripes = colorStripeOptions{cc};
 
-    % Set the range of different intensity to correct the test image. We se
-    % the max correction level differently for the green primary as it
-    % seems we need further correction to match the color. We can updated
-    % it later on based on the pilot test.
-    switch imageParams.whichColorStripes
-        case 'red'
-            maxIntensityColorCorrect = 0.5;
-        case 'green'
-            maxIntensityColorCorrect = 0.6;
-        case 'blue'
-            maxIntensityColorCorrect = 0.6;
-    end
+    % Set the different levels of color corrections. Now we will set the
+    % same maximum ratio for all three primaries.
+    maxIntensityColorCorrect = 0.6;
     imageParams.nTestPoints = 20;
     imageParams.intensityColorCorrect = linspace(0,maxIntensityColorCorrect,imageParams.nTestPoints);
 
