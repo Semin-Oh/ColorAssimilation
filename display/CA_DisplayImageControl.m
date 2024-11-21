@@ -51,8 +51,8 @@ try
     stepsize_imagePosition = 0.05;
     stepsize_testImage_size = 0.1;
     stepsize_height_pixel = 5;
-    stepsize_intensityColorCorrect = 0.1;[]
-q
+    stepsize_intensityColorCorrect = 0.1;
+
     % Make a loop here to update the canvas in real time.
     while 1
         % Set the color of stripes and which image to put in the center.
