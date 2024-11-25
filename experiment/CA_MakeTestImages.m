@@ -49,7 +49,7 @@ switch imageParams.whichDisplay
 end
 imageParams.testImageSize = 0.65;
 imageParams.position_leftImage_x = 0.36;
-imageParams.stripeHeightPixel = 5;
+imageParams.stripeHeightPixel = 3;
 imageParams.colorCorrectMethod = 'uv';
 imageParams.nChannelsColorCorrect = 1;
 
