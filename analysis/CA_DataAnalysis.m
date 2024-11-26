@@ -25,13 +25,13 @@ sysInfo = GetComputerInfo();
 switch sysInfo.userShortName
     % Semin office computer.
     case 'semin'
-        baseFiledir = '/Users/semin/Dropbox (Personal)/Giessen/projects';
+        baseFiledir = '/Users/semin/Dropbox (Personal)/JLU/2) Projects';
         % Lab Linux computer.
     case 'gegenfurtner'
-        baseFiledir = '/home/gegenfurtner/Dropbox/Giessen/projects';
+        baseFiledir = '/home/gegenfurtner/Dropbox/JLU/2) Projects';
     otherwise
         % Semin's laptop.
-        baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\Giessen\projects';
+        baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\JLU\2) Projects';
 end
 
 % Set repository name.
@@ -47,8 +47,8 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 %
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
-targetSubjectsNames = subjectNames;
-% targetSubjectsNames = {'Semin'};
+% targetSubjectsNames = subjectNames;
+targetSubjectsNames = {'Semin'};
 nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
@@ -458,7 +458,7 @@ title('Primary = (Blue)');
 %
 % Extract the mean AI results for the faces. We will highlight them in the
 % figure.
-idxFaceImages = ~(or(strcmp(testImageNames,'brownegg'),strcmp(testImageNames,'whiteegg')));
+idxFaceImages = ~(or(strcmp(testImageNames,'potato'),strcmp(testImageNames,'whiteegg')));
 
 % Plot happens here.
 figure; hold on;
