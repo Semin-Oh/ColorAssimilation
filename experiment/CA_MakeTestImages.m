@@ -74,10 +74,10 @@ sysInfo = GetComputerInfo();
 switch sysInfo.userShortName
     case 'semin'
         % Office computer.
-        baseFiledir = '~/Dropbox (Personal)/Giessen/projects';
+        baseFiledir = '~/Dropbox (Personal)/JLU/2) Projects';
     otherwise
         % This is for Semin's laptop.
-        baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\Giessen\projects';
+        baseFiledir = 'C:\Users\ohsem\Dropbox (Personal)\JLU\2) Projects';
 end
 
 % Set repository name including the above path.
