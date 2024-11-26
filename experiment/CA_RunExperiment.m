@@ -37,10 +37,8 @@ switch sysInfo.userShortName
         baseFiledir = '~/Documents/MATLAB';
     case 'gegenfurtner'
         % Lab Linux computer Dropbox directory.
-        baseFiledir = '/home/gegenfurtner/Dropbox/Giessen/projects';
+        baseFiledir = '/home/gegenfurtner/Dropbox/JLU/2) Projects';
     otherwise
-        % This is for Semin's laptop.
-        baseFiledir = 'C:\Users\ohsem\Documents\MATLAB';
 end
 
 % Set repository name.
