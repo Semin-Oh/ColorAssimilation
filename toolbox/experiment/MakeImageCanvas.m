@@ -101,6 +101,9 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 %                         a function.
 %    11/05/24    smo    - Now the image is set to the same size before
 %                         placing it on the canvas.
+%    11/26/24    smo    - We give tolerance when we crop the actual image
+%                         content part so that we don't include the
+%                         residual pixels on the edge.
 
 %% Set variables.
 arguments
@@ -187,11 +190,19 @@ if ~isempty(testImage)
     idxImageWidth = [];
     bgSetting = squeeze(testImage(1,1,:));
 
+    % We will give tolerance to detect the image content so that we can not
+    % include the residual parts of the edges of the image content.
+    bgTolerance = 30;
+    bgSettingLow = bgSetting-bgTolerance;
+    bgSettingHigh = bgSetting+bgTolerance;
+
     % Here, we will extract the pixels that does not match with the color
     % of the background, which is the actual image.
     for hh = 1:testImage_height
         for ww = 1:testImage_width
-            areAllEqual = (testImageRaw(hh,ww,1)==bgSetting(1)) & (testImageRaw(hh,ww,2)==bgSetting(2)) & (testImageRaw(hh,ww,3)==bgSetting(3));
+            areAllEqual = (testImageRaw(hh,ww,1)>bgSettingLow(1) && testImageRaw(hh,ww,1)<=bgSettingHigh(1))...
+                & (testImageRaw(hh,ww,2)>bgSettingLow(2) && testImageRaw(hh,ww,2)<=bgSettingHigh(2))...
+                & (testImageRaw(hh,ww,3)>bgSettingLow(3) && testImageRaw(hh,ww,3)<=bgSettingHigh(3));
             if ~(areAllEqual)
                 idxImageHeight(end+1) = hh;
                 idxImageWidth(end+1) = ww;
@@ -402,7 +413,7 @@ if ~isempty(testImage)
             % same as the primary anchor.
             uvY_colorCorrectedImage_target(1:2,:) = MakeImageShiftChromaticity(uvY_testImage(1:2,:),uv_targetColorStripe,options.intensityColorCorrect);
             % uvY_colorCorrectedImage_target(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
-            
+
             % Calculate the digital RGB values from the u'v' coordinates to
             % convert it to the color corrected image.
             XYZ_colorCorrectedImage_target = uvYToXYZ(uvY_colorCorrectedImage_target);
@@ -420,7 +431,7 @@ if ~isempty(testImage)
             mean_uvY_target = mean(uvY_colorCorrectedImage_target,2);
             mean_uvY = mean(uvY_colorCorrectedImage,2);
             ratio_Y = mean_uvY_target(3)/mean_uvY(3);
-            
+
             % Get digital RGB values per each channel. We will use it to
             % plot the image profile in the end.
             red_colorCorrectedImage = RGB_colorCorrectedImage(1,:);
@@ -437,7 +448,7 @@ if ~isempty(testImage)
                 testImageColorCorrect(idxImageHeight(ii),idxImageWidth(ii),3) = RGB_colorCorrectedImage(3,ii);
             end
     end
-    
+
     % Make image with no background for plot.
     for ii = 1:length(idxImageHeight)
         testImageRaw_noBG(idxImageHeight(ii),idxImageWidth(ii),:) = testImageRaw(idxImageHeight(ii), idxImageWidth(ii), :);
@@ -613,7 +624,7 @@ if (options.verbose)
     xlabel('CIE u-prime','fontsize',13);
     ylabel('CIE v-prime','fontsize',13);
     legend('Original','Color-correct','Display gamut',...
-        'Location','southeast','fontsize',11);    
+        'Location','southeast','fontsize',11);
     % legend('Original','Stripes','Color-correct','Display gamut',...
     %     'Location','southeast','fontsize',11);
     title('Image profile on CIE uv-prime coordinates');
