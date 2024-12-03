@@ -246,7 +246,22 @@ for ss = 1:nSubjects
 
                 % The 'AI' value should be zero if there is no color assimiliation effect.
                 AI(tt) = m/a;
+                
+                % Here, we calculate the assimilation index (AI) in a
+                % couple different ways.
+                %
+                % AI in XYZ space. This is the original way to calculate
+                % the AI value. We will simply convert the mean uvY values
+                % into XYZ values to calculate.
+                mean_XYZ_testImageRaw = uvYToXYZ(mean_uvY_testImageRaw);
+                mean_XYZ_testImageStripe = uvYToXYZ(mean_uvY_testImageStripe);
+                mean_XYZ_colorCorrectImage = uvYToXYZ(mean_uvY_colorCorrectImage);
+                
+                m = norm(mean_XYZ_colorCorrectImage-mean_XYZ_testImageRaw);
+                a = norm(mean_XYZ_testImageStripe-mean_XYZ_testImageRaw);
 
+                AI_XYZ(tt) = m/a;              
+               
                 %% Plot the results.
                 %
                 subplot(nPrimaries,nTestImages,tt + nTestImages*(pp-1)); hold on;
@@ -377,6 +392,20 @@ for ss = 1:nSubjects
 
     % Save the figure if you want.
     % saveas(gcf,append(subjectName,'.png'));
+end
+
+%% Compare c vs AI values.
+figure; hold on;
+for ss = 1:nSubjects
+    subplot(1,nSubjects,ss); hold on;
+    plot(c_periphery{ss}.red, AI_periphery{ss}.red, 'r.');
+    plot(c_periphery{ss}.green, AI_periphery{ss}.green, 'g.');
+    plot(c_periphery{ss}.blue, AI_periphery{ss}.blue, 'b.');
+    xlabel('Coefficient c');
+    ylabel('Assimilation index (AI)');
+    xlim([0 0.6]);
+    ylim([0.7 1.8]);
+    title(sprintf('Subject = (%s)',targetSubjectsNames{ss}));
 end
 
 %% Plot the AI results.
