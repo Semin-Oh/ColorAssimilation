@@ -313,12 +313,15 @@ for ss = 1:nSubjects
             switch pp
                 case 1
                     AI_all.red = AI;
+                    AI_XYZ_all.red = AI_XYZ;
                     c_all.red = matchingIntensityColorCorrect_sorted;
                 case 2
                     AI_all.green = AI;
+                    AI_XYZ_all.green = AI_XYZ;
                     c_all.green = matchingIntensityColorCorrect_sorted;
                 case 3
                     AI_all.blue = AI;
+                    AI_XYZ_all.blue = AI_XYZ;
                     c_all.blue = matchingIntensityColorCorrect_sorted;
             end
 
@@ -329,9 +332,11 @@ for ss = 1:nSubjects
         switch expMode
             case 'periphery'
                 AI_periphery{ss} = AI_all;
+                AI_XYZ_periphery{ss} = AI_XYZ_all;
                 c_periphery{ss} = c_all;
             case 'fovea'
                 AI_fovea{ss} = AI_all;
+                AI_XYZ_fovea{ss} = AI_XYZ_all;
                 c_fovea{ss} = c_all;
         end
     end
@@ -407,6 +412,17 @@ for ss = 1:nSubjects
     ylim([0.7 1.8]);
     title(sprintf('Subject = (%s)',targetSubjectsNames{ss}));
 end
+
+%% Compare the AI values between the one based on u'v' vs. XYZ.
+figure; hold on;
+for ss = 1:nSubjects
+    plot(AI_fovea{ss}.red, AI_XYZ_fovea{ss}.red, 'r.');
+    plot(AI_fovea{ss}.green, AI_XYZ_fovea{ss}.green, 'g.');
+    plot(AI_fovea{ss}.blue, AI_XYZ_fovea{ss}.blue, 'b.');
+end
+xlabel('AI (uv)');
+ylabel('AI (XYZ)');
+axis square;
 
 %% Plot the AI results.
 %
