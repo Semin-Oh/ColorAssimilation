@@ -476,7 +476,7 @@ f_5=plot(mean_AI_periphery_green(idxFaceImages),mean_AI_fovea_green(idxFaceImage
 f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
 
 % 45-deg line.
-f_4=plot([0 10],[0 10],'k-');
+f_7=plot([0 10],[0 10],'k-');
 
 % Figure stuff.
 xlabel('AI (Peripheral)','fontsize',13);
