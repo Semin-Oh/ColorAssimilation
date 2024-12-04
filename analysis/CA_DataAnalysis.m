@@ -410,6 +410,7 @@ for ss = 1:nSubjects
     ylabel('Assimilation index (AI)');
     xlim([0 0.6]);
     ylim([0.7 1.8]);
+    axis square;
     title(sprintf('Subject = (%s)',targetSubjectsNames{ss}));
 end
 
@@ -420,6 +421,9 @@ for ss = 1:nSubjects
     plot(AI_fovea{ss}.green, AI_XYZ_fovea{ss}.green, 'g.');
     plot(AI_fovea{ss}.blue, AI_XYZ_fovea{ss}.blue, 'b.');
 end
+plot([0 10],[0 10],'k-');
+xlim([0 1.8]);
+ylim([0 1.8]);
 xlabel('AI (uv)');
 ylabel('AI (XYZ)');
 axis square;
