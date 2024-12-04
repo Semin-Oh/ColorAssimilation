@@ -58,12 +58,6 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 %    colorCorrectMethod       - Decide the color correcting method that
 %                               corresponds to the test image with stripes
 %                               on. Default to 'mean'.
-%    nChannelsColorCorrect    - The number of channels to correct when
-%                               generating color corrected image. You can
-%                               set this value to 1 if you want to correct
-%                               only the targeting channel, otherwise it
-%                               will correct all three channels. Default to
-%                               1.
 %    intensityColorCorrect    - Decide the color correction power on
 %                               the test image. If it sets to empty, the
 %                               amount of color correction would be solely
@@ -109,7 +103,7 @@ function [canvas imageProfile] = MakeImageCanvas(testImage,options)
 arguments
     testImage
     options.whichDisplay = 'curvedDisplay'
-    options.ratio_RGB_control_originalImage = 0.85
+    options.ratio_RGB_control_originalImage = 0.75
     options.testImageSize = 0.40
     options.addImageRight = false
     options.stripeHeightPixel (1,1) = 5
@@ -119,7 +113,6 @@ arguments
     options.verbose (1,1) = false
     options.sizeCanvas (1,2) = [1920 1080]
     options.colorCorrectMethod = 'uv'
-    options.nChannelsColorCorrect (1,1) = 1
     options.intensityColorCorrect = 0.33
 end
 
@@ -412,7 +405,7 @@ if ~isempty(testImage)
             % should be within 0-1 and 1 means all chromaticity becomes the
             % same as the primary anchor.
             uvY_colorCorrectedImage_target(1:2,:) = MakeImageShiftChromaticity(uvY_testImage(1:2,:),uv_targetColorStripe,options.intensityColorCorrect);
-            
+
             % The mean luminance will be set as the same as the striped
             % image.
             %
@@ -424,7 +417,7 @@ if ~isempty(testImage)
             mean_XYZ_testImageStripe = mean(XYZ_testImageStripe,2);
             mean_XYZ_testImage = mean(XYZ_testImage,2);
             ratio_mean_Y = mean_XYZ_testImageStripe(2)/mean_XYZ_testImage(2);
-            
+
             % Multiply the luminance ratio here.
             uvY_colorCorrectedImage_target(3,:) = uvY_colorCorrectedImage_target(3,:) * ratio_mean_Y;
 
@@ -451,17 +444,17 @@ if ~isempty(testImage)
             % CORRECTIONS.
             mean_uvY_colorCorrectedImage = mean(uvY_colorCorrectedImage,2);
             ratio_Y = mean_uvY_colorCorrectedImage_target(3)/mean_uvY_colorCorrectedImage(3);
-            fprintf('Luminance ratio = (%.2f) \n',ratio_Y);
-            fprintf('Mean luminance of the striped image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage_target(3));
-            fprintf('Mean luminance of the color corred image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage(3));
 
-            % If luminance is fall off, throw an error.
-            % diff_ratio_Y = abs(1-ratio_Y);
-            % criteria_ratio_Y = 0.01;
-            % if diff_ratio_Y > criteria_ratio_Y
-            %     error(fprintf('Color corrected image cannot be generated well for this color correction intensity. Luminance difference = (%.2f) \n',...
-            %         diff_ratio_Y));
-            % end
+            % If luminance is fall off on the color corrected image, throw an error.
+            diff_ratio_Y = abs(1-ratio_Y);
+            criteria_ratio_Y = 0.05;
+            if diff_ratio_Y > criteria_ratio_Y
+                fprintf('Luminance ratio = (%.2f) \n',ratio_Y);
+                fprintf('Mean luminance of the striped image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage_target(3));
+                fprintf('Mean luminance of the color corred image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage(3));
+
+                error('Color corrected image cannot be generated well for this color correction intensity');
+            end
 
             % Get digital RGB values per each channel. We will use it to
             % plot the image profile in the end.

@@ -51,7 +51,7 @@ imageParams.testImageSize = 0.65;
 imageParams.position_leftImage_x = 0.36;
 imageParams.stripeHeightPixel = 3;
 imageParams.colorCorrectMethod = 'uv';
-imageParams.nChannelsColorCorrect = 1;
+imageParams.ratio_RGB_control_originalImage = 0.75;
 
 % Set this 'true' to put three images on the canvas.
 imageParams.testImageType = 'periphery';
@@ -135,7 +135,8 @@ for cc = 1:nColorStripeOptions
     % test images on it.
     nullImage = MakeImageCanvas([],'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
         'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,....
-        'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'verbose',false);
+        'stripeHeightPixel',imageParams.stripeHeightPixel,...
+        'ratio_RGB_control_originalImage',imageParams.ratio_RGB_control_originalImage,'verbose',false);
     disp('Null image has been successfully generated!');
 
     % Make test stimulus.
@@ -158,8 +159,8 @@ for cc = 1:nColorStripeOptions
             intensityColorCorrectTemp = imageParams.intensityColorCorrect(tt);
             [testImage{ii,tt} testImageProfile{ii,tt}] = MakeImageCanvas(imageTemp,'whichDisplay',imageParams.whichDisplay,'sizeCanvas',imageParams.sizeCanvans,'testImageSize',imageParams.testImageSize,...
                 'position_leftImage_x',imageParams.position_leftImage_x,'whichColorStripes',imageParams.whichColorStripes,'colorCorrectMethod',imageParams.colorCorrectMethod,...
-                'stripeHeightPixel',imageParams.stripeHeightPixel,'nChannelsColorCorrect',imageParams.nChannelsColorCorrect,'intensityColorCorrect',intensityColorCorrectTemp,...
-                'addImageRight',imageParams.addImageRight,'verbose',false);
+                'stripeHeightPixel',imageParams.stripeHeightPixel,'intensityColorCorrect',intensityColorCorrectTemp,...
+                'addImageRight',imageParams.addImageRight,'ratio_RGB_control_originalImage',imageParams.ratio_RGB_control_originalImage,'verbose',false);
 
             % Show progress every 5 images.
             if mod(tt,5) == 0
