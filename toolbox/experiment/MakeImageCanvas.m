@@ -412,14 +412,35 @@ if ~isempty(testImage)
             % should be within 0-1 and 1 means all chromaticity becomes the
             % same as the primary anchor.
             uvY_colorCorrectedImage_target(1:2,:) = MakeImageShiftChromaticity(uvY_testImage(1:2,:),uv_targetColorStripe,options.intensityColorCorrect);
-            % uvY_colorCorrectedImage_target(1:2,:) = uvY_testImage(1:2,:) + options.intensityColorCorrect * (uv_targetColorStripe - uvY_testImage(1:2,:));
+            
+            % The mean luminance will be set as the same as the striped
+            % image.
+            %
+            % Get the XYZ values of the striped image.
+            XYZ_testImageStripe = RGBToXYZ(RGB_testImageStripe,M_RGB2XYZ,gamma);
+
+            % Calculate the ratio to make the target color corrected image
+            % to have the same mean luminance value as the striped image.
+            mean_XYZ_testImageStripe = mean(XYZ_testImageStripe,2);
+            mean_XYZ_testImage = mean(XYZ_testImage,2);
+            ratio_mean_Y = mean_XYZ_testImageStripe(2)/mean_XYZ_testImage(2);
+            
+            % Multiply the luminance ratio here.
+            uvY_colorCorrectedImage_target(3,:) = uvY_colorCorrectedImage_target(3,:) * ratio_mean_Y;
+
+            % Check if the mean luminance is the same.
+            mean_uvY_colorCorrectedImage_target = mean(uvY_colorCorrectedImage_target,2);
+            criteriaMeanY = 0.01;
+            if (mean_uvY_colorCorrectedImage_target(3) - mean_XYZ_testImageStripe(2)) > criteriaMeanY
+                error('Mean luminance value mismatch between striped and color corrected images!');
+            end
 
             % Calculate the digital RGB values from the u'v' coordinates to
             % convert it to the color corrected image.
             XYZ_colorCorrectedImage_target = uvYToXYZ(uvY_colorCorrectedImage_target);
             RGB_colorCorrectedImage = XYZToRGB(XYZ_colorCorrectedImage_target,M_RGB2XYZ,gamma);
 
-            % TEMP - Now Calculate it back to the u'v'. This process is
+            % Now Calculate it back to the u'v'. This process is
             % quantizing so that we know how actual image would distribute
             % on the chromaticity coordinates.
             XYZ_colorCorrectedImage = RGBToXYZ(RGB_colorCorrectedImage,M_RGB2XYZ,gamma);
@@ -428,9 +449,19 @@ if ~isempty(testImage)
             % TEMP - MEAN LUMINANCE. THIS IS FOR CHECKING HOW MUCH THE MEAN
             % LUMINANCE CHANGES OVER THE DIFFERENT LEVEL OF COLOR
             % CORRECTIONS.
-            mean_uvY_target = mean(uvY_colorCorrectedImage_target,2);
-            mean_uvY = mean(uvY_colorCorrectedImage,2);
-            ratio_Y = mean_uvY_target(3)/mean_uvY(3);
+            mean_uvY_colorCorrectedImage = mean(uvY_colorCorrectedImage,2);
+            ratio_Y = mean_uvY_colorCorrectedImage_target(3)/mean_uvY_colorCorrectedImage(3);
+            fprintf('Luminance ratio = (%.2f) \n',ratio_Y);
+            fprintf('Mean luminance of the striped image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage_target(3));
+            fprintf('Mean luminance of the color corred image = (%.2f) cd/m2 \n',mean_uvY_colorCorrectedImage(3));
+
+            % If luminance is fall off, throw an error.
+            % diff_ratio_Y = abs(1-ratio_Y);
+            % criteria_ratio_Y = 0.01;
+            % if diff_ratio_Y > criteria_ratio_Y
+            %     error(fprintf('Color corrected image cannot be generated well for this color correction intensity. Luminance difference = (%.2f) \n',...
+            %         diff_ratio_Y));
+            % end
 
             % Get digital RGB values per each channel. We will use it to
             % plot the image profile in the end.
@@ -638,34 +669,3 @@ if ~isempty(testImage)
     imageProfile.uvY_colorCorrectedImage = uvY_colorCorrectedImage;
 end
 end
-
-%% Parts calculating CIECAM and CIELAB stats. Keep here for now as we are not using right now.
-%
-% Calculate the CIECAM02 stats and modify it as you want.
-% LA = 20;
-% JCH_testImage = XYZToJCH(XYZ_testImage,XYZ_white,LA);
-% JCH_testImage_corrected = JCH_testImage;
-% JCH_testImage_corrected(3,:) = JCH_testImage(3,:)-50;
-% XYZ_testImage_correct = JCHToXYZ(JCH_testImage_corrected,XYZ_white,LA);
-% RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
-
-% Calculate the CIELAB stats.
-% lab_testImage = xyz2lab(XYZ_testImage','WhitePoint',XYZ_white');
-% dRGB_steps = [1:1:255];
-% dRGB_steps_zero = zeros(size(dRGB_steps));
-% RGB_red = [dRGB_steps; dRGB_steps_zero; dRGB_steps_zero];
-% RGB_green = [dRGB_steps_zero; dRGB_steps; dRGB_steps_zero];
-% RGB_blue = [dRGB_steps_zero; dRGB_steps_zero; dRGB_steps];
-% lab_red = xyz2lab(RGBToXYZ(RGB_red,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-% lab_green = xyz2lab(RGBToXYZ(RGB_green,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-% lab_blue = xyz2lab(RGBToXYZ(RGB_blue,M_RGB2XYZ_sRGB,gamma_RGB)','WhitePoint',XYZ_white');
-% lab_testImage = lab_testImage';
-% lab_testImage_corrected = lab_testImage;
-% lab_testImage_corrected(2,:) = lab_testImage(2,:)+20;
-% XYZ_testImage_correct = lab2xyz(lab_testImage_corrected','WhitePoint',XYZ_white');
-% XYZ_testImage_correct = XYZ_testImage_correct';
-% RGB_testImage_correct = XYZToRGB(XYZ_testImage_correct,M_RGB2XYZ_sRGB,gamma_RGB);
-
-% Calculate the cone responses.
-% M_XYZtoCones = [0.4002 0.7075 -0.0808; -0.2263 1.1653 0.0457; 0.0000 0.0000 0.9182];
-% lms_testImage = M_XYZtoCones * XYZ_testImage;
