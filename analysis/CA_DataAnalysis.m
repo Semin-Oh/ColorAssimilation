@@ -48,7 +48,7 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
 % targetSubjectsNames = subjectNames;
-targetSubjectsNames = {'Semin','Yuan','Shuchen'};
+targetSubjectsNames = {'Semin','Shuchen'};
 nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
@@ -453,7 +453,7 @@ mean_AI_fovea_blue = mean(AI_fovea_all_blue,1);
 % Plot here.
 figure; hold on;
 sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
-numYaxisLimits = [0.3 1.5];
+numYaxisLimits = [0.3 1.7];
 
 % Red.
 subplot(nPrimaries,1,1); hold on;
