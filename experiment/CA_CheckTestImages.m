@@ -1,9 +1,12 @@
 % CA_CheckTestImages.
 %
 % This is to check the test images generated fine.
+%
+% See also:
+%    CA_MakeTestImages.
 
 % History.
-%    12/02/24   smo    - Wrote it.
+%    12/02/24    smo    - Wrote it.
 
 %% Initiate.
 clear; close all;
@@ -55,5 +58,5 @@ end
 imageProfiles = load(testImageProfilename);
 imageProfiles = imageProfiles.testImageProfile;
 
-%% 
+%%
 
