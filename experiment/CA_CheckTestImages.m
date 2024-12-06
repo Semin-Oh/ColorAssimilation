@@ -34,7 +34,7 @@ testImageProfileDir = fullfile(testFiledir,'image','TestImageProfiles');
 expModeOptions = {'periphery','fovea'};
 stripeColorOptions = {'red','green','blue'};
 expMode = 'periphery';
-stripeColor = 'blue';
+stripeColor = 'green';
 
 %% Load test images
 testImageFilename = GetMostRecentFileName(testImageFiledir,sprintf('TestImages_%s_%s',expMode,stripeColor));
@@ -77,7 +77,8 @@ for ii = 1:nTestImages
 
     % Make a new figure per test image.
     figure; hold on;
-    sgtitle(sprintf('Test image %d / lum = %.2f cd/m2',ii,mean_uvY_testImageStripe_temp(3)));
+    sgtitle(sprintf('Test image = (%s) / lum = %.2f cd/m2',...
+        images.imageParams.testImageFilenames{ii},mean_uvY_testImageStripe_temp(3)));
     
     for tt = 1:nTestPoints
         uvY_colorCorrectedImage_temp = imageProfiles{ii,tt}.uvY_colorCorrectedImage;
