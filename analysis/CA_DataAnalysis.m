@@ -47,8 +47,9 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 %
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
-% targetSubjectsNames = subjectNames;
-targetSubjectsNames = {'Semin','Shuchen'};
+exclSubjectNames = {'Laysa','Elef','Jacob'};
+targetSubjectsNames = subjectNames(~ismember(subjectNames,exclSubjectNames));
+% targetSubjectsNames = {'Semin','Shuchen','Yuan'};
 nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
