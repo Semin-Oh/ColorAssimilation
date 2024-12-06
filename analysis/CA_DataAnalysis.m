@@ -47,7 +47,7 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 %
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
-exclSubjectNames = {'Laysa','Elef','Jacob'};
+exclSubjectNames = {'Laysa','Elef'};
 targetSubjectsNames = subjectNames(~ismember(subjectNames,exclSubjectNames));
 % targetSubjectsNames = {'Semin','Shuchen','Yuan'};
 nSubjects = length(targetSubjectsNames);
