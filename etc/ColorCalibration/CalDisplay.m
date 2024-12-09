@@ -102,7 +102,7 @@ for ii = 1:nChannels
 end
 
 % Black correction if you want.
-BLACKCORRECTION = false;
+BLACKCORRECTION = true;
 if (BLACKCORRECTION)
     for ii = 1:nChannels
         % Find the index for the black per each channel. For some channels,

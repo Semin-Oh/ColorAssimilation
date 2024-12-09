@@ -23,7 +23,7 @@ image = imread(fullfile(testFiledir,testImagename));
 %
 % Generate the test images with different levels of color corrections to
 % see how the color coordinates change over the power of color correction.
-targetIntensityColorCorrect = [0:0.1:0.7];
+targetIntensityColorCorrect = [0:0.1:0.6];
 nTargets = length(targetIntensityColorCorrect);
 
 for ii = 1:nTargets
@@ -36,5 +36,7 @@ for ii = 1:nTargets
         saveFiledir = '~/Desktop/';
         saveFilename = sprintf('foveal_%d.png',ii);
         saveas(figure(1),fullfile(saveFiledir,saveFilename));
+        saveFilename2 = sprintf('chromaticity_%d.png',ii);
+        saveas(figure(4),fullfile(saveFiledir,saveFilename2));
     end
 end
