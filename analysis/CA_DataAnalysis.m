@@ -49,7 +49,7 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 % available.
 exclSubjectNames = {'Laysa','Elef'};
 targetSubjectsNames = subjectNames(~ismember(subjectNames,exclSubjectNames));
-% targetSubjectsNames = {'Semin','Shuchen','Yuan'};
+% targetSubjectsNames = {'Semin'};
 nSubjects = length(targetSubjectsNames);
 
 % Choose how recent data to load. Set this 0 to load the most recent data
@@ -315,15 +315,18 @@ for ss = 1:nSubjects
                 case 1
                     AI_all.red = AI;
                     AI_XYZ_all.red = AI_XYZ;
-                    c_all.red = matchingIntensityColorCorrect_sorted;
+                    % c_all.red = matchingIntensityColorCorrect_sorted;
+                    c_all.red = meanMatchingIntensityColorCorrect;
                 case 2
                     AI_all.green = AI;
                     AI_XYZ_all.green = AI_XYZ;
-                    c_all.green = matchingIntensityColorCorrect_sorted;
+                    % c_all.green = matchingIntensityColorCorrect_sorted;
+                    c_all.green = meanMatchingIntensityColorCorrect;
                 case 3
                     AI_all.blue = AI;
                     AI_XYZ_all.blue = AI_XYZ;
-                    c_all.blue = matchingIntensityColorCorrect_sorted;
+                    % c_all.blue = matchingIntensityColorCorrect_sorted;
+                    c_all.blue = meanMatchingIntensityColorCorrect;
             end
 
             % Save out the raw exp data.
@@ -403,7 +406,7 @@ end
 %% Compare c vs AI values.
 figure; hold on;
 for ss = 1:nSubjects
-    subplot(1,nSubjects,ss); hold on;
+    subplot(3,ceil(nSubjects/3),ss); hold on;
     plot(c_periphery{ss}.red, AI_periphery{ss}.red, 'r.');
     plot(c_periphery{ss}.green, AI_periphery{ss}.green, 'g.');
     plot(c_periphery{ss}.blue, AI_periphery{ss}.blue, 'b.');
