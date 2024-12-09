@@ -15,7 +15,7 @@ addImageRight = false;
 saveImages = true;
 
 %% Load images.
-testFiledir = '/Users/semin/Dropbox (Personal)/Giessen/projects/ColorAssimilation/image/RawImages';
+testFiledir = '/Users/semin/Dropbox (Personal)/JLU/2) Projects/ColorAssimilation/image/RawImages';
 testImagename = 'rudolf.png';
 image = imread(fullfile(testFiledir,testImagename));
 

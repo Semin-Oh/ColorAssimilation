@@ -79,6 +79,13 @@ if (verbose)
     end
 end
 
+%% Spectra of primaries.
+intensity_dRGB = 255;
+figure; hold on;
+plot(wls,spd_center(:,intensity_dRGB,1),'r-');
+plot(wls,spd_center(:,intensity_dRGB,2),'g-');
+plot(wls,spd_center(:,intensity_dRGB,3),'b-');
+
 %% Chromaticity diagram.
 load T_xyzJuddVos
 T_XYZ = T_xyzJuddVos;
