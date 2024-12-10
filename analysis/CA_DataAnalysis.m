@@ -438,7 +438,7 @@ axis square;
 %% Plot the AI results.
 %
 % Choose which AI values to use.
-whichCalAI = 'XYZ';
+whichCalAI = 'uv';
 switch whichCalAI
     case 'XYZ'
         AI_periphery_plot = AI_XYZ_periphery;
