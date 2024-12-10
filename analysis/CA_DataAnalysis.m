@@ -243,12 +243,12 @@ for ss = 1:nSubjects
                 % changes, which results in different 'AI' values over different
                 % levels of color corrections.
                 m = norm(mean_uvY_colorCorrectImage(1:2)-mean_uvY_testImageRaw(1:2));
-                % a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
-                a = norm(uv_displayPrimary(1:2,idxWhichPrimary)-mean_uvY_testImageRaw(1:2));
+                a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
+                % a = norm(uv_displayPrimary(1:2,idxWhichPrimary)-mean_uvY_testImageRaw(1:2));
 
                 % The 'AI' value should be zero if there is no color assimiliation effect.
                 AI(tt) = m/a;
-                
+
                 % Here, we calculate the assimilation index (AI) in a
                 % couple different ways.
                 %
@@ -261,12 +261,12 @@ for ss = 1:nSubjects
                 XYZ_displayPrimary = xyYToXYZ(xyY_displayPrimary);
 
                 m = norm(mean_XYZ_colorCorrectImage-mean_XYZ_testImageRaw);
-                % a = norm(mean_XYZ_testImageStripe-mean_XYZ_testImageRaw);
-                a = norm(XYZ_displayPrimary(:,idxWhichPrimary)-mean_XYZ_testImageRaw);
+                a = norm(mean_XYZ_testImageStripe-mean_XYZ_testImageRaw);
+                % a = norm(XYZ_displayPrimary(:,idxWhichPrimary)-mean_XYZ_testImageRaw);
 
-                AI_XYZ(tt) = m/a;         
+                AI_XYZ(tt) = m/a;
 
-                % AI in CIELAB. 
+                % AI in CIELAB.
                 whitePoint = sum(XYZ_displayPrimary,2);
                 mean_Lab_testImageRaw = XYZToLab(uvYToXYZ(mean_uvY_testImageRaw),whitePoint);
                 mean_Lab_testImageStripe = XYZToLab(uvYToXYZ(mean_uvY_testImageStripe),whitePoint);
@@ -274,13 +274,12 @@ for ss = 1:nSubjects
                 Lab_displayPrimary = XYZToLab(XYZ_displayPrimary,whitePoint);
 
                 m = norm(mean_Lab_colorCorrectImage-mean_Lab_testImageRaw);
-                % a = norm(mean_Lab_testImageStripe-mean_Lab_testImageRaw);
-                a = norm(Lab_displayPrimary(:,idxWhichPrimary)-mean_Lab_testImageRaw);
-                
+                a = norm(mean_Lab_testImageStripe-mean_Lab_testImageRaw);
+                % a = norm(Lab_displayPrimary(:,idxWhichPrimary)-mean_Lab_testImageRaw);
+
                 AI_Lab(tt) = m/a;
 
                 %% Plot the results.
-                %
                 subplot(nPrimaries,nTestImages,tt + nTestImages*(pp-1)); hold on;
 
                 % Plot the image profiles.
@@ -374,10 +373,10 @@ end
 % Color correction coefficient (c). This is the raw data from the
 % experiment.
 PLOTRAWDATAPERSUB = false;
+xAxisImages = linspace(1,nTestImages,nTestImages);
 if (PLOTRAWDATAPERSUB)
     for ss = 1:nSubjects
         subjectName = targetSubjectsNames{ss};
-        xAxisImages = linspace(1,nTestImages,nTestImages);
 
         figure; hold on;
         sgtitle(sprintf('Subject = (%s)',subjectName));
@@ -429,12 +428,7 @@ end
 %% Compare c vs AI values.
 %
 % Set the Y axis range.
-switch whichCalAI
-    case 'XYZ'
-        numYaxisLimits = [0.5 1.8];
-    otherwise
-        numYaxisLimits = [0 1];
-end
+numYaxisLimits = [0 1.8];
 
 figure; hold on;
 for ss = 1:nSubjects
@@ -466,10 +460,11 @@ for ss = 1:nSubjects
     plot(AI_periphery{ss}.blue, AI_XYZ_periphery{ss}.blue, 'b.','markersize',8);
 end
 plot([0 10],[0 10],'k-');
-xlim([0 1]);
-ylim([0 1.8]);
+xlim(numYaxisLimits);
+ylim(numYaxisLimits);
 xlabel('AI (uv)');
-ylabel('AI (XYZ or CIELAB)');
+ylabel('AI (XYZ)');
+title('Mean AI value: uv vs XYZ');
 axis square;
 
 % uv vs. CIELAB.
@@ -479,27 +474,31 @@ for ss = 1:nSubjects
     plot(AI_fovea{ss}.red, AI_Lab_fovea{ss}.red, 'r.','markersize',8);
     plot(AI_fovea{ss}.green, AI_Lab_fovea{ss}.green, 'g.','markersize',8);
     plot(AI_fovea{ss}.blue, AI_Lab_fovea{ss}.blue, 'b.','markersize',8);
-    
+
     % Periphery.
     plot(AI_periphery{ss}.red, AI_Lab_periphery{ss}.red, 'r.','markersize',8);
     plot(AI_periphery{ss}.green, AI_Lab_periphery{ss}.green, 'g.','markersize',8);
     plot(AI_periphery{ss}.blue, AI_Lab_periphery{ss}.blue, 'b.','markersize',8);
 end
 plot([0 10],[0 10],'k-');
-xlim([0 1]);
-ylim([0 1.8]);
+xlim(numYaxisLimits);
+ylim(numYaxisLimits);
 xlabel('AI (uv)');
-ylabel('AI (XYZ or CIELAB)');
+ylabel('AI (CIELAB)');
+title('Mean AI value: uv vs CIELAB');
 axis square;
 
 %% Plot the AI results.
 %
 % Choose which AI values to use.
-whichCalAI = 'uv';
+whichCalAI = 'CIELAB';
 switch whichCalAI
     case 'XYZ'
         AI_periphery_plot = AI_XYZ_periphery;
         AI_fovea_plot = AI_XYZ_fovea;
+    case 'Lab'
+        AI_periphery_plot = AI_Lab_periphery;
+        AI_fovea_plot = AI_Lab_fovea;
     otherwise
         AI_periphery_plot = AI_periphery;
         AI_fovea_plot = AI_fovea;
@@ -539,12 +538,7 @@ figure; hold on;
 sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
 
 % Set the Y axis range.
-switch whichCalAI
-    case 'XYZ'
-        numYaxisLimits = [0.5 1.8];
-    otherwise
-        numYaxisLimits = [0.3 0.6];
-end
+numYaxisLimits = [0.6 1.8];
 
 % Red.
 subplot(nPrimaries,1,1); hold on;
@@ -602,7 +596,7 @@ idxFaceImages = ~(or(strcmp(testImageNames,'potato'),strcmp(testImageNames,'whit
 
 % Plot happens here.
 figure; hold on;
-title(sprintf('AI: Peripheral vs. Foveal (N=%d)',nSubjects));
+title(sprintf('AI (%s): Peripheral vs. Foveal (N=%d)',whichCalAI,nSubjects));
 subtitle(sprintf('Face images are marked with bigger marker (nFaces = %d)',sum(idxFaceImages)));
 
 % Add standard error bar.
@@ -645,9 +639,3 @@ legend([f_1 f_2 f_3],sprintf('Mean AI (red), N=%d',nSubjects),sprintf('Mean AI (
     sprintf('Mean AI (blue), N=%d',nSubjects),'location','southeast');
 grid on;
 axis square;
-
-%% Save out something if you want.
-SAVETHERESULTS = false;
-
-if (SAVETHERESULTS)
-end
