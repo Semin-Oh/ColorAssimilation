@@ -243,7 +243,8 @@ for ss = 1:nSubjects
                 % changes, which results in different 'AI' values over different
                 % levels of color corrections.
                 m = norm(mean_uvY_colorCorrectImage(1:2)-mean_uvY_testImageRaw(1:2));
-                a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
+                % a = norm(mean_uvY_testImageStripe(1:2)-mean_uvY_testImageRaw(1:2));
+                a = norm(uv_displayPrimary(1:2,idxWhichPrimary)-mean_uvY_testImageRaw(1:2));
 
                 % The 'AI' value should be zero if there is no color assimiliation effect.
                 AI(tt) = m/a;
@@ -465,6 +466,15 @@ mean_AI_fovea_red = mean(AI_fovea_all_red,1);
 mean_AI_fovea_green = mean(AI_fovea_all_green,1);
 mean_AI_fovea_blue = mean(AI_fovea_all_blue,1);
 
+% Calculate the standard error.
+stdError_AI_periphery_red = std(AI_periphery_all_red)./sqrt(nSubjects);
+stdError_AI_periphery_green = std(AI_periphery_all_green)./sqrt(nSubjects);
+stdError_AI_periphery_blue = std(AI_periphery_all_blue)./sqrt(nSubjects);
+
+stdError_AI_fovea_red = std(AI_fovea_all_red)./sqrt(nSubjects);
+stdError_AI_fovea_green = std(AI_fovea_all_green)./sqrt(nSubjects);
+stdError_AI_fovea_blue = std(AI_fovea_all_blue)./sqrt(nSubjects);
+
 % Plot here.
 figure; hold on;
 sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
@@ -538,6 +548,22 @@ f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','ma
 f_4=plot(mean_AI_periphery_red(idxFaceImages),mean_AI_fovea_red(idxFaceImages),'ro','MarkerSize',8);
 f_5=plot(mean_AI_periphery_green(idxFaceImages),mean_AI_fovea_green(idxFaceImages),'go','MarkerSize',8);
 f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
+
+% Add standard error bar.
+errorbar(mean_AI_periphery_red,mean_AI_fovea_red,...
+    stdError_AI_fovea_red,stdError_AI_fovea_red,...
+    stdError_AI_periphery_red,stdError_AI_periphery_red,...
+    'LineStyle','none','Color','r','LineWidth',0.1);
+
+errorbar(mean_AI_periphery_green,mean_AI_fovea_green,...
+    stdError_AI_fovea_green,stdError_AI_fovea_green,...
+    stdError_AI_periphery_green,stdError_AI_periphery_green,...
+    'LineStyle','none','Color','g');
+
+errorbar(mean_AI_periphery_blue,mean_AI_fovea_blue,...
+    stdError_AI_fovea_blue,stdError_AI_fovea_blue,...
+    stdError_AI_periphery_blue,stdError_AI_periphery_blue,...
+    'LineStyle','none','Color','b');
 
 % 45-deg line.
 f_7=plot([0 10],[0 10],'k-');
