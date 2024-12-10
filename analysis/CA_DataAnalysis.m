@@ -258,12 +258,27 @@ for ss = 1:nSubjects
                 mean_XYZ_testImageRaw = uvYToXYZ(mean_uvY_testImageRaw);
                 mean_XYZ_testImageStripe = uvYToXYZ(mean_uvY_testImageStripe);
                 mean_XYZ_colorCorrectImage = uvYToXYZ(mean_uvY_colorCorrectImage);
-                
-                m = norm(mean_XYZ_colorCorrectImage-mean_XYZ_testImageRaw);
-                a = norm(mean_XYZ_testImageStripe-mean_XYZ_testImageRaw);
+                XYZ_displayPrimary = xyYToXYZ(xyY_displayPrimary);
 
-                AI_XYZ(tt) = m/a;              
-               
+                m = norm(mean_XYZ_colorCorrectImage-mean_XYZ_testImageRaw);
+                % a = norm(mean_XYZ_testImageStripe-mean_XYZ_testImageRaw);
+                a = norm(XYZ_displayPrimary(:,idxWhichPrimary)-mean_XYZ_testImageRaw);
+
+                AI_XYZ(tt) = m/a;         
+
+                % AI in CIELAB. 
+                whitePoint = sum(XYZ_displayPrimary,2);
+                mean_Lab_testImageRaw = XYZToLab(uvYToXYZ(mean_uvY_testImageRaw),whitePoint);
+                mean_Lab_testImageStripe = XYZToLab(uvYToXYZ(mean_uvY_testImageStripe),whitePoint);
+                mean_Lab_colorCorrectImage = XYZToLab(uvYToXYZ(mean_uvY_colorCorrectImage),whitePoint);
+                Lab_displayPrimary = XYZToLab(XYZ_displayPrimary,whitePoint);
+
+                m = norm(mean_Lab_colorCorrectImage-mean_Lab_testImageRaw);
+                % a = norm(mean_Lab_testImageStripe-mean_Lab_testImageRaw);
+                a = norm(Lab_displayPrimary(:,idxWhichPrimary)-mean_Lab_testImageRaw);
+                
+                AI_Lab(tt) = m/a;
+
                 %% Plot the results.
                 %
                 subplot(nPrimaries,nTestImages,tt + nTestImages*(pp-1)); hold on;
@@ -318,16 +333,19 @@ for ss = 1:nSubjects
                     AI_XYZ_all.red = AI_XYZ;
                     c_raw_all.red = matchingIntensityColorCorrect_sorted;
                     c_all.red = meanMatchingIntensityColorCorrect;
+                    AI_Lab_all.red = AI_Lab;
                 case 2
                     AI_all.green = AI;
                     AI_XYZ_all.green = AI_XYZ;
                     c_raw_all.green = matchingIntensityColorCorrect_sorted;
                     c_all.green = meanMatchingIntensityColorCorrect;
+                    AI_Lab_all.green = AI_Lab;
                 case 3
                     AI_all.blue = AI;
                     AI_XYZ_all.blue = AI_XYZ;
                     c_raw_all.blue = matchingIntensityColorCorrect_sorted;
                     c_all.blue = meanMatchingIntensityColorCorrect;
+                    AI_Lab_all.blue = AI_Lab;
             end
 
             % Save out the raw exp data.
@@ -340,11 +358,13 @@ for ss = 1:nSubjects
                 AI_XYZ_periphery{ss} = AI_XYZ_all;
                 c_raw_periphery{ss} = c_raw_all;
                 c_periphery{ss} = c_all;
+                AI_Lab_periphery{ss} = AI_Lab_all;
             case 'fovea'
                 AI_fovea{ss} = AI_all;
                 AI_XYZ_fovea{ss} = AI_XYZ_all;
                 c_raw_fovea{ss} = c_raw_all;
                 c_fovea{ss} = c_all;
+                AI_Lab_fovea{ss} = AI_Lab_all;
         end
     end
 end
@@ -353,7 +373,7 @@ end
 %
 % Color correction coefficient (c). This is the raw data from the
 % experiment.
-PLOTRAWDATAPERSUB = true;
+PLOTRAWDATAPERSUB = false;
 if (PLOTRAWDATAPERSUB)
     for ss = 1:nSubjects
         subjectName = targetSubjectsNames{ss};
@@ -407,6 +427,15 @@ if (PLOTRAWDATAPERSUB)
 end
 
 %% Compare c vs AI values.
+%
+% Set the Y axis range.
+switch whichCalAI
+    case 'XYZ'
+        numYaxisLimits = [0.5 1.8];
+    otherwise
+        numYaxisLimits = [0 1];
+end
+
 figure; hold on;
 for ss = 1:nSubjects
     subplot(3,ceil(nSubjects/3),ss); hold on;
@@ -416,23 +445,51 @@ for ss = 1:nSubjects
     xlabel('Coefficient c');
     ylabel('Assimilation index (AI)');
     xlim([0 0.6]);
-    ylim([0.7 1.8]);
+    ylim(numYaxisLimits);
     axis square;
     title(sprintf('Subject = (%s)',targetSubjectsNames{ss}));
 end
 
-%% Compare the AI values between the one based on u'v' vs. XYZ.
+%% Compare the AI values over using different color spaces.
+%
+% uv vs. XYZ.
 figure; hold on;
 for ss = 1:nSubjects
-    plot(AI_fovea{ss}.red, AI_XYZ_fovea{ss}.red, 'r.');
-    plot(AI_fovea{ss}.green, AI_XYZ_fovea{ss}.green, 'g.');
-    plot(AI_fovea{ss}.blue, AI_XYZ_fovea{ss}.blue, 'b.');
+    % Fovea.
+    plot(AI_fovea{ss}.red, AI_XYZ_fovea{ss}.red, 'r.','markersize',8);
+    plot(AI_fovea{ss}.green, AI_XYZ_fovea{ss}.green, 'g.','markersize',8);
+    plot(AI_fovea{ss}.blue, AI_XYZ_fovea{ss}.blue, 'b.','markersize',8);
+
+    % Periphery.
+    plot(AI_periphery{ss}.red, AI_XYZ_periphery{ss}.red, 'r.','markersize',8);
+    plot(AI_periphery{ss}.green, AI_XYZ_periphery{ss}.green, 'g.','markersize',8);
+    plot(AI_periphery{ss}.blue, AI_XYZ_periphery{ss}.blue, 'b.','markersize',8);
 end
 plot([0 10],[0 10],'k-');
-xlim([0 1.8]);
+xlim([0 1]);
 ylim([0 1.8]);
 xlabel('AI (uv)');
-ylabel('AI (XYZ)');
+ylabel('AI (XYZ or CIELAB)');
+axis square;
+
+% uv vs. CIELAB.
+figure; hold on;
+for ss = 1:nSubjects
+    % Fovea.
+    plot(AI_fovea{ss}.red, AI_Lab_fovea{ss}.red, 'r.','markersize',8);
+    plot(AI_fovea{ss}.green, AI_Lab_fovea{ss}.green, 'g.','markersize',8);
+    plot(AI_fovea{ss}.blue, AI_Lab_fovea{ss}.blue, 'b.','markersize',8);
+    
+    % Periphery.
+    plot(AI_periphery{ss}.red, AI_Lab_periphery{ss}.red, 'r.','markersize',8);
+    plot(AI_periphery{ss}.green, AI_Lab_periphery{ss}.green, 'g.','markersize',8);
+    plot(AI_periphery{ss}.blue, AI_Lab_periphery{ss}.blue, 'b.','markersize',8);
+end
+plot([0 10],[0 10],'k-');
+xlim([0 1]);
+ylim([0 1.8]);
+xlabel('AI (uv)');
+ylabel('AI (XYZ or CIELAB)');
 axis square;
 
 %% Plot the AI results.
