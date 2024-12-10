@@ -491,7 +491,7 @@ axis square;
 %% Plot the AI results.
 %
 % Choose which AI values to use.
-whichCalAI = 'CIELAB';
+whichCalAI = 'uv';
 switch whichCalAI
     case 'XYZ'
         AI_periphery_plot = AI_XYZ_periphery;
@@ -499,7 +499,7 @@ switch whichCalAI
     case 'Lab'
         AI_periphery_plot = AI_Lab_periphery;
         AI_fovea_plot = AI_Lab_fovea;
-    otherwise
+    case 'uv'
         AI_periphery_plot = AI_periphery;
         AI_fovea_plot = AI_fovea;
 end
