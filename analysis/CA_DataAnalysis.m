@@ -444,6 +444,8 @@ switch whichCalAI
         AI_periphery_plot = AI_XYZ_periphery;
         AI_fovea_plot = AI_XYZ_fovea;
     otherwise
+        AI_periphery_plot = AI_periphery;
+        AI_fovea_plot = AI_fovea;
 end
 
 % Rearrange the data array.
@@ -478,7 +480,14 @@ stdError_AI_fovea_blue = std(AI_fovea_all_blue)./sqrt(nSubjects);
 % Plot here.
 figure; hold on;
 sgtitle(sprintf('Mean AI results for all subjects (N=%d)',nSubjects));
-numYaxisLimits = [0.3 1.7];
+
+% Set the Y axis range.
+switch whichCalAI
+    case 'XYZ'
+        numYaxisLimits = [0.5 1.8];
+    otherwise
+        numYaxisLimits = [0.3 0.6];
+end
 
 % Red.
 subplot(nPrimaries,1,1); hold on;
@@ -539,16 +548,6 @@ figure; hold on;
 title(sprintf('AI: Peripheral vs. Foveal (N=%d)',nSubjects));
 subtitle(sprintf('Face images are marked with bigger marker (nFaces = %d)',sum(idxFaceImages)));
 
-% Mean AI results (ALL).
-f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
-f_2=plot(mean_AI_periphery_green,mean_AI_fovea_green,'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',4);
-f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',4);
-
-% Mean AI results (FACES).
-f_4=plot(mean_AI_periphery_red(idxFaceImages),mean_AI_fovea_red(idxFaceImages),'ro','MarkerSize',8);
-f_5=plot(mean_AI_periphery_green(idxFaceImages),mean_AI_fovea_green(idxFaceImages),'go','MarkerSize',8);
-f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
-
 % Add standard error bar.
 errorbar(mean_AI_periphery_red,mean_AI_fovea_red,...
     stdError_AI_fovea_red,stdError_AI_fovea_red,...
@@ -565,6 +564,16 @@ errorbar(mean_AI_periphery_blue,mean_AI_fovea_blue,...
     stdError_AI_periphery_blue,stdError_AI_periphery_blue,...
     'LineStyle','none','Color','b');
 
+% Mean AI results (ALL).
+f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
+f_2=plot(mean_AI_periphery_green,mean_AI_fovea_green,'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',4);
+f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',4);
+
+% Mean AI results (FACES).
+f_4=plot(mean_AI_periphery_red(idxFaceImages),mean_AI_fovea_red(idxFaceImages),'ro','MarkerSize',8);
+f_5=plot(mean_AI_periphery_green(idxFaceImages),mean_AI_fovea_green(idxFaceImages),'go','MarkerSize',8);
+f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
+
 % 45-deg line.
 f_7=plot([0 10],[0 10],'k-');
 
@@ -573,6 +582,8 @@ xlabel('AI (Peripheral)','fontsize',13);
 ylabel('AI (Foveal)','fontsize',13);
 xlim(numYaxisLimits);
 ylim(numYaxisLimits);
+xticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
+yticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
 legend([f_1 f_2 f_3],sprintf('Mean AI (red), N=%d',nSubjects),sprintf('Mean AI (green), N=%d',nSubjects),...
     sprintf('Mean AI (blue), N=%d',nSubjects),'location','southeast');
 grid on;
