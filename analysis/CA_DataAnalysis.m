@@ -652,7 +652,6 @@ title('Individual AI: Peripheral vs. Foveal');
 
 for ss = 1:nSubjects
     subplot(4,ceil(nSubjects/4),ss); hold on;
-    title(sprintf('Subject = (%s)',targetSubjectsNames{ss}));
 
     % All test images.
     f_1=plot(AI_periphery_all_red(ss,:), AI_fovea_all_red(ss,:),'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
@@ -667,7 +666,21 @@ for ss = 1:nSubjects
     % 45-deg line.
     f_7=plot([0 10],[0 10],'k-');
 
+    % Calculate correlation here.
+    %
+    % Periphery.
+    oneSubject_AI_periphery_RGB = [AI_periphery_all_red(ss,:)';AI_periphery_all_green(ss,:)';AI_periphery_all_blue(ss,:)'];
+    mean_AI_periphery_RGB = [mean_AI_periphery_red';mean_AI_periphery_green';mean_AI_periphery_blue'];
+    
+    % Fovea.
+    oneSubject_AI_fovea_RGB = [AI_fovea_all_red(ss,:)';AI_fovea_all_green(ss,:)';AI_fovea_all_blue(ss,:)'];
+    mean_AI_fovea_RGB = [mean_AI_fovea_red';mean_AI_fovea_green';mean_AI_fovea_blue'];
+    
+    % Correlation coefficient.
+    r = corr([oneSubject_AI_periphery_RGB; oneSubject_AI_fovea_RGB], [mean_AI_periphery_RGB; mean_AI_fovea_RGB]);
+
     % Figure stuff.
+    title(sprintf('Subject = (%s) / r = (%.2f)',targetSubjectsNames{ss},r));
     xlabel('AI (Peripheral)','fontsize',13);
     ylabel('AI (Foveal)','fontsize',13);
     xlim(numYaxisLimits);
