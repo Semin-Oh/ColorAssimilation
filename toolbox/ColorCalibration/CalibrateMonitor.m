@@ -1,57 +1,82 @@
+%% CalibrateMonitor.
+%
+% Calibrate the monitor in 8 bits mode. It is a modified version to work on
+% the Linux computer where the curved display is connected to.
+%
+% See also:
+%    CALIBRATION_mt_calibrator_8bits.m.
+
+% History:
+%    01/31/25    smo    - Started working on it.
+
 %% Initialze.
-clear all; close all
+clear; close all;
 
-%%
-instrfind
-
-%%% check com port number before running!
-%%%
+%% Set variables.
+%
+% Measurement place.
 room = 'CurvedDisplay';
 
-Screens=Screen('Screens');
-ScreenNumber=0;
+% Set measurement range. It's based on 8-bit settings.
+dRGB_target_min = 0;
+dRGB_target_max = 255;
+nTargetPoints = 10;
+dRGB_target = round(linspace(dRGB_target_min,dRGB_target_max,nTargetPoints));
 
-% PsychImaging('PrepareConfiguration');
-% PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible'); % CHECK CHECK CHECK
-% PsychImaging('AddTask', 'General', 'EnableNative10BitFramebuffer');
-% [window rect] = PsychImaging('OpenWindow',  ScreenNumber,0);
-[window rect] = Screen('OpenWindow',  ScreenNumber,0);
+spd = nan(401,length(dRGB_target),4);
 
-HideCursor;
-CS2000_initConnection('/dev/ttyACM0');
+%% Connect to the spectroradiometer.
+%
+% The port number for the curved display is '/dev/ttyACM0', which should be
+% updated based on which computer that connected to the spectroradiometer.
+switch room
+    case 'CurvedDisplay'
+        port_CS2000 = '/dev/ttyACM0';
+    otherwise
+        port_CS2000 = 'COM5';
+end
 
-%%%% try measuring zero
-intercept=CS2000_measure();
+% Connection happens here. Check the status message.
+CS2000_initConnection(port_CS2000);
+
+%% Open PTB screen.
+initialScreenSettings = [0.5 0.5 0.5];
+[window windowRect] = OpenPlainScreen(initialScreenSettings);
+
+%% try measuring zero
+intercept = CS2000_measure();
 Screen('FillRect',window,0);
 Screen('Flip',window);
 
-% sca
-% error pd
+%% Make a loop to measure the desired range.
+%
+% Channel. Red, Green, Blue, and Gray, in an order.
+nChannels = 4;
 
-values=linspace(0,255,2^8);
-% values=155:255;
+for cc = 1:nChannels
 
-% values=linspace(0,1,5);
-values=values(2:end);
-SPECTRA=nan(401,length(values),4);
+    % Different points for a gamma table per each channel.
+    for dd = 1:length(dRGB_target)
 
-for ch=1:4
-    for v= 1:length(values)
-        col=zeros(1,3);
-        if ch<4
-            col(ch)=values(v);
+
+        dRGB_measure_temp = zeros(1,3);
+        if cc < 4
+            dRGB_measure_temp(cc) = dRGB_target(dd);
         else
-            col=col+values(v);
+            dRGB_measure_temp=dRGB_measure_temp + dRGB_target(dd);
         end
-        Screen('FillRect',window,uint8(col));
+
+        % Screen the image to measure.
+        Screen('FillRect',window,uint8(dRGB_measure_temp));
         Screen('Flip',window);
 
-        tmp=CS2000_measure();
-        SPECTRA(:,v,ch)=tmp.spectralData;
-        time=clock;
-        save(['SPECTRA_' room '_' date],'SPECTRA','intercept','time')
-        
-        sound(snd,40000);
+        % Measurement happens here.
+        rawData = CS2000_measure();
+        spd(:,dd,cc) = rawData.spectralData;
+
+        % Save the spectra here.
+        date = datetime("now");
+        fileName = sprintf('spd_%s_',room,)
+        save(['spd_' room '_' date],'spd','intercept','time')
     end
 end
-sca
