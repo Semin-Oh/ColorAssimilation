@@ -1,0 +1,127 @@
+; Setup File for Windows 8/7/Vista/XP
+; Copyright by KONICA MINOLTA, INC.
+;
+; Manufacturer:	KONICA MINOLTA, INC.
+; Revision:	1.02
+; Last Modify:	2013/04/01
+
+[Version]
+LayoutFile=layout.inf
+Signature="$CHICAGO$"
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318}
+Provider=%Companyname%
+DriverVer=04/01/2013,1.0.0.2
+CatalogFile=KMSECM700.cat
+
+[DestinationDirs]
+DefaultDestDir=12
+
+
+;-----------------------------------------------------------------
+;  Install class Ports
+;-----------------------------------------------------------------
+[ClassInstall]
+AddReg=PortsClass.AddReg
+
+[PortsClass.AddReg]
+HKR,,,,%PortsClassName%
+
+[ClassInstall32.NT]
+AddReg=PortsClass.NT.AddReg
+
+[PortsClass.NT.AddReg]
+HKR,,,,%PortsClassName%
+HKR,,Icon,,"-23"
+HKR,,Installer32,,"MsPorts.Dll,PortsClassInstaller"
+
+[ControlFlags]
+ExcludeFromSelect=USB\VID_132B&PID_2105
+
+
+;-----------------------------------------------------------------
+;  Manufacturer
+;-----------------------------------------------------------------
+[Manufacturer]
+%CompanyName%=Models,ntx86,ntamd64
+
+[Models]
+%USB.PnP%=ComPort, USB\VID_132B&PID_2105
+
+[Models.ntx86]
+%USB.PnP%=ComPort, USB\VID_132B&PID_2105
+
+[Models.ntamd64]
+%USB.PnP%=ComPort, USB\VID_132B&PID_2105
+
+;-----------------------------------------------------------------
+;  COM sections
+;-----------------------------------------------------------------
+[ComPort.NT]
+include=mdmcpq.inf
+CopyFiles=ComPort.NT.Copy
+AddReg=ComPort.NT.AddReg
+
+[ComPort.NT.HW]
+include=mdmcpq.inf
+AddReg=ComPort.NT.HW.AddReg
+
+[ComPort.NT.Copy]
+usbser.sys,,,0x20
+
+[ComPort.NT.AddReg]
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[ComPort.NT.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"serenum"
+
+
+;-----------------------------------------------------------------
+;  Service installation
+;-----------------------------------------------------------------
+[ComPort.NT.Services]
+include=mdmcpq.inf
+AddService = usbser, 0x00000002, Serial_Service_Inst,Serial_EventLog_Inst
+Serial_EventLog_Inst
+AddService = Serenum,,Serenum_Service_Inst
+
+
+;-----------------------------------------------------------------
+;  Serial Port Driver install sections
+;-----------------------------------------------------------------
+[Serial_Service_Inst]
+DisplayName    = %Serial.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\usbser.sys
+LoadOrderGroup = Extended base
+
+;-----------------------------------------------------------------
+;  Serenum Driver install section
+;-----------------------------------------------------------------
+[Serenum_Service_Inst]
+DisplayName    = %Serenum.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\serenum.sys
+LoadOrderGroup = PNP Filter
+
+[Serial_EventLog_Inst]
+AddReg = Serial_EventLog_AddReg
+
+[Serial_EventLog_AddReg]
+HKR,,EventMessageFile,0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\usbser.sys"
+HKR,,TypesSupported,0x00010001,7
+
+;-----------------------------------------------------------------
+;  User readable strings
+;-----------------------------------------------------------------
+[Strings]
+CompanyName="KONICA MINOLTA, INC."
+DiskName_Desc="Installation Disk"
+PortsClassName = "Ports (COM & LPT)"
+Serenum.SVCDESC = "Serenum Filter Driver"
+Serial.SVCDESC = "USBシリアル ポート ドライバ"
+USB.PnP="Spectrophotometer CM-700/-600 Series"
