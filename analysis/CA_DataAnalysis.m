@@ -47,7 +47,8 @@ subjectNames = subjectNameList(~startsWith(subjectNameList,'.'));
 %
 % Choose which subjects to analyze. For now, we will run for every subject
 % available.
-exclSubjectNames = {'Laysa','Elef','Jacob','Jette'};
+% exclSubjectNames = {'Laysa','Elef','Jacob','Leoni','Julius'};
+exclSubjectNames = {'Laysa','Elef','Jacob','Leoni'};
 targetSubjectsNames = subjectNames(~ismember(subjectNames,exclSubjectNames));
 % targetSubjectsNames = {'Semin'};
 nSubjects = length(targetSubjectsNames);
@@ -626,9 +627,9 @@ f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','ma
 % f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
 
 % Mean AI (NON-FACES).
-f_4=plot(mean_AI_periphery_red(~idxFaceImages),mean_AI_fovea_red(~idxFaceImages),'ro','MarkerSize',9,'linewidth',1);
-f_5=plot(mean_AI_periphery_green(~idxFaceImages),mean_AI_fovea_green(~idxFaceImages),'go','MarkerSize',9);
-f_6=plot(mean_AI_periphery_blue(~idxFaceImages),mean_AI_fovea_blue(~idxFaceImages),'bo','MarkerSize',9);
+f_4=plot(mean_AI_periphery_red(~idxFaceImages),mean_AI_fovea_red(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
+f_5=plot(mean_AI_periphery_green(~idxFaceImages),mean_AI_fovea_green(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
+f_6=plot(mean_AI_periphery_blue(~idxFaceImages),mean_AI_fovea_blue(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
 
 % 45-deg line.
 f_7=plot([0 10],[0 10],'k-');
@@ -683,10 +684,10 @@ for ss = 1:nSubjects
     title(sprintf('Subject = (%s) / r = (%.2f)',targetSubjectsNames{ss},r));
     xlabel('AI (Peripheral)','fontsize',13);
     ylabel('AI (Foveal)','fontsize',13);
-    xlim(numYaxisLimits);
-    ylim(numYaxisLimits);
-    xticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
-    yticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
+    xlim([0.4 numYaxisLimits(2)]);
+    ylim([0.4 numYaxisLimits(2)]);
+    xticks([0.4:0.1:numYaxisLimits(2)]);
+    yticks([0.4:0.1:numYaxisLimits(2)]);
     legend([f_1 f_2 f_3],'red','green','blue','location','southeast');
     grid on;
     axis square;

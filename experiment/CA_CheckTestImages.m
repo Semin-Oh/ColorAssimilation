@@ -34,7 +34,7 @@ testImageProfileDir = fullfile(testFiledir,'image','TestImageProfiles');
 expModeOptions = {'periphery','fovea'};
 stripeColorOptions = {'red','green','blue'};
 expMode = 'periphery';
-stripeColor = 'green';
+stripeColor = 'blue';
 
 %% Load test images
 testImageFilename = GetMostRecentFileName(testImageFiledir,sprintf('TestImages_%s_%s',expMode,stripeColor));
@@ -74,6 +74,9 @@ for ii = 1:nTestImages
     % Get chromaticity of a striped image.
     uvY_testImageStripe_temp = imageProfiles{ii,1}.uvY_testImageStripe;
     mean_uvY_testImageStripe_temp = mean(uvY_testImageStripe_temp,2);
+    
+    % Collect the luminanc
+    luminance(ii) = mean_uvY_testImageStripe_temp(3);
 
     % Make a new figure per test image.
     figure; hold on;
@@ -100,3 +103,6 @@ for ii = 1:nTestImages
         subtitle(sprintf('Lum = %.2f cd/m2',mean_uvY_colorCorrectedImage_temp(3)));
     end
 end
+
+mean(luminance)
+std(luminance)
