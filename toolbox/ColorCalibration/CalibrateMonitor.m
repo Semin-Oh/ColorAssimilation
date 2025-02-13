@@ -8,75 +8,100 @@
 
 % History:
 %    01/31/25    smo    - Started working on it.
+%    02/13/25    smo    - Cleaned up and needs to be tested if it's
+%                         working.
 
 %% Initialze.
 clear; close all;
 
 %% Set variables.
 %
-% Measurement place.
-room = 'CurvedDisplay';
+% Set measurement range. It'll be converted into the settings in 8-bit.
+nMeasurePoints = 10;
+targetScreenSettings = linspace(0,1,nMeasurePoints);
 
-% Set measurement range. It's based on 8-bit settings.
-dRGB_target_min = 0;
-dRGB_target_max = 255;
-nTargetPoints = 10;
-dRGB_target = round(linspace(dRGB_target_min,dRGB_target_max,nTargetPoints));
+% Target measurement channels.
+targetChannels = {'red','green','blue','gray'};
+nChannels = length(targetChannels);
 
-spd = nan(401,length(dRGB_target),4);
+% Print out control.
+verbose = false;
 
-%% Connect to the spectroradiometer.
+%% Get display info to measure.
 %
-% The port number for the curved display is '/dev/ttyACM0', which should be
-% updated based on which computer that connected to the spectroradiometer.
-switch room
+% Get a key input here.
+while 1
+    inputMessageDisplay = 'Which display are you measuring [1:Curved Display,2:EIZO monitor]: ';
+    numDisplay = input(inputMessageDisplay);
+    numDisplayOptions = [1,2];
+
+    if ismember(numDisplay, numDisplayOptions)
+        break
+    end
+
+    disp('Choose one among the available options!');
+end
+displayOptions = {'CurvedDisplay','EIZO'};
+displayMeasured = displayOptions(numDisplay);
+
+% Set the port number to connect the spectroradiometer over different
+% displays.
+switch displayMeasured
     case 'CurvedDisplay'
         port_CS2000 = '/dev/ttyACM0';
+    case 'EIZO'
+        port_CS2000 = 'COM5';
     otherwise
         port_CS2000 = 'COM5';
 end
 
-% Connection happens here. Check the status message.
+%% Connect to the spectroradiometer.
 CS2000_initConnection(port_CS2000);
 
 %% Open PTB screen.
+%
+% We will open the mid gray screen as the initial screen.
 initialScreenSettings = [0.5 0.5 0.5];
 [window windowRect] = OpenPlainScreen(initialScreenSettings);
 
-%% try measuring zero
-intercept = CS2000_measure();
-Screen('FillRect',window,0);
-Screen('Flip',window);
-
-%% Make a loop to measure the desired range.
+%% Measurement happens here.
 %
-% Channel. Red, Green, Blue, and Gray, in an order.
-nChannels = 4;
-
+% Make a loop for all channels.
 for cc = 1:nChannels
+    targetChannel = targetChannels{cc};
 
-    % Different points for a gamma table per each channel.
-    for dd = 1:length(dRGB_target)
+    % Make a loop for a gamma table.
+    for dd = 1:nMeasurePoints
 
+        % Default format for the digital values.
+        screenSettingsMeasure = zeros(1,3);
 
-        dRGB_measure_temp = zeros(1,3);
-        if cc < 4
-            dRGB_measure_temp(cc) = dRGB_target(dd);
-        else
-            dRGB_measure_temp=dRGB_measure_temp + dRGB_target(dd);
+        % Set the screen settings differently over different channels.
+        switch targetChannel
+            case 'gray'
+                screenSettingsMeasure(:) = targetScreenSettings(dd);
+            otherwise
+                % For the other single channels.
+                screenSettingsMeasure(cc) = targetScreenSettings(dd);
         end
 
         % Screen the image to measure.
-        Screen('FillRect',window,uint8(dRGB_measure_temp));
-        Screen('Flip',window);
+        SetPlainScreenSettings(screenSettingsMeasure,window,windowRect,'verbose',verbose);
 
         % Measurement happens here.
         rawData = CS2000_measure();
-        spd(:,dd,cc) = rawData.spectralData;
 
-        % Save the spectra here.
-        date = datetime("now");
-        fileName = sprintf('spd_%s_',room,)
-        save(['spd_' room '_' date],'spd','intercept','time')
+        % Read out the spectrum.
+        spd_oneChannel(:,dd) = rawData.spectralData;
     end
+
+    % Save out the spectra over different channels.
+    spds{cc} = spd_oneChannel;
 end
+
+%% Save the spectra here.
+dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+saveFiledir = '~/desktop';
+saveFilename = fullfile(saveFiledir,sprintf('spd_%s_%s',displayMeasured,dayTimestr));
+save(saveFilename,'spds');
+disp('Data has been saved successfully!');
