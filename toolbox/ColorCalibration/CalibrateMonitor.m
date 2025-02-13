@@ -61,7 +61,7 @@ CS2000_initConnection(port_CS2000);
 %% Open PTB screen.
 %
 % We will open the mid gray screen as the initial screen.
-initialScreenSettings = [0.5 0.5 0.5];
+initialScreenSettings = [0.5 0.5 0.5]';
 [window windowRect] = OpenPlainScreen(initialScreenSettings);
 
 %% Measurement happens here.
@@ -74,7 +74,7 @@ for cc = 1:nChannels
     for dd = 1:nMeasurePoints
 
         % Default format for the digital values.
-        screenSettingsMeasure = zeros(1,3);
+        screenSettingsMeasure = zeros(3,1);
 
         % Set the screen settings differently over different channels.
         switch targetChannel
