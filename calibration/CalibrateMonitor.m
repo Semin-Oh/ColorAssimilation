@@ -10,6 +10,7 @@
 %    01/31/25    smo    - Started working on it.
 %    02/13/25    smo    - Cleaned up and needs to be tested if it's
 %                         working.
+%    03/12/25    smo    - Made it work on measuring EIZO monitor.
 
 %% Initialze.
 clear; close all;
@@ -19,6 +20,7 @@ clear; close all;
 % Set measurement range. It'll be converted into the settings in 8-bit.
 nMeasurePoints = 10;
 targetScreenSettings = linspace(0,1,nMeasurePoints);
+targetScreenSettings8bit = SettingsToIntegers(targetScreenSettings,'nInputLevels',256);
 
 % Target measurement channels.
 targetChannels = {'red','green','blue','gray'};
@@ -42,7 +44,7 @@ while 1
     disp('Choose one among the available options!');
 end
 displayOptions = {'CurvedDisplay','EIZO'};
-displayMeasured = displayOptions(numDisplay);
+displayMeasured = displayOptions{numDisplay};
 
 % Set the port number to connect the spectroradiometer over different
 % displays. Also, set the folder to save the results.
@@ -67,6 +69,14 @@ CS2000_initConnection(port_CS2000);
 % We will open the mid gray screen as the initial screen.
 initialScreenSettings = [0.5 0.5 0.5]';
 [window windowRect] = OpenPlainScreen(initialScreenSettings);
+
+% Add text for info.
+textString = 'Press any key to start calibration';
+DrawFormattedText(window,textString,'center','center',[0 0 0]);
+Screen('flip',window);
+
+% Wait for a key press to start measurement.
+KbWait;
 
 %% Measurement happens here.
 %
@@ -103,9 +113,20 @@ for cc = 1:nChannels
     spds{cc} = spd_oneChannel;
 end
 
-%% Save the spectra here.
+% Close the PTB screen when it's done.
+CloseScreen;
+
+% Collect the results in one struct.
+data.describe.displayType = displayMeasured;
+data.describe.measuredChannels = targetChannels;
+data.describe.nMeasurePoints = nMeasurePoints;
+data.describe.targetScreenSettings = targetScreenSettings;
+data.digitalInput = targetScreenSettings8bit;
+data.spectra = spds;
+
+%% Save out the results here.
 dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
 saveFiledir = fullfile(baseFiledir,'calibration');
 saveFilename = fullfile(saveFiledir,sprintf('spd_%s_%d_%s',displayMeasured,nMeasurePoints,dayTimestr));
-save(saveFilename,'spds');
+save(saveFilename,'data');
 disp('Data has been saved successfully!');
