@@ -45,15 +45,19 @@ displayOptions = {'CurvedDisplay','EIZO'};
 displayMeasured = displayOptions(numDisplay);
 
 % Set the port number to connect the spectroradiometer over different
-% displays.
+% displays. Also, set the folder to save the results.
+
 switch displayMeasured
     case 'CurvedDisplay'
         port_CS2000 = '/dev/ttyACM0';
+        baseFiledir = '/home/gegenfurtner/Dropbox/JLU/2) Projects';
     case 'EIZO'
         port_CS2000 = 'COM5';
+        baseFiledir = 'C:\Users\fulvous.uni-giessen\Dropbox\JLU\2) Projects';
     otherwise
         port_CS2000 = 'COM5';
 end
+
 
 %% Connect to the spectroradiometer.
 CS2000_initConnection(port_CS2000);
@@ -101,7 +105,7 @@ end
 
 %% Save the spectra here.
 dayTimestr = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-saveFiledir = '~/desktop';
-saveFilename = fullfile(saveFiledir,sprintf('spd_%s_%s',displayMeasured,dayTimestr));
+saveFiledir = fullfile(baseFiledir,'calibration');
+saveFilename = fullfile(saveFiledir,sprintf('spd_%s_%d_%s',displayMeasured,nMeasurePoints,dayTimestr));
 save(saveFilename,'spds');
 disp('Data has been saved successfully!');
