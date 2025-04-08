@@ -1,4 +1,4 @@
-% CalDisplay.
+% AnalyzeMonitor.
 %
 % This routine checks and shows the basic characteristics of the display.
 
@@ -6,6 +6,7 @@
 %    07/29/24    smo    - Started on it.
 %    07/30/24    smo    - Now plotting spectra, CIE xy coordinates, gamma
 %                         curve, and also optimizing gamma.
+%    04/08/25    smo    - Routine name changed from 'CalDisplay'.
 
 %% Initialize.
 clear all; close all;
