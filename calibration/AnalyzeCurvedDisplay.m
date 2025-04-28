@@ -83,9 +83,25 @@ end
 %% Spectra of primaries.
 intensity_dRGB = 255;
 figure; hold on;
+
+% Center.
 plot(wls,spd_center(:,intensity_dRGB,1),'r-');
 plot(wls,spd_center(:,intensity_dRGB,2),'g-');
 plot(wls,spd_center(:,intensity_dRGB,3),'b-');
+xlabel('Wavelength (nm)');
+ylabel('Spectral power');
+xlim([min(wls) max(wls)]);
+legend('Red','Green','Blue');
+
+% % Left.
+% plot(wls,spd_left(:,intensity_dRGB,1),'r-');
+% plot(wls,spd_left(:,intensity_dRGB,2),'g-');
+% plot(wls,spd_left(:,intensity_dRGB,3),'b-');
+%
+% % Right.
+% plot(wls,spd_right(:,intensity_dRGB,1),'r-');
+% plot(wls,spd_right(:,intensity_dRGB,2),'g-');
+% plot(wls,spd_right(:,intensity_dRGB,3),'b-');
 
 %% Chromaticity diagram.
 load T_xyzJuddVos
@@ -229,27 +245,51 @@ if (verbose)
         xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
         plot([xyY_sRGB(1,:) xyY_sRGB(1,1)], [xyY_sRGB(2,:) xyY_sRGB(2,1)],'k-','LineWidth',1);
     end
+end
 
-    % Display gamma.
+%% Display gamut with white point.
+if (verbose)
+    % Display gamut.
     figure; hold on;
-    plot([xyY_left_gamut(1,:) xyY_left_gamut(1,1)], [xyY_left_gamut(2,:) xyY_left_gamut(2,1)],'o-','LineWidth',2);
-    plot([xyY_right_gamut(1,:) xyY_right_gamut(1,1)], [xyY_right_gamut(2,:) xyY_left_gamut(2,1)],'*--','LineWidth',2);
-    plot([xyY_right_gamut(1,:) xyY_right_gamut(1,1)], [xyY_right_gamut(2,:) xyY_left_gamut(2,1)],'.:','LineWidth',2);
 
-    % Planckian locus.
-    T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
-    plot([T_xy(1,:) T_xy(1,1)], [T_xy(2,:) T_xy(2,1)], 'k-');
+    % Center.
+    uv_center_gamut = xyTouv(xyY_center_gamut(1:2,:));
+    plot([uv_center_gamut(1,:) uv_center_gamut(1,1)], [uv_center_gamut(2,:) uv_center_gamut(2,1)],...
+        'b-','markerfacecolor','k','markeredgecolor','k','LineWidth',1);
+    % White point.
+    xyY_center_whitepoint = xyY_center{4}(:,end);
+    uv_center_whitepoint = xyTouv(xyY_center_whitepoint(1:2,:));
+    plot(uv_center_whitepoint(1),uv_center_whitepoint(2),'o',...
+        'MarkerFaceColor','b','MarkerEdgeColor','k')
+
+    % % Left.
+    % plot([xyY_left_gamut(1,:) xyY_left_gamut(1,1)], [xyY_left_gamut(2,:) xyY_left_gamut(2,1)],'o-','LineWidth',2);
+    % % Right.
+    % plot([xyY_right_gamut(1,:) xyY_right_gamut(1,1)], [xyY_right_gamut(2,:) xyY_left_gamut(2,1)],'*--','LineWidth',2);
 
     % sRGB.
     xyY_sRGB = [0.6400 0.3000 0.1500; 0.3300 0.6000 0.0600; 0.2126 0.7152 0.0722];
-    plot([xyY_sRGB(1,:) xyY_sRGB(1,1)], [xyY_sRGB(2,:) xyY_sRGB(2,1)],'k-','LineWidth',1);
+    uv_sRGB = xyTouv(xyY_sRGB(1:2,:));
+    plot([uv_sRGB(1,:) uv_sRGB(1,1)], [uv_sRGB(2,:) uv_sRGB(2,1)],'k:','LineWidth',1);
 
-    xlabel('CIE x');
-    ylabel('CIE y');
+    % D65.
+    xy_D65 = [0.3127; 0.3290];
+    uv_D65 = xyTouv(xy_D65);
+    plot(uv_D65(1),uv_D65(2),'ko');
+
+    % Planckian locus.
+    T_xy = [T_XYZ(1,:)./sum(T_XYZ); T_XYZ(2,:)./sum(T_XYZ)];
+    T_uv = xyTouv(T_xy);
+    % plot([T_uv(1,:) T_uv(1,1)], [T_uv(2,:) T_uv(2,1)], 'k-');
+    plot([T_uv(1,1:65) T_uv(1,1)], [T_uv(2,1:65) T_uv(2,1)], 'k-');
+
+    xlabel('CIE u-prime');
+    ylabel('CIE v-prime');
     xlim([0 1]);
     ylim([0 1]);
-    title('Display gamut on the CIE xy coordinates');
-    legend('Left','Right','Center','sRGB')
+    title('Display gamut on the CIE uv-prime coordinates');
+    % legend('Left','Right','Center','sRGB')
+    legend('Display Gamut (center)','Display White Point','sRGB','D65');
 end
 
 %% Gamma curves.
