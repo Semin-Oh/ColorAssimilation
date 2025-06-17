@@ -24,7 +24,15 @@ end
 XYZw = sum(M_RGBToXYZ,2);
 
 %% Load and preprocess image.
-image = im2double(imread("image1.png"));
+testImagedir = '/Users/semin/Dropbox (Personal)/JLU/2) Projects/ColorAssimilation/images_illusion';
+imageFileList = dir(testImagedir);
+imageFilenameList = {imageFileList.name};
+imageFilenameList = imageFilenameList(~startsWith(imageFilenameList,'.'));
+nImages = length(imageFilenameList);
+
+idxImage = 1;
+testImagefilename = fullfile(testImagedir,imageFilenameList{idxImage});
+image = im2double(imread(testImagefilename));
 image = uint8(image .* 255);
 imageSize = size(image);
 XYZ = RGBToXYZ(image, M_RGBToXYZ, gamma);
@@ -53,7 +61,7 @@ ap_img = reshape(ap, H, W);
 bp_img = reshape(bp, H, W);
 
 %% Apply color assimilation on a'b' in CAM16-UCS.
-sigma = 12;
+sigma = 2;
 ap_blur = imgaussfilt(ap_img, sigma);
 bp_blur = imgaussfilt(bp_img, sigma);
 
