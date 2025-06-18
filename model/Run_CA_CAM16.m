@@ -72,14 +72,15 @@ bp_img = reshape(bp, H, W);
 %
 % Set parameters.
 sigma = 13;
-e = 1;
+e = 0.2;
 
 % Add Gaussian filter to each a and b axis on CAM16 UCS. The sigma value
 % defines how much pooling happens from the adjacent area.
 ap_blur = imgaussfilt(ap_img, sigma);
 bp_blur = imgaussfilt(bp_img, sigma);
 
-% Add an amplifying layer. Effect is null if the variable e is set to 0.
+% Add an amplifying layer. Effect is equal across the pixels (1) if e is
+% set to 0.
 W_map = sqrt((ap_img - ap_blur).^2 + (bp_img - bp_blur).^2);
 W_map = W_map ./ max(W_map(:));
 W_map = W_map .^ e;
