@@ -12,6 +12,19 @@
 %% Initialize.
 clear; close all;
 
+%% Set variables.
+%
+% Choose which image to play with.
+idxImage = 5;
+
+% Set CA-CAM16 parameters here.
+sigma = 12;
+e = 0.7;
+
+% Plotting options.
+heatmap = true;
+colorcoords = false;
+
 %% Set display type.
 displayType = 'sRGB';
 switch displayType
@@ -34,9 +47,6 @@ imageFileList = dir(testImagedir);
 imageFilenameList = {imageFileList.name};
 imageFilenameList = imageFilenameList(~startsWith(imageFilenameList,'.'));
 nImages = length(imageFilenameList);
-
-% Choose which image to play with.
-idxImage = 2;
 
 % Load the image.
 testImagefilename = fullfile(testImagedir,imageFilenameList{idxImage});
@@ -79,10 +89,6 @@ bp_img = reshape(bp, H, W);
 
 %% Apply color assimilation on a'b' in CAM16-UCS.
 %
-% Set parameters.
-sigma = 12;
-e = 0.7;
-
 % Add Gaussian filter to each a and b axis on CAM16 UCS. The sigma value
 % defines how much pooling happens from the adjacent area.
 ap_blur = imgaussfilt(ap_img, sigma);
@@ -110,6 +116,9 @@ h = atan2d(bp, ap);
 h(h < 0) = h(h < 0) + 360;
 JCH_assim = [J; C; h];
 
+%% This is temp processing to match the brightness level before and after applying the model.
+JCH_assim(1,:) = JCH(1,:);
+
 %% CAM16 inverse calculations.
 XYZ_assim = JCHToXYZ(JCH_assim, XYZw, LA);
 RGB_assim = XYZToRGB(XYZ_assim, M_RGBToXYZ, gamma);
@@ -122,13 +131,23 @@ image_assim = reshape(RGB_assim', imageSize);
 % Here we will find the pixel locations where the target images are placed.
 % We take the pixel location using the original image.
 switch idxImage
+    case 1
+        targetRGB = [255 182 129];
     case 2
         targetRGB = [255 0 0];
+    case 3
+        targetRGB = [202 7 86];
+    case 4
+        targetRGB = [241 241 241];
     case 5
-        targetRGB = [202 182 129];
+        targetRGB = [0 255 0];
+        targetRGB = [255 0 0];
     otherwise
         targetRGB = [255 255 255];
 end
+
+% Cropping happens here. We fill find the pixels that matches the target
+% RGB values.
 idxImageHeight = [];
 idxImageWidth = [];
 for hh = 1:H
@@ -163,52 +182,65 @@ end
 
 %% Plot it.
 %
+% Set the number of subplots.
+if ~heatmap
+    nSubplots = 4;
+else
+    nSubplots = 6;
+end
+
 % Original image and model edited image.
 figure;
-subplot(3,2,1);
+subplot(nSubplots/2,2,1);
 imshow(image);
 title('Original Illusion');
 
-subplot(3,2,2);
+subplot(nSubplots/2,2,2);
 imshow(image_assim);
 title('CA-CAM16 Output');
 
-subplot(3,2,3);
+subplot(nSubplots/2,2,3);
 imshow(croppedImage);
 title('Original Target');
 
-subplot(3,2,4);
+subplot(nSubplots/2,2,4);
 imshow(croppedImage_assim);
 title('CA-CAM16 Output (Target)');
 
+sgtitle(sprintf('CA-CAM16: \\sigma = (%.2f) / e = (%.2f)',sigma,e));
+
 % Heat map of amplifying layer.
-subplot(3,2,5:6);
-imagesc(W_map);
-axis image off;
-colormap('hot');  % or try 'parula', 'jet', etc.
-colorbar;
-title(sprintf('Assimilation Weight Map (\\sigma = %.2f, e = %.2f)', sigma, e));
+if heatmap
+    subplot(nSubplots/2,2,5:6);
+    imagesc(W_map);
+    axis image off;
+    colormap('hot');  % or try 'parula', 'jet', etc.
+    colorbar;
+    title(sprintf('Assimilation Weight Map (\\sigma = %.2f, e = %.2f)', sigma, e));
+end
 
 % Plot it on CAM16-UCS a'b' plane.
-figure;
-subplot(1,2,1);
-plot(ap_raw,bp_raw,'k.');
-xlabel('CAM16-UCS a');
-ylabel('CAM16-UCS b');
-xRange = [-3 3];
-yRange = [-3 3];
-xlim(xRange);
-ylim(yRange);
-axis square;
-grid on;
-title('Original image');
+if (colorcoords)
+    figure;
+    subplot(1,2,1);
+    plot(ap_raw,bp_raw,'k.');
+    xlabel('CAM16-UCS a');
+    ylabel('CAM16-UCS b');
+    xRange = [-3 3];
+    yRange = [-3 3];
+    xlim(xRange);
+    ylim(yRange);
+    axis square;
+    grid on;
+    title('Original image');
 
-subplot(1,2,2);
-plot(ap_assim,bp_assim,'g.');
-xlabel('CAM16-UCS a');
-ylabel('CAM16-UCS b');
-xlim(xRange);
-ylim(yRange);
-axis square;
-grid on;
-title('Processed image');
+    subplot(1,2,2);
+    plot(ap_assim,bp_assim,'g.');
+    xlabel('CAM16-UCS a');
+    ylabel('CAM16-UCS b');
+    xlim(xRange);
+    ylim(yRange);
+    axis square;
+    grid on;
+    title('Processed image');
+end
