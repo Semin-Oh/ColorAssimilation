@@ -12,6 +12,7 @@
 %                         all primaries at once.
 %    11/06/24    smo    - Now it works on Lab Linux computer.
 %    11/12/24    smo    - Big updates to plot the results.
+%    07/01/25    smo    - Added a diagonal error bar in the results graph.
 
 %% Initialize.
 close all; clear;
@@ -601,20 +602,31 @@ title(sprintf('AI (%s): Peripheral vs. Foveal (N=%d)',whichCalAI,nSubjects));
 subtitle('Non-face image is marked with bigger circle');
 
 % Add standard error bar.
-errorbar(mean_AI_periphery_red,mean_AI_fovea_red,...
-    stdError_AI_fovea_red,stdError_AI_fovea_red,...
-    stdError_AI_periphery_red,stdError_AI_periphery_red,...
-    'LineStyle','none','Color','r');
+addErrorbar = false;
+if (addErrorbar)
+    errorbar(mean_AI_periphery_red,mean_AI_fovea_red,...
+        stdError_AI_fovea_red,stdError_AI_fovea_red,...
+        stdError_AI_periphery_red,stdError_AI_periphery_red,...
+        'LineStyle','none','Color','r');
 
-errorbar(mean_AI_periphery_green,mean_AI_fovea_green,...
-    stdError_AI_fovea_green,stdError_AI_fovea_green,...
-    stdError_AI_periphery_green,stdError_AI_periphery_green,...
-    'LineStyle','none','Color','g');
+    errorbar(mean_AI_periphery_green,mean_AI_fovea_green,...
+        stdError_AI_fovea_green,stdError_AI_fovea_green,...
+        stdError_AI_periphery_green,stdError_AI_periphery_green,...
+        'LineStyle','none','Color','g');
 
-errorbar(mean_AI_periphery_blue,mean_AI_fovea_blue,...
-    stdError_AI_fovea_blue,stdError_AI_fovea_blue,...
-    stdError_AI_periphery_blue,stdError_AI_periphery_blue,...
-    'LineStyle','none','Color','b');
+    errorbar(mean_AI_periphery_blue,mean_AI_fovea_blue,...
+        stdError_AI_fovea_blue,stdError_AI_fovea_blue,...
+        stdError_AI_periphery_blue,stdError_AI_periphery_blue,...
+        'LineStyle','none','Color','b');
+end
+
+% Add diagonal error bar.
+addDiagErrorbar = true;
+if (addDiagErrorbar)
+    e_1 = plotindiv([mean_AI_periphery_red(idxFaceImages)' mean_AI_fovea_red(idxFaceImages)'],[1 0 0 0.3]);
+    e_2 = plotindiv([mean_AI_periphery_green(idxFaceImages)' mean_AI_fovea_green(idxFaceImages)'],[0 1 0 0.3]);
+    e_3 = plotindiv([mean_AI_periphery_blue(idxFaceImages)' mean_AI_fovea_blue(idxFaceImages)'],[0 0 1 0.3]);
+end
 
 % Mean AI results (ALL).
 f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',5);
@@ -635,8 +647,8 @@ f_6=plot(mean_AI_periphery_blue(~idxFaceImages),mean_AI_fovea_blue(~idxFaceImage
 f_7=plot([0 10],[0 10],'k-');
 
 % Figure stuff.
-xlabel('AI (Peripheral)','fontsize',13);
-ylabel('AI (Foveal)','fontsize',13);
+xlabel('Assimiliation Index (Peripheral)','fontsize',13);
+ylabel('Assimiliation Index (Foveal)','fontsize',13);
 xlim(numYaxisLimits);
 ylim(numYaxisLimits);
 xticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
@@ -651,43 +663,52 @@ axis square;
 figure; hold on;
 title('Individual AI: Peripheral vs. Foveal');
 
+nRowsSubplot = 2;
 for ss = 1:nSubjects
-    subplot(4,ceil(nSubjects/4),ss); hold on;
+    subplot(nRowsSubplot,ceil(nSubjects/nRowsSubplot),ss); hold on;
 
     % All test images.
     f_1=plot(AI_periphery_all_red(ss,:), AI_fovea_all_red(ss,:),'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
     f_2=plot(AI_periphery_all_green(ss,:), AI_fovea_all_green(ss,:),'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',4);
     f_3=plot(AI_periphery_all_blue(ss,:), AI_fovea_all_blue(ss,:),'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',4);
 
-    % Face images.
-    plot(AI_periphery_all_red(ss,idxFaceImages), AI_fovea_all_red(ss,idxFaceImages),'ro','MarkerSize',8);
-    plot(AI_periphery_all_green(ss,idxFaceImages), AI_fovea_all_green(ss,idxFaceImages),'go','MarkerSize',8);
-    plot(AI_periphery_all_blue(ss,idxFaceImages), AI_fovea_all_blue(ss,idxFaceImages),'bo','MarkerSize',8);
+    % Non-Face images.
+    plot(AI_periphery_all_red(ss,~idxFaceImages), AI_fovea_all_red(ss,~idxFaceImages),'ko','MarkerSize',8);
+    plot(AI_periphery_all_green(ss,~idxFaceImages), AI_fovea_all_green(ss,~idxFaceImages),'ko','MarkerSize',8);
+    plot(AI_periphery_all_blue(ss,~idxFaceImages), AI_fovea_all_blue(ss,~idxFaceImages),'ko','MarkerSize',8);
 
     % 45-deg line.
     f_7=plot([0 10],[0 10],'k-');
 
-    % Calculate correlation here.
+    % Add diagonal error bar.
+    if (addDiagErrorbar)
+        e_1 = plotindiv([AI_periphery_all_red(ss,idxFaceImages)' AI_fovea_all_red(ss,idxFaceImages)'],[1 0 0 0.3]);
+        e_2 = plotindiv([AI_periphery_all_green(ss,idxFaceImages)' AI_fovea_all_green(ss,idxFaceImages)'],[0 1 0 0.3]);
+        e_3 = plotindiv([AI_periphery_all_blue(ss,idxFaceImages)' AI_fovea_all_blue(ss,idxFaceImages)'],[0 0 1 0.3]);
+    end
+
+    % Calculate correlation between individual vs. average.
     %
     % Periphery.
     oneSubject_AI_periphery_RGB = [AI_periphery_all_red(ss,:)';AI_periphery_all_green(ss,:)';AI_periphery_all_blue(ss,:)'];
     mean_AI_periphery_RGB = [mean_AI_periphery_red';mean_AI_periphery_green';mean_AI_periphery_blue'];
-    
+
     % Fovea.
     oneSubject_AI_fovea_RGB = [AI_fovea_all_red(ss,:)';AI_fovea_all_green(ss,:)';AI_fovea_all_blue(ss,:)'];
     mean_AI_fovea_RGB = [mean_AI_fovea_red';mean_AI_fovea_green';mean_AI_fovea_blue'];
-    
+
     % Correlation coefficient.
     r = corr([oneSubject_AI_periphery_RGB; oneSubject_AI_fovea_RGB], [mean_AI_periphery_RGB; mean_AI_fovea_RGB]);
 
     % Figure stuff.
-    title(sprintf('Subject = (%s) / r = (%.2f)',targetSubjectsNames{ss},r));
-    xlabel('AI (Peripheral)','fontsize',13);
-    ylabel('AI (Foveal)','fontsize',13);
+    % title(sprintf('Subject = (%s) / r = (%.2f)',targetSubjectsNames{ss},r));
+    title(sprintf('Subject %d / r = (%.2f)',ss,r));
+    xlabel('Assimiliation Index (Peripheral)','fontsize',13);
+    ylabel('Assimiliation Index (Foveal)','fontsize',13);
     xlim([0.4 numYaxisLimits(2)]);
     ylim([0.4 numYaxisLimits(2)]);
-    xticks([0.4:0.1:numYaxisLimits(2)]);
-    yticks([0.4:0.1:numYaxisLimits(2)]);
+    xticks([0.4:0.3:numYaxisLimits(2)]);
+    yticks([0.4:0.3:numYaxisLimits(2)]);
     legend([f_1 f_2 f_3],'red','green','blue','location','southeast');
     grid on;
     axis square;
