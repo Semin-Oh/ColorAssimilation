@@ -68,11 +68,11 @@ tmp = d_se / sqrt(2);
 % tmp2 = d_se2/sqrt(2);
 % line([x-tmp2,x+tmp2],[y-tmp2 y+tmp2],'linewidth',1.5,'color',[0 0 0]);
 
-% axis square
 
-% bootstrap to get 95% confidence interval of diognal
 d = data(:,1) ./ sqrt(2) - data(:,2) ./ sqrt(2);
 dd = data(:,1) ./ sqrt(2) + data(:,2) ./ sqrt(2);
+
+% bootstrap to get 95% confidence interval of diognal
 % n = 5000;
 % m = zeros(1,n);
 % for i = 1:n
@@ -97,10 +97,11 @@ y = -[ci(1) mean(d) ci(2)]./sqrt(2)+b/sqrt(2);
 if isempty(col)
     col = [0.5 0.5 0.5 0.5];
 end    
+    % Mean value.
+    h =plot(x(2),y(2),'.','markersize',10,'color',col);%15
+
     % Diagonal line.
     line([x(1) x(3)],y([1 3]),'linewidth',2,'color',col);%2.5
-    % Mean value.
-    plot(x(2),y(2),'.','markersize',10,'color',col);%15
 
 end
 

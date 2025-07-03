@@ -598,8 +598,8 @@ idxFaceImages = ~(or(strcmp(testImageNames,'potato'),strcmp(testImageNames,'whit
 
 % Plot happens here.
 figure; hold on;
-title(sprintf('AI (%s): Peripheral vs. Foveal (N=%d)',whichCalAI,nSubjects));
-subtitle('Non-face image is marked with bigger circle');
+% title(sprintf('AI (%s): Peripheral vs. Foveal (N=%d)',whichCalAI,nSubjects));
+% subtitle('Non-face image is marked with bigger circle');
 
 % Add standard error bar.
 addErrorbar = false;
@@ -629,9 +629,9 @@ if (addDiagErrorbar)
 end
 
 % Mean AI results (ALL).
-f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',5);
-f_2=plot(mean_AI_periphery_green,mean_AI_fovea_green,'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',5);
-f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',5);
+f_1=plot(mean_AI_periphery_red,mean_AI_fovea_red,'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',7);
+f_2=plot(mean_AI_periphery_green,mean_AI_fovea_green,'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',7);
+f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',7);
 
 % Mean AI results (FACES).
 % f_4=plot(mean_AI_periphery_red(idxFaceImages),mean_AI_fovea_red(idxFaceImages),'ro','MarkerSize',8);
@@ -639,9 +639,9 @@ f_3=plot(mean_AI_periphery_blue,mean_AI_fovea_blue,'o','markerfacecolor','b','ma
 % f_6=plot(mean_AI_periphery_blue(idxFaceImages),mean_AI_fovea_blue(idxFaceImages),'bo','MarkerSize',8);
 
 % Mean AI (NON-FACES).
-f_4=plot(mean_AI_periphery_red(~idxFaceImages),mean_AI_fovea_red(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
-f_5=plot(mean_AI_periphery_green(~idxFaceImages),mean_AI_fovea_green(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
-f_6=plot(mean_AI_periphery_blue(~idxFaceImages),mean_AI_fovea_blue(~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.5);
+f_4=plot(mean_AI_periphery_red(~idxFaceImages),mean_AI_fovea_red(~idxFaceImages),'ko','MarkerSize',10,'Linewidth',1.5);
+f_5=plot(mean_AI_periphery_green(~idxFaceImages),mean_AI_fovea_green(~idxFaceImages),'ko','MarkerSize',10,'Linewidth',1.5);
+f_6=plot(mean_AI_periphery_blue(~idxFaceImages),mean_AI_fovea_blue(~idxFaceImages),'ko','MarkerSize',10,'Linewidth',1.5);
 
 % 45-deg line.
 f_7=plot([0 10],[0 10],'k-');
@@ -649,12 +649,14 @@ f_7=plot([0 10],[0 10],'k-');
 % Figure stuff.
 xlabel('Assimiliation Index (Peripheral)','fontsize',13);
 ylabel('Assimiliation Index (Foveal)','fontsize',13);
-xlim(numYaxisLimits);
-ylim(numYaxisLimits);
+xlim([1.1 1.7]);
+ylim([1.1 1.7]);
 xticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
 yticks([numYaxisLimits(1):0.1:numYaxisLimits(2)]);
-legend([f_1 f_2 f_3],sprintf('Red (N=%d)',nSubjects),sprintf('Green (N=%d)',nSubjects),...
-    sprintf('Blue (N=%d)',nSubjects),'location','southeast');
+% legend([f_1 f_2 f_3],sprintf('Images - Red (N=%d)',nSubjects),sprintf('Images - Green (N=%d)',nSubjects),...
+%     sprintf('Images - Blue (N=%d)',nSubjects),'location','southeast');
+legend([f_1 f_2 f_3 e_1 e_2 e_3],'All images: Red','All images: Green','All images: Blue',...
+    'Average faces: Red','Average faces: Green','Average faces: Blue','location','southeast');
 grid on;
 axis square;
 
@@ -668,14 +670,14 @@ for ss = 1:nSubjects
     subplot(nRowsSubplot,ceil(nSubjects/nRowsSubplot),ss); hold on;
 
     % All test images.
-    f_1=plot(AI_periphery_all_red(ss,:), AI_fovea_all_red(ss,:),'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',4);
-    f_2=plot(AI_periphery_all_green(ss,:), AI_fovea_all_green(ss,:),'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',4);
-    f_3=plot(AI_periphery_all_blue(ss,:), AI_fovea_all_blue(ss,:),'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',4);
+    f_1=plot(AI_periphery_all_red(ss,:), AI_fovea_all_red(ss,:),'o','markerfacecolor','r','markeredgecolor','k','MarkerSize',6);
+    f_2=plot(AI_periphery_all_green(ss,:), AI_fovea_all_green(ss,:),'o','markerfacecolor','g','markeredgecolor','k','MarkerSize',6);
+    f_3=plot(AI_periphery_all_blue(ss,:), AI_fovea_all_blue(ss,:),'o','markerfacecolor','b','markeredgecolor','k','MarkerSize',6);
 
     % Non-Face images.
-    plot(AI_periphery_all_red(ss,~idxFaceImages), AI_fovea_all_red(ss,~idxFaceImages),'ko','MarkerSize',8);
-    plot(AI_periphery_all_green(ss,~idxFaceImages), AI_fovea_all_green(ss,~idxFaceImages),'ko','MarkerSize',8);
-    plot(AI_periphery_all_blue(ss,~idxFaceImages), AI_fovea_all_blue(ss,~idxFaceImages),'ko','MarkerSize',8);
+    plot(AI_periphery_all_red(ss,~idxFaceImages), AI_fovea_all_red(ss,~idxFaceImages),'ko','MarkerSize',9.5,'Linewidth',1.3);
+    plot(AI_periphery_all_green(ss,~idxFaceImages), AI_fovea_all_green(ss,~idxFaceImages),'ko','MarkerSize',9.5,'Linewidth',1.3);
+    plot(AI_periphery_all_blue(ss,~idxFaceImages), AI_fovea_all_blue(ss,~idxFaceImages),'ko','MarkerSize',9,'Linewidth',1.3);
 
     % 45-deg line.
     f_7=plot([0 10],[0 10],'k-');
